@@ -5,6 +5,15 @@ root = tk.Tk()
 root.title("Archeo 2022")
 root.attributes("-topmost", 1)
 
+
+def zastosuj_pobranie():
+    pass
+
+
+def zastosuj_zwrot():
+    pass
+
+
 # WINDOW SIZE & LOCATION
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
@@ -67,50 +76,87 @@ combobox_operator.grid(column=1, row=0, sticky="W")
 
 # CENTER FRAMES
 
-left_frame = ttk.LabelFrame(root, text="aaa")
-separator_frame = ttk.Frame(root)
-right_frame = ttk.LabelFrame(root, text="bbb")
+left_frame = ttk.LabelFrame(root, text="Pobranie akt")
+left_frame.columnconfigure(0, minsize=100)
+left_frame.columnconfigure(1, weight=1)
+left_frame.columnconfigure(2, weight=1)
+left_frame.columnconfigure(3, minsize=100)
 
-left_frame.grid(column=0, row=5)
+separator_frame = ttk.Frame(root)
+
+right_frame = ttk.LabelFrame(root, text="Zwrot akt")
+right_frame.columnconfigure(0, minsize=100)
+right_frame.columnconfigure(1, weight=1)
+right_frame.columnconfigure(2, weight=1)
+right_frame.columnconfigure(3, minsize=100)
+
+left_frame.grid(column=0, row=5, sticky="E")
 separator_frame.grid(column=1, row=5)
-right_frame.grid(column=2, row=5)
+right_frame.grid(column=2, row=5, sticky="W")
 
 # SEPARATOR FRAME
-'''
-Wstawienie separatora jako widget osobnego frame'a
 vertical_separator = ttk.Separator(
     separator_frame,
     orient="vertical",
     cursor="man",
-    )
+)
 
-vertical_separator.grid(ipady=200, pady=10)'''
-
-ttk.Separator(
-    root,
-    orient="vertical",
-    style='yellow.TSeparator'
-).place(x=window_width/2, y=100, relheight=0.7)
+vertical_separator.grid(pady=10, ipady=100)
 
 # LEFT FRAME
-pobranie_label = ttk.Label(left_frame, text="Pobranie AKT", background="yellow")
-pobranie_label.grid(column=0, row=0, sticky="N", pady=50)
+pobranie_label = ttk.Label(left_frame, text="Numer TR:", background="yellow")
 
-pobranie_label2 = ttk.Label(left_frame, text="Pobranie AKT")
-pobranie_label2.grid(column=0, row=1, sticky="N", pady=50)
+pobrana_teczka = tk.StringVar()
+pobranie_entry = ttk.Entry(left_frame, textvariable=pobrana_teczka)
 
+pobierajacy_label = ttk.Label(left_frame, text="Pobierający akta:")
 
-pobranie_label3 = ttk.Label(left_frame, text="Pobranie AKT")
-pobranie_label3.grid(column=0, row=2, sticky="N", pady=100)
+selected_pobierajacy = tk.StringVar()
+combobox_pobierajacy = ttk.Combobox(left_frame,
+                                    textvariable=selected_pobierajacy,
+                                    )
 
+combobox_pobierajacy["values"] = ["Błażej Prajs",
+                                  "Marzena Ciszek",
+                                  "Wojciech Kaczmarek",
+                                  ]
+
+zastosuj_pobranie_button = ttk.Button(left_frame, text="Zastosuj", command=zastosuj_pobranie)
+
+pobranie_label.grid(column=1, row=1, sticky="E", pady=30)
+pobranie_entry.grid(column=2, row=1, sticky="W")
+pobierajacy_label.grid(column=1, row=2, sticky="E", pady=20)
+combobox_pobierajacy.grid(column=2, row=2, sticky="W")
+zastosuj_pobranie_button.grid(column=1, columnspan=2, row=3, sticky="WE", pady=5)
 
 # RIGHT FRAME
 zwrot_label = ttk.Label(right_frame,
-                        text="Zwrot AKT",
+                        text="Numer TR",
                         background="pink",
                         )
 
-zwrot_label.grid(column=0, row=0, sticky="NE", ipadx=50)
+zwracana_teczka = tk.StringVar()
+zwrot_entry = ttk.Entry(right_frame,
+                        textvariable=zwracana_teczka,
+                        )
+
+zwracajacy_label = ttk.Label(right_frame, text="Zwracający akta:")
+
+selected_zwracajacy = tk.StringVar()
+combobox_zwracajacy = ttk.Combobox(right_frame, textvariable=selected_zwracajacy)
+
+combobox_zwracajacy["values"] = ["Błażej Prajs",
+                                 "Marzena Ciszek",
+                                 "Wojciech Kaczmarek",
+                                 ]
+
+zastosuj_zwrot_button = ttk.Button(right_frame, text="Zastosuj", command=zastosuj_zwrot)
+
+zwrot_label.grid(column=1, row=0, sticky="E", pady=30)
+zwrot_entry.grid(column=2, row=0, sticky="W")
+zwracajacy_label.grid(column=1, row=1, sticky="E", pady=20)
+combobox_zwracajacy.grid(column=2, row=1, sticky="W")
+zastosuj_zwrot_button.grid(column=1, columnspan=2, row=2, pady=5, sticky="WE")
 
 # HORIZONTAL SEPARATOR
 horizontal_separator = ttk.Separator(root,
@@ -118,11 +164,19 @@ horizontal_separator = ttk.Separator(root,
                                      cursor="man",
                                      )
 
-horizontal_separator.grid(columnspan=3, row=8, ipadx=200, padx=10)
+horizontal_separator.grid(columnspan=3,
+                          row=8,
+                          ipadx=window_width,
+                          pady=15,
+                          )
 
-#CLOSE BUTTON
+# TEXT AREA
+archeo_data = tk.Text(root, height=10)
+
+archeo_data.grid(columnspan=3, row=10, padx=10, pady=10, ipady=50, ipadx=100)
+
+# CLOSE BUTTON
 zamknij_button = ttk.Button(root, text="Zamknij", command=lambda: root.quit())
-zamknij_button.grid(column=1, row=10, sticky="WE")
-root.mainloop()
+zamknij_button.grid(column=1, row=12, sticky="WE", padx=10, pady=10)
 
-# TEST COMMIT
+root.mainloop()
