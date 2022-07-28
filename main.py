@@ -124,3 +124,5 @@ horizontal_separator.grid(columnspan=3, row=8, ipadx=200, padx=10)
 zamknij_button = ttk.Button(root, text="Zamknij", command=lambda: root.quit())
 zamknij_button.grid(column=1, row=10, sticky="WE")
 root.mainloop()
+
+# TEST COMMIT
