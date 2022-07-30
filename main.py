@@ -1,5 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
+import sqlite3
+with sqlite3.connect("pojazdy.db") as db:
+    cursor = db.cursor()
+from datetime import datetime
+
+cursor.execute(""" CREATE TABLE IF NOT EXISTS pojazdy(
+id integer PRIMARY KEY AUTOINCREMENT, 
+nr_rej text NOT NULL, 
+data_pobrania text NOT NULL,
+osoba_pobranie text NOT NULL, 
+operator_pobranie text NOT NULL, 
+data_zwrou text, 
+osoba_zwrot text, 
+operator_zwrot text); """)
+
+
+
 
 root = tk.Tk()
 root.title("Archeo 2022")
@@ -7,8 +24,17 @@ root.attributes("-topmost", 1)
 
 
 def zastosuj_pobranie():
-    pass
+    now = datetime.now()
+    teczka = pobranie_entry.get()
+    osoba = combobox_pobierajacy.get()
+    operator = combobox_operator.get()
 
+    cursor.execute(f""" INSERT INTO pojazdy(nr_rej, data_pobrania, osoba_pobranie, operator_pobranie) VALUES("{teczka}", 
+"{now}", "{osoba}", "{operator}"); """)
+    db.commit()
+
+    for n in cursor.execute(""" SELECT * FROM pojazdy"""):
+        archeo_data.insert("", tk.END, values=n)
 
 def zastosuj_zwrot():
     pass
@@ -61,10 +87,7 @@ combobox_label = ttk.Label(
     font="Arial 13"
 )
 
-selected_operator = tk.StringVar()
-combobox_operator = ttk.Combobox(combobox_frame,
-                                 textvariable=selected_operator,
-                                 )
+combobox_operator = ttk.Combobox(combobox_frame)
 
 combobox_operator["values"] = ["Arkadiusz Wieloch",
                                "Barbara Naruszewicz",
@@ -106,15 +129,11 @@ vertical_separator.grid(pady=10, ipady=100)
 # LEFT FRAME
 pobranie_label = ttk.Label(left_frame, text="Numer TR:", background="yellow")
 
-pobrana_teczka = tk.StringVar()
-pobranie_entry = ttk.Entry(left_frame, textvariable=pobrana_teczka)
+pobranie_entry = ttk.Entry(left_frame)
 
 pobierajacy_label = ttk.Label(left_frame, text="Pobierający akta:")
 
-selected_pobierajacy = tk.StringVar()
-combobox_pobierajacy = ttk.Combobox(left_frame,
-                                    textvariable=selected_pobierajacy,
-                                    )
+combobox_pobierajacy = ttk.Combobox(left_frame)
 
 combobox_pobierajacy["values"] = ["Błażej Prajs",
                                   "Marzena Ciszek",
@@ -171,9 +190,25 @@ horizontal_separator.grid(columnspan=3,
                           )
 
 # TEXT AREA
-archeo_data = tk.Text(root, height=10)
+columns = ("id", "TR", "Data Pobrania", "Pobierający", "Operator pobranie", "Data zwrotu", "Zwracający", "Operator zwrot")
 
-archeo_data.grid(columnspan=3, row=10, padx=10, pady=10, ipady=50, ipadx=100)
+archeo_data = ttk.Treeview(root, columns=columns, show='headings')
+
+archeo_data.heading("id", text="id")
+archeo_data.heading("TR", text="TR")
+archeo_data.heading("Data Pobrania", text="Data Pobrania")
+archeo_data.heading("Pobierający", text="Pobierający")
+archeo_data.heading("Operator pobranie", text="Operator pobranie")
+archeo_data.heading("Data zwrotu", text="Data zwrotu")
+archeo_data.heading("Zwracający", text="Zwracający")
+archeo_data.heading("Operator zwrot", text="Operator zwrot")
+
+archeo_data.grid(columnspan=3, row=10, sticky="NSEW", padx=10)
+
+# SCROLLBAR
+scrollbar = ttk.Scrollbar(root, orient=tk.VERTICAL, command=archeo_data.yview)
+archeo_data.configure(yscrollcommand=scrollbar.set)
+scrollbar.grid(column=4, row=10, sticky="NS")
 
 # CLOSE BUTTON
 zamknij_button = ttk.Button(root, text="Zamknij", command=lambda: root.quit())
