@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter.messagebox import showerror
 import sqlite3
 with sqlite3.connect("pojazdy.db") as db:
     cursor = db.cursor()
@@ -15,9 +16,6 @@ data_zwrou text,
 osoba_zwrot text, 
 operator_zwrot text); """)
 
-
-
-
 root = tk.Tk()
 root.title("Archeo 2022")
 root.attributes("-topmost", 1)
@@ -29,15 +27,29 @@ def zastosuj_pobranie():
     osoba = combobox_pobierajacy.get()
     operator = combobox_operator.get()
 
-    cursor.execute(f""" INSERT INTO pojazdy(nr_rej, data_pobrania, osoba_pobranie, operator_pobranie) VALUES("{teczka}", 
-"{now}", "{osoba}", "{operator}"); """)
-    db.commit()
+    if teczka == "" or osoba == "":
+        showerror("Błąd", "Pola  'Numer TR' i 'Osoba pobierająca' są obowiązkowe!")
+    else:
+        cursor.execute(f""" INSERT INTO pojazdy(nr_rej, data_pobrania, osoba_pobranie, operator_pobranie) 
+        VALUES("{teczka}", "{now}", "{osoba}", "{operator}"); """)
+        db.commit()
 
-    for n in cursor.execute(""" SELECT * FROM pojazdy"""):
-        archeo_data.insert("", tk.END, values=n)
+        for n in cursor.execute(""" SELECT * FROM pojazdy"""):
+            archeo_data.insert("", tk.END, values=n)
+
 
 def zastosuj_zwrot():
-    pass
+    now = datetime.now()
+    teczka = zwrot_entry.get()
+    osoba = combobox_zwracajacy.get()
+    operator = combobox_operator.get()
+
+    cursor.execute(f""" UPDATE pojazdy SET data_zwrou = "{now}", osoba_zwrot = "{osoba}", 
+    operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}"; """)
+    db.commit()
+
+    for n in cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{teczka}"; """):
+        archeo_data.insert("", tk.END, values=n)
 
 
 # WINDOW SIZE & LOCATION
@@ -54,9 +66,11 @@ root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 root.resizable(True, True)
 
 # CONFIGURE THE GRID
-root.columnconfigure(0, weight=3)
-root.columnconfigure(1, weight=1)
-root.columnconfigure(2, weight=3)
+root.columnconfigure(0, minsize=30)
+root.columnconfigure(1, weight=3)
+root.columnconfigure(2, weight=1)
+root.columnconfigure(3, weight=3)
+root.columnconfigure(4, minsize=30)
 
 # WELCOME LABEL
 welcome_label = ttk.Label(
@@ -68,7 +82,7 @@ welcome_label = ttk.Label(
     anchor="center",
 )
 
-welcome_label.grid(columnspan=3, row=0, sticky="WE", pady=5, ipady=5)
+welcome_label.grid(columnspan=5, row=0, sticky="WE", pady=5, ipady=5)
 
 # COMBOBOX FRAME
 combobox_frame = ttk.Frame(
@@ -76,7 +90,7 @@ combobox_frame = ttk.Frame(
     borderwidth=15,
 )
 
-combobox_frame.grid(columnspan=3, row=3, )
+combobox_frame.grid(column=1, columnspan=3, row=2)
 
 # LABEL & COMBOBOX IN COMBOBOX FRAME - SELECT OPERATOR
 combobox_label = ttk.Label(
@@ -113,9 +127,9 @@ right_frame.columnconfigure(1, weight=1)
 right_frame.columnconfigure(2, weight=1)
 right_frame.columnconfigure(3, minsize=100)
 
-left_frame.grid(column=0, row=5, sticky="E")
-separator_frame.grid(column=1, row=5)
-right_frame.grid(column=2, row=5, sticky="W")
+left_frame.grid(column=1, row=4, sticky="NSWE")
+separator_frame.grid(column=2, row=4)
+right_frame.grid(column=3, row=4, sticky="NSWE")
 
 # SEPARATOR FRAME
 vertical_separator = ttk.Separator(
@@ -142,11 +156,11 @@ combobox_pobierajacy["values"] = ["Błażej Prajs",
 
 zastosuj_pobranie_button = ttk.Button(left_frame, text="Zastosuj", command=zastosuj_pobranie)
 
-pobranie_label.grid(column=1, row=1, sticky="E", pady=30)
-pobranie_entry.grid(column=2, row=1, sticky="W")
-pobierajacy_label.grid(column=1, row=2, sticky="E", pady=20)
-combobox_pobierajacy.grid(column=2, row=2, sticky="W")
-zastosuj_pobranie_button.grid(column=1, columnspan=2, row=3, sticky="WE", pady=5)
+pobranie_label.grid(column=1, row=0, sticky="E", pady=30)
+pobranie_entry.grid(column=2, row=0, sticky="WE")
+pobierajacy_label.grid(column=1, row=1, sticky="E", pady=20)
+combobox_pobierajacy.grid(column=2, row=1, sticky="WE")
+zastosuj_pobranie_button.grid(column=1, columnspan=2, row=2, sticky="WE", pady=5)
 
 # RIGHT FRAME
 zwrot_label = ttk.Label(right_frame,
@@ -172,9 +186,9 @@ combobox_zwracajacy["values"] = ["Błażej Prajs",
 zastosuj_zwrot_button = ttk.Button(right_frame, text="Zastosuj", command=zastosuj_zwrot)
 
 zwrot_label.grid(column=1, row=0, sticky="E", pady=30)
-zwrot_entry.grid(column=2, row=0, sticky="W")
+zwrot_entry.grid(column=2, row=0, sticky="WE")
 zwracajacy_label.grid(column=1, row=1, sticky="E", pady=20)
-combobox_zwracajacy.grid(column=2, row=1, sticky="W")
+combobox_zwracajacy.grid(column=2, row=1, sticky="WE")
 zastosuj_zwrot_button.grid(column=1, columnspan=2, row=2, pady=5, sticky="WE")
 
 # HORIZONTAL SEPARATOR
@@ -183,27 +197,29 @@ horizontal_separator = ttk.Separator(root,
                                      cursor="man",
                                      )
 
-horizontal_separator.grid(columnspan=3,
+horizontal_separator.grid(column=1,
+                          columnspan=3,
                           row=8,
                           ipadx=window_width,
                           pady=15,
                           )
 
-# TEXT AREA
-columns = ("id", "TR", "Data Pobrania", "Pobierający", "Operator pobranie", "Data zwrotu", "Zwracający", "Operator zwrot")
+# DATABASE AREA
+columns = ("id", "TR", "Data pobrania", "Pobierający", "Operator pobranie",
+           "Data zwrotu", "Zwracający", "Operator zwrot")
 
-archeo_data = ttk.Treeview(root, columns=columns, show='headings')
+archeo_data = ttk.Treeview(root, columns=columns, show='headings', displaycolumns='#all')
 
-archeo_data.heading("id", text="id")
-archeo_data.heading("TR", text="TR")
-archeo_data.heading("Data Pobrania", text="Data Pobrania")
-archeo_data.heading("Pobierający", text="Pobierający")
-archeo_data.heading("Operator pobranie", text="Operator pobranie")
-archeo_data.heading("Data zwrotu", text="Data zwrotu")
-archeo_data.heading("Zwracający", text="Zwracający")
-archeo_data.heading("Operator zwrot", text="Operator zwrot")
+for column in columns:
+    archeo_data.heading(column, text=column)
 
-archeo_data.grid(columnspan=3, row=10, sticky="NSEW", padx=10)
+archeo_data.column("id", width=60)
+archeo_data.column("TR", width=120)
+archeo_data.column("Data pobrania", width=120)
+archeo_data.column("Data zwrotu", width=120)
+archeo_data.column("Operator pobranie", width=140)
+
+archeo_data.grid(column=1, columnspan=3, row=10, sticky="NSEW")
 
 # SCROLLBAR
 scrollbar = ttk.Scrollbar(root, orient=tk.VERTICAL, command=archeo_data.yview)
@@ -212,6 +228,6 @@ scrollbar.grid(column=4, row=10, sticky="NS")
 
 # CLOSE BUTTON
 zamknij_button = ttk.Button(root, text="Zamknij", command=lambda: root.quit())
-zamknij_button.grid(column=1, row=12, sticky="WE", padx=10, pady=10)
+zamknij_button.grid(column=2, row=12, sticky="WE", padx=10, pady=10)
 
 root.mainloop()
