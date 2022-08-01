@@ -1,10 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showerror
+from tkinter.messagebox import showerror, askyesno
 import sqlite3
 with sqlite3.connect("pojazdy.db") as db:
     cursor = db.cursor()
 from datetime import datetime
+import re
+
+#TODO Regex w nr rejestracyjnym
+#TODO dezaktywacja okienek jak nie ma wybranego operatora
+#TODO sprawdzenie czy podane dane nie widnieją już w bazie po klinięciu zastosuj
 
 cursor.execute(""" CREATE TABLE IF NOT EXISTS pojazdy(
 id integer PRIMARY KEY AUTOINCREMENT, 
@@ -22,27 +27,41 @@ root.attributes("-topmost", 1)
 
 
 def zastosuj_pobranie():
-    now = datetime.now()
-    teczka = pobranie_entry.get()
-    osoba = combobox_pobierajacy.get()
-    operator = combobox_operator.get()
+    now = datetime.now().strftime("%y-%m-%d %H:%M")
+    teczka = pobranie_entry.get().upper()
+    osoba = combobox_pobierajacy.get().title()
+    operator = combobox_operator.get().title()
+
+#TODO do optymalizacji
 
     if teczka == "" or osoba == "":
         showerror("Błąd", "Pola  'Numer TR' i 'Osoba pobierająca' są obowiązkowe!")
-    else:
+    elif check_tr(teczka):
         cursor.execute(f""" INSERT INTO pojazdy(nr_rej, data_pobrania, osoba_pobranie, operator_pobranie) 
         VALUES("{teczka}", "{now}", "{osoba}", "{operator}"); """)
         db.commit()
 
         for n in cursor.execute(""" SELECT * FROM pojazdy"""):
             archeo_data.insert("", tk.END, values=n)
+    elif not check_tr(teczka):
+        poprawna_tr = askyesno("Błędny numer rejestracyjny",
+                               f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemnoci.\n"
+                               f"Czy '{teczka}' to na pewno poprawny numer rejestracyjny?")
+        if poprawna_tr:
+            cursor.execute(f""" INSERT INTO pojazdy(nr_rej, data_pobrania, osoba_pobranie, operator_pobranie) 
+            VALUES("{teczka}", "{now}", "{osoba}", "{operator}"); """)
+            db.commit()
+
+            for n in cursor.execute(""" SELECT * FROM pojazdy"""):
+                archeo_data.insert("", tk.END, values=n)
+
 
 
 def zastosuj_zwrot():
-    now = datetime.now()
-    teczka = zwrot_entry.get()
-    osoba = combobox_zwracajacy.get()
-    operator = combobox_operator.get()
+    now = datetime.now().strftime("%y-%m-%d %H:%M")
+    teczka = zwrot_entry.get().upper()
+    osoba = combobox_zwracajacy.get().title()
+    operator = combobox_operator.get().title()
 
     cursor.execute(f""" UPDATE pojazdy SET data_zwrou = "{now}", osoba_zwrot = "{osoba}", 
     operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}"; """)
@@ -51,6 +70,13 @@ def zastosuj_zwrot():
     for n in cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{teczka}"; """):
         archeo_data.insert("", tk.END, values=n)
 
+
+def check_tr(nr_rej):
+    pattern = re.compile(r"^[A-Z]{1,3}\s[A-Z\d]{3,5}$|^[A-Z]\d\s[A-Z\d]{3,5}$")
+    if pattern.search(nr_rej):
+        return True
+    else:
+        return False
 
 # WINDOW SIZE & LOCATION
 screen_width = root.winfo_screenwidth()
