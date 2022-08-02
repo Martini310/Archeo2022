@@ -78,6 +78,12 @@ def check_tr(nr_rej):
     else:
         return False
 
+
+def enable_frame():
+    if combobox_operator.get() != "":
+        pobranie_entry.config(state="enabled")
+        combobox_pobierajacy.config(state="enabled")
+
 # WINDOW SIZE & LOCATION
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
@@ -91,16 +97,29 @@ center_y = int(screen_height / 2 - window_height / 1.8)
 root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 root.resizable(True, True)
 
+# NOTEBOOK WIDGET
+notebook = ttk.Notebook(root)
+notebook.pack(pady=10, expand=True)
+
+pojazd = ttk.Frame(notebook)
+kierowca = ttk.Frame(notebook)
+
+pojazd.pack(fill="both", expand=True)
+kierowca.pack(fill="both", expand=True)
+
+notebook.add(pojazd, text="Pojazdy")
+notebook.add(kierowca, text="Kierowcy")
+
 # CONFIGURE THE GRID
-root.columnconfigure(0, minsize=30)
-root.columnconfigure(1, weight=3)
-root.columnconfigure(2, weight=1)
-root.columnconfigure(3, weight=3)
-root.columnconfigure(4, minsize=30)
+pojazd.columnconfigure(0, minsize=30)
+pojazd.columnconfigure(1, weight=3)
+pojazd.columnconfigure(2, weight=1)
+pojazd.columnconfigure(3, weight=3)
+pojazd.columnconfigure(4, minsize=30)
 
 # WELCOME LABEL
 welcome_label = ttk.Label(
-    root,
+    pojazd,
     text="Witaj w Archeo 2022!",
     background="green",
     foreground="white",
@@ -112,7 +131,7 @@ welcome_label.grid(columnspan=5, row=0, sticky="WE", pady=5, ipady=5)
 
 # COMBOBOX FRAME
 combobox_frame = ttk.Frame(
-    root,
+    pojazd,
     borderwidth=15,
 )
 
@@ -139,15 +158,15 @@ combobox_operator.grid(column=1, row=0, sticky="W")
 
 # CENTER FRAMES
 
-left_frame = ttk.LabelFrame(root, text="Pobranie akt")
+left_frame = ttk.LabelFrame(pojazd, text="Pobranie akt")
 left_frame.columnconfigure(0, minsize=100)
 left_frame.columnconfigure(1, weight=1)
 left_frame.columnconfigure(2, weight=1)
 left_frame.columnconfigure(3, minsize=100)
 
-separator_frame = ttk.Frame(root)
+separator_frame = ttk.Frame(pojazd)
 
-right_frame = ttk.LabelFrame(root, text="Zwrot akt")
+right_frame = ttk.LabelFrame(pojazd, text="Zwrot akt")
 right_frame.columnconfigure(0, minsize=100)
 right_frame.columnconfigure(1, weight=1)
 right_frame.columnconfigure(2, weight=1)
@@ -218,7 +237,7 @@ combobox_zwracajacy.grid(column=2, row=1, sticky="WE")
 zastosuj_zwrot_button.grid(column=1, columnspan=2, row=2, pady=5, sticky="WE")
 
 # HORIZONTAL SEPARATOR
-horizontal_separator = ttk.Separator(root,
+horizontal_separator = ttk.Separator(pojazd,
                                      orient="horizontal",
                                      cursor="man",
                                      )
@@ -234,7 +253,7 @@ horizontal_separator.grid(column=1,
 columns = ("id", "TR", "Data pobrania", "Pobierający", "Operator pobranie",
            "Data zwrotu", "Zwracający", "Operator zwrot")
 
-archeo_data = ttk.Treeview(root, columns=columns, show='headings', displaycolumns='#all')
+archeo_data = ttk.Treeview(pojazd, columns=columns, show='headings', displaycolumns='#all')
 
 for column in columns:
     archeo_data.heading(column, text=column)
@@ -248,12 +267,12 @@ archeo_data.column("Operator pobranie", width=140)
 archeo_data.grid(column=1, columnspan=3, row=10, sticky="NSEW")
 
 # SCROLLBAR
-scrollbar = ttk.Scrollbar(root, orient=tk.VERTICAL, command=archeo_data.yview)
+scrollbar = ttk.Scrollbar(pojazd, orient=tk.VERTICAL, command=archeo_data.yview)
 archeo_data.configure(yscrollcommand=scrollbar.set)
 scrollbar.grid(column=4, row=10, sticky="NS")
 
 # CLOSE BUTTON
-zamknij_button = ttk.Button(root, text="Zamknij", command=lambda: root.quit())
+zamknij_button = ttk.Button(pojazd, text="Zamknij", command=lambda: root.quit())
 zamknij_button.grid(column=2, row=12, sticky="WE", padx=10, pady=10)
 
 root.mainloop()
