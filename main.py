@@ -2,14 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showerror, askyesno
 import sqlite3
+
 with sqlite3.connect("pojazdy.db") as db:
     cursor = db.cursor()
 from datetime import datetime
 import re
 
-#TODO Regex w nr rejestracyjnym
-#TODO dezaktywacja okienek jak nie ma wybranego operatora
-#TODO sprawdzenie czy podane dane nie widnieją już w bazie po klinięciu zastosuj
+# TODO sprawdzenie czy podane dane nie widnieją już w bazie po klinięciu zastosuj
 
 cursor.execute(""" CREATE TABLE IF NOT EXISTS pojazdy(
 id integer PRIMARY KEY AUTOINCREMENT, 
@@ -17,7 +16,7 @@ nr_rej text NOT NULL,
 data_pobrania text NOT NULL,
 osoba_pobranie text NOT NULL, 
 operator_pobranie text NOT NULL, 
-data_zwrou text, 
+data_zwrotu text, 
 osoba_zwrot text, 
 operator_zwrot text); """)
 
@@ -32,7 +31,7 @@ def zastosuj_pobranie():
     osoba = combobox_pobierajacy.get().title()
     operator = combobox_operator.get().title()
 
-#TODO do optymalizacji
+    # TODO do optymalizacji
 
     if teczka == "" or osoba == "":
         showerror("Błąd", "Pola  'Numer TR' i 'Osoba pobierająca' są obowiązkowe!")
@@ -56,14 +55,13 @@ def zastosuj_pobranie():
                 archeo_data.insert("", tk.END, values=n)
 
 
-
 def zastosuj_zwrot():
     now = datetime.now().strftime("%y-%m-%d %H:%M")
     teczka = zwrot_entry.get().upper()
     osoba = combobox_zwracajacy.get().title()
     operator = combobox_operator.get().title()
 
-    cursor.execute(f""" UPDATE pojazdy SET data_zwrou = "{now}", osoba_zwrot = "{osoba}", 
+    cursor.execute(f""" UPDATE pojazdy SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", 
     operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}"; """)
     db.commit()
 
@@ -79,10 +77,11 @@ def check_tr(nr_rej):
         return False
 
 
-def enable_frame():
-    if combobox_operator.get() != "":
-        pobranie_entry.config(state="enabled")
-        combobox_pobierajacy.config(state="enabled")
+def enable_frame(event):
+    pobranie_entry.config(state="enabled")
+    combobox_pobierajacy.config(state="enabled")
+    zwrot_entry.config(state="enabled")
+    combobox_zwracajacy.config(state="enabled")
 
 # WINDOW SIZE & LOCATION
 screen_width = root.winfo_screenwidth()
@@ -156,6 +155,9 @@ combobox_operator["values"] = ["Arkadiusz Wieloch",
 combobox_label.grid(column=0, row=0, sticky="E")
 combobox_operator.grid(column=1, row=0, sticky="W")
 
+combobox_operator.bind("<KeyPress>", enable_frame)
+combobox_operator.bind("<<ComboboxSelected>>", enable_frame, add="+")
+
 # CENTER FRAMES
 
 left_frame = ttk.LabelFrame(pojazd, text="Pobranie akt")
@@ -188,11 +190,11 @@ vertical_separator.grid(pady=10, ipady=100)
 # LEFT FRAME
 pobranie_label = ttk.Label(left_frame, text="Numer TR:", background="yellow")
 
-pobranie_entry = ttk.Entry(left_frame)
+pobranie_entry = ttk.Entry(left_frame, state="disabled")
 
 pobierajacy_label = ttk.Label(left_frame, text="Pobierający akta:")
 
-combobox_pobierajacy = ttk.Combobox(left_frame)
+combobox_pobierajacy = ttk.Combobox(left_frame, state="disabled")
 
 combobox_pobierajacy["values"] = ["Błażej Prajs",
                                   "Marzena Ciszek",
@@ -208,20 +210,15 @@ combobox_pobierajacy.grid(column=2, row=1, sticky="WE")
 zastosuj_pobranie_button.grid(column=1, columnspan=2, row=2, sticky="WE", pady=5)
 
 # RIGHT FRAME
-zwrot_label = ttk.Label(right_frame,
-                        text="Numer TR",
-                        background="pink",
-                        )
+zwrot_label = ttk.Label(right_frame, text="Numer TR", background="pink")
 
 zwracana_teczka = tk.StringVar()
-zwrot_entry = ttk.Entry(right_frame,
-                        textvariable=zwracana_teczka,
-                        )
+zwrot_entry = ttk.Entry(right_frame, textvariable=zwracana_teczka, state="disabled")
 
 zwracajacy_label = ttk.Label(right_frame, text="Zwracający akta:")
 
 selected_zwracajacy = tk.StringVar()
-combobox_zwracajacy = ttk.Combobox(right_frame, textvariable=selected_zwracajacy)
+combobox_zwracajacy = ttk.Combobox(right_frame, textvariable=selected_zwracajacy, state="disabled")
 
 combobox_zwracajacy["values"] = ["Błażej Prajs",
                                  "Marzena Ciszek",
