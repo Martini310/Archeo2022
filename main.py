@@ -38,6 +38,12 @@ def zastosuj_pobranie():
     osoba = combobox_pobierajacy.get().title()
     operator = combobox_operator.get().title()
 
+    if inna_data_pobrania.get():
+        if format_inna_data(data_pobrania_entry.get()):
+            now = data_pobrania_entry.get()
+        else:
+            return showerror("Błedny format daty", "Data powinna być w formaci RRRR-MM-DD. Sprawdź poprawność danych")
+
     if teczka == "" or osoba == "":
         # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd
         showerror("Błąd", "Pola  'Numer TR' i 'Pobierający akta' są obowiązkowe!")
@@ -57,6 +63,18 @@ def zastosuj_pobranie():
             cursor.execute(insert_pobranie_to_db(teczka, now, osoba, operator))
             db.commit()
 
+    potwierdzenie_zapisu(teczka, now, osoba, operator)
+
+def potwierdzenie_zapisu(tr, data, pobierajacy, operator):
+    cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{tr}" AND 
+    data_pobrania >= "{data}" AND osoba_pobranie = "{pobierajacy}" AND operator_pobranie = "{operator}"; """)
+    if len(cursor.fetchall()) == 1:
+        for n in cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{tr}" AND 
+            data_pobrania >= "{data}" AND osoba_pobranie = "{pobierajacy}" AND operator_pobranie = "{operator}"; """):
+            archeo_data.insert("", tk.END, values=n)
+    img = tk.PhotoImage(file="check.gif")
+    potwierdzenie_label = tk.Label(left_frame, image=img)
+    potwierdzenie_label.grid(columnspan=2, row=4)
 
 def zastosuj_zwrot():
     now = datetime.now().strftime("%y-%m-%d %H:%M")
@@ -92,11 +110,13 @@ def enable_frame(event):
 
 
 def show_all():
+    # Funkcja do przycisku "Pokaż wszystko", żeby wyświetlić wszystkie dane z bazy
     for n in cursor.execute(""" SELECT * FROM pojazdy """):
         archeo_data.insert("", tk.END, values=n)
 
 
 def clear():
+    # Funkcja do przycisku "Wyczyść". Usuwa wszystkie wiersze w polu z danymi z bazy, lub tylko zaznaczoną
     if archeo_data.selection():
         selected_data = archeo_data.selection()
         archeo_data.delete(selected_data)
@@ -106,11 +126,24 @@ def clear():
     sel = archeo_data.selection()
     archeo_data.delete(sel)'''
 
+
 def inna_data():
+    # Jeśli zaznaczy się checkbox uaktywni się pole na date i przeniesie tam 'focus'
     if inna_data_pobrania.get():
         data_pobrania_entry.config(state="enable")
+        data_pobrania_entry.delete(0, "end")
+        data_pobrania_entry.focus_set()
+    # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
     if not inna_data_pobrania.get():
+        data_pobrania_entry.insert(0, "RRRR-MM-DD")
         data_pobrania_entry.config(state="disabled")
+
+def format_inna_data(data):
+    format = re.compile(r"^20[\d]{2}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][\d]|3[0-1])$")
+    if format.search(data):
+        return True
+    else:
+        return False
 
 
 # WINDOW SIZE & LOCATION
@@ -222,7 +255,7 @@ vertical_separator.grid(pady=10, ipady=100)
 # @@@@@@@@@@@@@@ LEFT FRAME @@@@@@@@@@@@@@@@
 tablica = tk.PhotoImage(file="tablica.gif")
 tablica_label = ttk.Label(left_frame, image=tablica)
-tablica_label.place(relx=0.46, rely=0.12)
+tablica_label.place(relx=0.455, rely=0.065)
 
     # NUMER REJESTRACYJNY
 pobranie_label = ttk.Label(left_frame, text="Numer TR:", background="yellow")
@@ -240,7 +273,11 @@ combobox_pobierajacy["values"] = ["Błażej Prajs",
 inna_data_pobrania = tk.BooleanVar()
 data_pobrania_check = ttk.Checkbutton(left_frame, onvalue=True, offvalue=False, text="Inna data",
                                       variable=inna_data_pobrania, command=inna_data)
-data_pobrania_entry = ttk.Entry(left_frame, state="disabled")
+#wzor_data = tk.StringVar(value="rrrr-mm-dd")
+data_pobrania_entry = ttk.Entry(left_frame)
+data_pobrania_entry.insert(0, "RRRR-MM-DD")
+data_pobrania_entry.config(state="disabled")
+
 
     # ZASTOSUJ - PRZYCISK
 zastosuj_pobranie_button = ttk.Button(left_frame, text="Zastosuj", command=zastosuj_pobranie)
@@ -253,6 +290,9 @@ data_pobrania_check.grid(column=1, row=2, sticky="E", pady=10)
 data_pobrania_entry.grid(column=2, row=2, sticky="W")
 zastosuj_pobranie_button.grid(column=1, columnspan=2, row=3, sticky="WE", pady=5)
 
+img = tk.PhotoImage(file="check.gif")
+potwierdzenie_label = tk.Label(left_frame, image=img, text="OK", compound="left")
+potwierdzenie_label.grid(columnspan=2, row=4)
 # @@@@@@@@@@@@@ RIGHT FRAME @@@@@@@@@@@@@@@@
 zwrot_label = ttk.Label(right_frame, text="Numer TR", background="pink")
 
