@@ -12,6 +12,7 @@ import re
 # TODO Możliwość wprowadzenia innej daty
 # TODO Dodać zdjęcie TR do zwrotu, i ładnie to umiejscowić
 # TODO Uprządkować kod i porobić opisy
+# TODO Wyświetlanie potwierdzenia tylko aktualnie dodanej/zwróconej teczki
 
 cursor.execute(""" CREATE TABLE IF NOT EXISTS pojazdy( id integer PRIMARY KEY AUTOINCREMENT, 
                                                         nr_rej text NOT NULL, 
@@ -42,7 +43,10 @@ def zastosuj_pobranie():
         if format_inna_data(data_pobrania_entry.get()):
             now = data_pobrania_entry.get()
         else:
-            return showerror("Błedny format daty", "Data powinna być w formaci RRRR-MM-DD. Sprawdź poprawność danych")
+            return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
+
+    if sprawdz_czy_dubel(teczka):
+        return showerror("Błąd", f"Teczka o nr '{teczka}' została już pobrana i nie odnotowano jej zwrotu.")
 
     if teczka == "" or osoba == "":
         # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd
@@ -55,8 +59,8 @@ def zastosuj_pobranie():
 
     elif not check_tr(teczka):
         # Jeśli nr TR jest błędny pokaż zapytanie
-        poprawna_tr = askyesno("Błędny numer rejestracyjny",
-                               f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemnoci.\n"
+        poprawna_tr = askyesno("Błąd",
+                               f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemności.\n"
                                f"Czy '{teczka}' to na pewno poprawny numer rejestracyjny?")
         if poprawna_tr:
             # Po zatwierdzeniu wprowadzi dane do bazy
@@ -66,15 +70,20 @@ def zastosuj_pobranie():
     potwierdzenie_zapisu(teczka, now, osoba, operator)
 
 def potwierdzenie_zapisu(tr, data, pobierajacy, operator):
-    cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{tr}" AND 
-    data_pobrania >= "{data}" AND osoba_pobranie = "{pobierajacy}" AND operator_pobranie = "{operator}"; """)
+    # Funkcja wyszukuje czy w bazie jest zapisany podany rekord,
+    # jeśli tak to wyświetla go w podglądziei wyświetla tekst potwierdzający zapisanie danych
+    wyszukanie_wpisu = f""" SELECT * FROM pojazdy WHERE nr_rej = "{tr}" AND 
+    data_pobrania >= "{data}" AND osoba_pobranie = "{pobierajacy}" AND operator_pobranie = "{operator}" AND data_zwrotu IS NULL; """
+    cursor.execute(wyszukanie_wpisu)
     if len(cursor.fetchall()) == 1:
-        for n in cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{tr}" AND 
-            data_pobrania >= "{data}" AND osoba_pobranie = "{pobierajacy}" AND operator_pobranie = "{operator}"; """):
+        for n in cursor.execute(wyszukanie_wpisu):
             archeo_data.insert("", tk.END, values=n)
-    img = tk.PhotoImage(file="check.gif")
-    potwierdzenie_label = tk.Label(left_frame, image=img)
-    potwierdzenie_label.grid(columnspan=2, row=4)
+        img = tk.PhotoImage(file="check.gif")
+        potwierdzenie_label.configure(image=img,
+                                  text=f"Prawidłowo zapisano pobranie teczki o nr '{tr}' przez pracownika {pobierajacy}.",
+                                  compound="left", font="Helvetica 8")
+        potwierdzenie_label.image = img
+
 
 def zastosuj_zwrot():
     now = datetime.now().strftime("%y-%m-%d %H:%M")
@@ -82,15 +91,15 @@ def zastosuj_zwrot():
     osoba = combobox_zwracajacy.get().title()
     operator = combobox_operator.get().title()
 
-    cursor.execute(f""" SELECT * FROM pojazdy WHERE data_zwrotu IS NOT NULL AND nr_rej = "{teczka}"; """)
-    if len(cursor.fetchall()) > 0:
-        showerror("Błąd", f"Teczka o numerze '{teczka}' została już zwrócona")
+    cursor.execute(f""" SELECT * FROM pojazdy WHERE data_zwrotu IS NULL AND nr_rej = "{teczka}"; """)
+    if len(cursor.fetchall()) == 0:
+        showerror("Błąd", f"Nie znaleziono niezwróconej teczki o nr '{teczka}'.")
     else:
         cursor.execute(f""" UPDATE pojazdy SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", 
-    operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}"; """)
+    operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}" AND data_zwrotu IS NULL; """)
         db.commit()
 
-    for n in cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{teczka}"; """):
+    for n in cursor.execute(f""" SELECT * FROM pojazdy WHERE nr_rej = "{teczka}" AND data_zwrotu = "{now}"; """):
         archeo_data.insert("", tk.END, values=n)
 
 
@@ -141,6 +150,14 @@ def inna_data():
 def format_inna_data(data):
     format = re.compile(r"^20[\d]{2}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][\d]|3[0-1])$")
     if format.search(data):
+        return True
+    else:
+        return False
+
+def sprawdz_czy_dubel(tr):
+    wyszukanie_wpisu = f""" SELECT * FROM pojazdy WHERE nr_rej = "{tr}" AND data_zwrotu IS NULL; """
+    cursor.execute(wyszukanie_wpisu)
+    if len(cursor.fetchall()) > 0:
         return True
     else:
         return False
@@ -255,11 +272,11 @@ vertical_separator.grid(pady=10, ipady=100)
 # @@@@@@@@@@@@@@ LEFT FRAME @@@@@@@@@@@@@@@@
 tablica = tk.PhotoImage(file="tablica.gif")
 tablica_label = ttk.Label(left_frame, image=tablica)
-tablica_label.place(relx=0.455, rely=0.065)
+tablica_label.place(relx=0.455, rely=0.064)
 
     # NUMER REJESTRACYJNY
 pobranie_label = ttk.Label(left_frame, text="Numer TR:", background="yellow")
-pobranie_entry = ttk.Entry(left_frame, state="disabled", width=12, justify="center", font="Arial 13 bold")
+pobranie_entry = ttk.Entry(left_frame, state="disabled", width=12, justify="center", font=("Helvetica", 13, "bold"))
 
     # OSOBA POBIERAJĄCA
 pobierajacy_label = ttk.Label(left_frame, text="Pobierający akta:")
@@ -289,10 +306,8 @@ combobox_pobierajacy.grid(column=2, row=1, sticky="WE")
 data_pobrania_check.grid(column=1, row=2, sticky="E", pady=10)
 data_pobrania_entry.grid(column=2, row=2, sticky="W")
 zastosuj_pobranie_button.grid(column=1, columnspan=2, row=3, sticky="WE", pady=5)
-
-img = tk.PhotoImage(file="check.gif")
-potwierdzenie_label = tk.Label(left_frame, image=img, text="OK", compound="left")
-potwierdzenie_label.grid(columnspan=2, row=4)
+potwierdzenie_label = tk.Label(left_frame)
+potwierdzenie_label.grid(column=0, columnspan=4, row=4)
 # @@@@@@@@@@@@@ RIGHT FRAME @@@@@@@@@@@@@@@@
 zwrot_label = ttk.Label(right_frame, text="Numer TR", background="pink")
 
