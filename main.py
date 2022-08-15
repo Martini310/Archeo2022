@@ -1,5 +1,81 @@
 import tkinter as tk
 from tkinter import ttk
+
+class App():
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title('Archeo 2022')
+
+        # Screen size
+        self.screen_width = self.root.winfo_screenwidth()
+        self.screen_height = self.root.winfo_screenheight()
+
+        # Window size
+        self.window_width = int(self.screen_width * 0.9)
+        self.window_height = int(self.screen_height * 0.9)
+
+        # Window location
+        self.center_x = int(self.screen_width / 2 - self.window_width / 2)
+        self.center_y = int(self.screen_height / 2 - self.window_height / 1.9)
+        self.root.geometry(f'{self.window_width}x{self.window_height}+{self.center_x}+{self.center_y}')
+        self.root.resizable(False, False)
+
+        # MENU BAR
+        self.menubar = tk.Menu(self.root)
+        self.root.config(menu=self.menubar)
+        self.file_menu = tk.Menu(self.menubar, tearoff=0)
+        self.help_menu = tk.Menu(self.menubar, tearoff=0)
+
+            # Menu items
+        self.file_menu.add_command(label='Informacje')
+        self.file_menu.add_command(label='Pusty')
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label='Zamknij', command=self.root.destroy)
+
+        self.help_menu.add_command(label='Witaj!')
+        self.help_menu.add_command(label='O aplikacji..')
+
+        self.menubar.add_cascade(label='Opcje', menu=self.file_menu)
+        self.menubar.add_cascade(label='Więcej', menu=self.help_menu)
+
+        # Welcome label
+        self.welcome = tk.Label(self.root,
+                                background='green',
+                                foreground='white',
+                                font='Arial 15 bold',
+                                text='Witaj w Archeo 2022!'
+                                )
+        self.welcome.pack(fill='both', ipady=5)
+
+        # NOTEBOOK WIDGET
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(pady=10, expand=True, fill="both")
+
+        self.pojazd = tk.Frame(self.notebook)
+        self.kierowca = tk.Frame(self.notebook)
+        self.wyszukiwanie = tk.Frame(self.notebook)
+
+        self.pojazd.pack(fill="both", expand=True)
+        self.kierowca.pack(fill="both", expand=True)
+        self.wyszukiwanie.pack(fill="both", expand=True)
+
+        self.notebook.add(self.pojazd, text="Pojazdy")
+        self.notebook.add(self.kierowca, text="Kierowcy")
+        self.notebook.add(self.wyszukiwanie, text="Wyszukiwanie")
+
+        self.root.mainloop()
+if __name__ == '__main__' :
+    app = App()
+
+
+
+
+
+
+
+'''
+import tkinter as tk
+from tkinter import ttk
 from tkinter.messagebox import showerror, askyesno
 import sqlite3
 
@@ -8,8 +84,8 @@ with sqlite3.connect("pojazdy.db") as db:
 from datetime import datetime
 import re
 
-# TODO Zmienić ikone potwierdzenia
 # TODO Uprządkować kod i porobić opisy
+
 
 cursor.execute(""" CREATE TABLE IF NOT EXISTS pojazdy( id integer PRIMARY KEY AUTOINCREMENT, 
                                                         nr_rej text NOT NULL, 
@@ -27,7 +103,7 @@ root.attributes("-topmost", 1)
 
 def insert_pobranie_to_db(nrrej, data, osoba, operator):
     return f""" INSERT INTO pojazdy(nr_rej, data_pobrania, osoba_pobranie, operator_pobranie) 
-        VALUES("{nrrej}", "{data}", "{osoba}", "{operator}"); """
+                            VALUES("{nrrej}", "{data}", "{osoba}", "{operator}"); """
 
 
 def zastosuj_pobranie():
@@ -80,10 +156,12 @@ def potwierdzenie_zapisu(tr, data, pobierajacy, operator):
     if len(cursor.fetchall()) == 1:
         for n in cursor.execute(wyszukanie_wpisu):
             archeo_data.insert("", tk.END, values=n)
-        img = tk.PhotoImage(file="check.gif")
-        potwierdzenie_label.configure(image=img,
-                                      text=f"Prawidłowo zapisano pobranie teczki o nr '{tr}' przez pracownika {pobierajacy}.",
-                                      compound="left", font="Helvetica 8")
+        img = tk.PhotoImage(file="green_check.png")
+        potwierdzenie_label.configure(
+                        image=img,
+                        text=f"Prawidłowo zapisano pobranie teczki o nr '{tr}' przez pracownika {pobierajacy}.",
+                        compound="left", font="Helvetica 8"
+                        )
         potwierdzenie_label.image = img
 
 
@@ -109,7 +187,7 @@ def zastosuj_zwrot():
         showerror("Błąd", f"Nie znaleziono niezwróconej teczki o nr '{teczka}'.")
     else:
         cursor.execute(f""" UPDATE pojazdy SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", 
-    operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}" AND data_zwrotu IS NULL; """)
+        operator_zwrot = "{operator}" WHERE nr_rej = "{teczka}" AND data_zwrotu IS NULL; """)
         db.commit()
 
     potwierdzenie_zwrotu(teczka, now, osoba, operator)
@@ -126,10 +204,12 @@ def potwierdzenie_zwrotu(tr, data, pobierajacy, operator):
     if len(cursor.fetchall()) >= 1:
         for n in cursor.execute(wyszukanie_wpisu):
             archeo_data.insert("", tk.END, values=n)
-        img = tk.PhotoImage(file="check.gif")
-        potwierdzenie_zwrotu_label.configure(image=img,
-                                      text=f"Prawidłowo odnotowano zwrot teczki o nr '{tr}' przez pracownika {pobierajacy}.",
-                                      compound="left", font="Helvetica 8")
+        img = tk.PhotoImage(file="green_check.png")
+        potwierdzenie_zwrotu_label.configure(
+                                image=img,
+                                text=f"Prawidłowo odnotowano zwrot teczki o nr '{tr}' przez pracownika {pobierajacy}.",
+                                compound="left", font="Helvetica 8"
+                                )
         potwierdzenie_zwrotu_label.image = img
 
 
@@ -288,6 +368,7 @@ combobox_operator.bind("<<ComboboxSelected>>", enable_frame, add="+")
 
 # CENTER FRAMES
 
+
 left_frame = ttk.LabelFrame(pojazd, text="Pobranie akt")
 
 left_frame.columnconfigure(0, minsize=100)
@@ -375,7 +456,7 @@ combobox_zwracajacy["values"] = ["Błażej Prajs",
 # INNA DATA ZWROTU
 inna_data_zwrot = tk.BooleanVar()
 data_zwrotu_check = ttk.Checkbutton(right_frame, onvalue=True, offvalue=False, text="Inna data",
-                                      variable=inna_data_zwrot, command=inna_data_zwrotu)
+                                    variable=inna_data_zwrot, command=inna_data_zwrotu)
 # wzor_data = tk.StringVar(value="rrrr-mm-dd")
 data_zwrotu_entry = ttk.Entry(right_frame)
 data_zwrotu_entry.insert(0, "RRRR-MM-DD")
@@ -439,3 +520,4 @@ clear_button = ttk.Button(pojazd, text="Clear", command=clear)
 clear_button.grid(column=1, row=12, sticky="W")
 
 root.mainloop()
+'''
