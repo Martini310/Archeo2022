@@ -12,7 +12,7 @@ class App():
 
         # Window size
         self.window_width = int(self.screen_width * 0.9)
-        self.window_height = int(self.screen_height * 0.9)
+        self.window_height = int(self.screen_height * 0.87)
 
         # Window location
         self.center_x = int(self.screen_width / 2 - self.window_width / 2)
@@ -47,9 +47,29 @@ class App():
                                 )
         self.welcome.pack(fill='both', ipady=5)
 
+        # OPERATOR select
+        self.operator_values = ['Arkadiusz Wieloch',
+                                'Barbara Naruszewicz',
+                                'Dorota Sikora']
+            # Operator Frame
+        self.operator_frame = tk.Frame(self.root, background='dark grey')
+        self.operator_frame.pack(pady=10, anchor='center')
+
+            # Operator Label
+        self.operator_label = tk.Label(self.operator_frame, anchor='center',
+                                       text='Wybierz operatora:',
+                                       background='dark grey',
+                                       foreground='white',
+                                       font='Arial 13 bold')
+        self.operator_label.grid(column=0, row=0, sticky="E")
+
+            # Operator Combobox
+        self.operator_combobox = ttk.Combobox(self.operator_frame, values=self.operator_values)
+        self.operator_combobox.grid(column=1, row=0, sticky='W')
+
         # NOTEBOOK WIDGET
         self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(pady=10, expand=True, fill="both")
+        self.notebook.pack(pady=5, expand=True, fill="both")
 
         self.pojazd = tk.Frame(self.notebook)
         self.kierowca = tk.Frame(self.notebook)
@@ -63,7 +83,122 @@ class App():
         self.notebook.add(self.kierowca, text="Kierowcy")
         self.notebook.add(self.wyszukiwanie, text="Wyszukiwanie")
 
+        self.pojazd.columnconfigure(0, minsize=30)
+        self.pojazd.columnconfigure(1, weight=3)
+        self.pojazd.columnconfigure(2, weight=1)
+        self.pojazd.columnconfigure(3, weight=3)
+        self.pojazd.columnconfigure(4, minsize=30)
+
+        # POBRANIE AKT POJAZDU --> pp
+        self.pojazd_pobranie_labelframe = tk.LabelFrame(self.pojazd, text='Pobranie akt pojazdu')
+        self.pojazd_pobranie_labelframe.grid(column=1, row=0, padx=30, sticky='NEWS')
+
+        self.pojazd_pobranie_labelframe.columnconfigure(0, minsize=100)
+        self.pojazd_pobranie_labelframe.columnconfigure(1, weight=1)
+        self.pojazd_pobranie_labelframe.columnconfigure(2, weight=1)
+        self.pojazd_pobranie_labelframe.columnconfigure(3, minsize=100)
+
+            # Tablica rejestracyjna
+        self.pp_tablica_label = tk.Label(self.pojazd_pobranie_labelframe, text='Numer TR', background='yellow')
+        self.pp_tablica_label.grid(column=1, row=0, sticky='E', pady=20)
+
+        self.pp_tablica_entry = tk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=12, justify='center')
+        self.pp_tablica_entry.grid(column=2, row=0, sticky='W')
+
+            # Osoba pobierająca
+        self.pp_osoba_values = ['Błażej Prajs',
+                                'Marzena Ciszek',
+                                'Dawid Łuczak']
+
+        self.pp_osoba_label = tk.Label(self.pojazd_pobranie_labelframe, text='Osoba pobierająca', background='pink')
+        self.pp_osoba_label.grid(column=1, row=1, sticky='E', pady=10)
+
+        self.pp_osoba_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_osoba_values)
+        self.pp_osoba_combobox.grid(column=2, row=1, sticky='W')
+
+            # Inna data pobrania
+        self.pp_data = tk.BooleanVar()
+        self.pp_data_check = ttk.Checkbutton(self.pojazd_pobranie_labelframe,
+                                             onvalue=True,
+                                             offvalue=False,
+                                             text='Inna data',
+                                             variable=self.pp_data)
+        self.pp_data_check.grid(column=1, row=2, sticky='E', pady=10)
+
+        self.pp_data_entry = tk.Entry(self.pojazd_pobranie_labelframe)
+        self.pp_data_entry.insert(0, 'RRRR-MM-DD')
+        self.pp_data_entry.config(state='disabled')
+        self.pp_data_entry.grid(column=2, row=2, sticky='W')
+
+            # Przycisk 'Zastosuj' POBRANIE
+        self.pp_zastosuj_button = tk.Button(self.pojazd_pobranie_labelframe, text='Zastosuj', width=40)
+        self.pp_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=20)
+
+            # Potwierdzenie zapisu
+        self.pp_potwierdzenie_label = tk.Label(self.pojazd_pobranie_labelframe)
+        self.pp_potwierdzenie_label.grid(column=0, columnspan=4, row=4)
+
+
+
+
+
+        self.pojazd_ver_separator = ttk.Separator(self.pojazd, orient='vertical')
+        self.pojazd_ver_separator.grid(column=2, row=0, ipady=150)
+
+
+
+
+        # ZWROT AKT POJAZDU --> pz
+        self.pojazd_zwrot_labelframe = tk.LabelFrame(self.pojazd, text='Zwrot akt pojazdu')
+        self.pojazd_zwrot_labelframe.grid(column=3, row=0, padx=30, sticky='NEWS')
+
+        self.pojazd_zwrot_labelframe.columnconfigure(0, minsize=100)
+        self.pojazd_zwrot_labelframe.columnconfigure(1, weight=1)
+        self.pojazd_zwrot_labelframe.columnconfigure(2, weight=1)
+        self.pojazd_zwrot_labelframe.columnconfigure(3, minsize=100)
+
+            # Tablica rejestracyjna
+        self.pz_tablica_label = tk.Label(self.pojazd_zwrot_labelframe, text='Numer TR', background='yellow')
+        self.pz_tablica_label.grid(column=1, row=0, sticky='E', pady=20)
+
+        self.pz_tablica_entry = tk.Entry(self.pojazd_zwrot_labelframe, state='disabled', width=12, justify='center')
+        self.pz_tablica_entry.grid(column=2, row=0, sticky='W')
+
+            # Osoba zwracająca
+        self.pz_osoba_values = ['Błażej Prajs',
+                                'Marzena Ciszek',
+                                'Dawid Łuczak']
+
+        self.pz_osoba_label = tk.Label(self.pojazd_zwrot_labelframe, text='Osoba zwracająca', background='pink')
+        self.pz_osoba_label.grid(column=1, row=1, sticky='E', pady=10)
+
+        self.pz_osoba_combobox = ttk.Combobox(self.pojazd_zwrot_labelframe, values=self.pp_osoba_values)
+        self.pz_osoba_combobox.grid(column=2, row=1, sticky='W')
+
+            # Inna data pobrania
+        self.pz_data = tk.BooleanVar()
+        self.pz_data_check = ttk.Checkbutton(self.pojazd_zwrot_labelframe,
+                                             onvalue=True,
+                                             offvalue=False,
+                                             text='Inna data',
+                                             variable=self.pz_data)
+        self.pz_data_check.grid(column=1, row=2, sticky='E', pady=10)
+
+        self.pz_data_entry = tk.Entry(self.pojazd_zwrot_labelframe)
+        self.pz_data_entry.insert(0, 'RRRR-MM-DD')
+        self.pz_data_entry.config(state='disabled')
+        self.pz_data_entry.grid(column=2, row=2, sticky='W')
+
+            # Przycisk 'Zastosuj' ZWROT
+        self.pz_zastosuj_button = tk.Button(self.pojazd_zwrot_labelframe, text='Zastosuj', width=40)
+        self.pz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=20)
+
+            # Potwierdzenie zapisu
+        self.pz_potwierdzenie_label = tk.Label(self.pojazd_zwrot_labelframe)
+        self.pz_potwierdzenie_label.grid(column=0, columnspan=4, row=4)
+
         self.root.mainloop()
+
 if __name__ == '__main__' :
     app = App()
 
