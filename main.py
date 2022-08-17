@@ -1,10 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
+import  sqlite3
 
 class App():
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('Archeo 2022')
+
+        # Set LABEL STYLE
+        self.style = ttk.Style(self.root)
+        self.style.configure('TLabel', font='Helvetica 12 bold')
 
         # Screen size
         self.screen_width = self.root.winfo_screenwidth()
@@ -99,7 +104,7 @@ class App():
         self.pojazd_pobranie_labelframe.columnconfigure(3, minsize=100)
 
             # Tablica rejestracyjna
-        self.pp_tablica_label = tk.Label(self.pojazd_pobranie_labelframe, text='Numer TR', background='yellow')
+        self.pp_tablica_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Numer TR', background='yellow')
         self.pp_tablica_label.grid(column=1, row=0, sticky='E', pady=20)
 
         self.pp_tablica_entry = tk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=12, justify='center')
@@ -110,7 +115,7 @@ class App():
                                 'Marzena Ciszek',
                                 'Dawid Łuczak']
 
-        self.pp_osoba_label = tk.Label(self.pojazd_pobranie_labelframe, text='Osoba pobierająca', background='pink')
+        self.pp_osoba_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba pobierająca', background='pink')
         self.pp_osoba_label.grid(column=1, row=1, sticky='E', pady=10)
 
         self.pp_osoba_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_osoba_values)
@@ -139,13 +144,9 @@ class App():
         self.pp_potwierdzenie_label.grid(column=0, columnspan=4, row=4)
 
 
-
-
-
+        # VERTICAL SEPARATOR - POJAZD
         self.pojazd_ver_separator = ttk.Separator(self.pojazd, orient='vertical')
-        self.pojazd_ver_separator.grid(column=2, row=0, ipady=150)
-
-
+        self.pojazd_ver_separator.grid(column=2, row=0, ipady=130, pady=10)
 
 
         # ZWROT AKT POJAZDU --> pz
@@ -158,7 +159,7 @@ class App():
         self.pojazd_zwrot_labelframe.columnconfigure(3, minsize=100)
 
             # Tablica rejestracyjna
-        self.pz_tablica_label = tk.Label(self.pojazd_zwrot_labelframe, text='Numer TR', background='yellow')
+        self.pz_tablica_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Numer TR', background='yellow')
         self.pz_tablica_label.grid(column=1, row=0, sticky='E', pady=20)
 
         self.pz_tablica_entry = tk.Entry(self.pojazd_zwrot_labelframe, state='disabled', width=12, justify='center')
@@ -169,7 +170,7 @@ class App():
                                 'Marzena Ciszek',
                                 'Dawid Łuczak']
 
-        self.pz_osoba_label = tk.Label(self.pojazd_zwrot_labelframe, text='Osoba zwracająca', background='pink')
+        self.pz_osoba_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Osoba zwracająca', background='pink')
         self.pz_osoba_label.grid(column=1, row=1, sticky='E', pady=10)
 
         self.pz_osoba_combobox = ttk.Combobox(self.pojazd_zwrot_labelframe, values=self.pp_osoba_values)
@@ -196,6 +197,40 @@ class App():
             # Potwierdzenie zapisu
         self.pz_potwierdzenie_label = tk.Label(self.pojazd_zwrot_labelframe)
         self.pz_potwierdzenie_label.grid(column=0, columnspan=4, row=4)
+
+
+        # HORIZONTAL SEPARATOR
+        self.pojazd_hor_separator = ttk.Separator(self.pojazd, orient='horizontal')
+        self.pojazd_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=30)
+
+
+        # DATABASE VIEW
+        self.pojazd_db_columns = ("id", "TR", "Data pobrania", "Pobierający", "Operator - pobranie", "Data zwrotu",
+                                  "Zwracający", "Operator - zwrot")
+        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=18)
+
+        for column in self.pojazd_db_columns:
+            self.pojazd_db_view.heading(column, text=column, anchor='center')
+
+        self.pojazd_db_view.column("id", width=60)
+        self.pojazd_db_view.column("TR", width=120)
+        self.pojazd_db_view.column("Data pobrania", width=120)
+        self.pojazd_db_view.column("Data zwrotu", width=120)
+        self.pojazd_db_view.column("Operator - pobranie", width=140)
+
+        self.pojazd_db_view.grid(column=1, columnspan=3, row=4, sticky='NEWS')
+
+            # SCROLLBAR
+        self.pojazd_db_scrollbar = ttk.Scrollbar(self.pojazd, orient=tk.VERTICAL, command=self.pojazd_db_view.yview)
+        self.pojazd_db_view.configure(yscrollcommand=self.pojazd_db_scrollbar.set)
+        self.pojazd_db_scrollbar.grid(column=4, row=4, sticky='NS')
+
+
+
+        # CLOSE BUTTON
+        self.zamknij_button = ttk.Button(self.pojazd, text="Zamknij", command=lambda: self.root.quit())
+        self.zamknij_button.grid(column=2, row=6, sticky="WE", padx=10, pady=10)
+
 
         self.root.mainloop()
 
