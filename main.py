@@ -1,11 +1,25 @@
 import tkinter as tk
 from tkinter import ttk
-import  sqlite3
+from tkinter.messagebox import showerror, askyesno
+import re
+from datetime import datetime
+import sqlite3
+with sqlite3.connect('archeo.db') as db:
+    cursor = db.cursor()
 
 class App():
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('Archeo 2022')
+
+        self.cursor.execute(""" CREATE TABLE IF NOT EXISTS pojazdy( id integer PRIMARY KEY AUTOINCREMENT, 
+                                                        tr text NOT NULL, 
+                                                        data_pobrania text NOT NULL, 
+                                                        osoba_pobranie text NOT NULL, 
+                                                        operator_pobranie text NOT NULL, 
+                                                        data_zwrotu text, 
+                                                        osoba_zwrot text, 
+                                                        operator_zwrot text); """)
 
         # Set LABEL STYLE
         self.style = ttk.Style(self.root)
@@ -69,8 +83,11 @@ class App():
         self.operator_label.grid(column=0, row=0, sticky="E")
 
             # Operator Combobox
-        self.operator_combobox = ttk.Combobox(self.operator_frame, values=self.operator_values)
+        self.operator_combobox = ttk.Combobox(self.operator_frame, values=self.operator_values, )
         self.operator_combobox.grid(column=1, row=0, sticky='W')
+
+        self.operator_combobox.bind("<KeyPress>", self.enable_frames)
+        self.operator_combobox.bind("<<ComboboxSelected>>", self.enable_frames, add="+")
 
         # NOTEBOOK WIDGET
         self.notebook = ttk.Notebook(self.root)
@@ -96,7 +113,7 @@ class App():
 
         # POBRANIE AKT POJAZDU --> pp
         self.pojazd_pobranie_labelframe = tk.LabelFrame(self.pojazd, text='Pobranie akt pojazdu')
-        self.pojazd_pobranie_labelframe.grid(column=1, row=0, padx=30, sticky='NEWS')
+        self.pojazd_pobranie_labelframe.grid(column=1, row=0, padx=30, sticky='NEWS', pady=20)
 
         self.pojazd_pobranie_labelframe.columnconfigure(0, minsize=100)
         self.pojazd_pobranie_labelframe.columnconfigure(1, weight=1)
@@ -104,21 +121,25 @@ class App():
         self.pojazd_pobranie_labelframe.columnconfigure(3, minsize=100)
 
             # Tablica rejestracyjna
-        self.pp_tablica_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Numer TR', background='yellow')
-        self.pp_tablica_label.grid(column=1, row=0, sticky='E', pady=20)
+        self.pp_tablica_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Numer TR:', background='yellow')
+        self.pp_tablica_label.grid(column=1, row=0, sticky='E', pady=20, padx=10)
 
-        self.pp_tablica_entry = tk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=12, justify='center')
-        self.pp_tablica_entry.grid(column=2, row=0, sticky='W')
+        self.pp_tablica_img = tk.PhotoImage(file='tablica.gif')
+        self.pp_tablica_img_label = ttk.Label(self.pojazd_pobranie_labelframe, image=self.pp_tablica_img)
+        self.pp_tablica_img_label.grid(column=2, row=0, sticky='W')
+
+        self.pp_tablica_entry = tk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=12, justify='center', font=('Arial 13 bold'))
+        self.pp_tablica_entry.grid(column=2, row=0, sticky='W', padx=14)
 
             # Osoba pobierająca
         self.pp_osoba_values = ['Błażej Prajs',
                                 'Marzena Ciszek',
                                 'Dawid Łuczak']
 
-        self.pp_osoba_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba pobierająca', background='pink')
-        self.pp_osoba_label.grid(column=1, row=1, sticky='E', pady=10)
+        self.pp_osoba_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba pobierająca:', background='pink')
+        self.pp_osoba_label.grid(column=1, row=1, sticky='E', pady=10, padx=10)
 
-        self.pp_osoba_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_osoba_values)
+        self.pp_osoba_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_osoba_values, state='disabled')
         self.pp_osoba_combobox.grid(column=2, row=1, sticky='W')
 
             # Inna data pobrania
@@ -127,8 +148,9 @@ class App():
                                              onvalue=True,
                                              offvalue=False,
                                              text='Inna data',
-                                             variable=self.pp_data)
-        self.pp_data_check.grid(column=1, row=2, sticky='E', pady=10)
+                                             variable=self.pp_data,
+                                             command=self.pp_inna_data)
+        self.pp_data_check.grid(column=1, row=2, sticky='E', pady=10, padx=10)
 
         self.pp_data_entry = tk.Entry(self.pojazd_pobranie_labelframe)
         self.pp_data_entry.insert(0, 'RRRR-MM-DD')
@@ -151,7 +173,7 @@ class App():
 
         # ZWROT AKT POJAZDU --> pz
         self.pojazd_zwrot_labelframe = tk.LabelFrame(self.pojazd, text='Zwrot akt pojazdu')
-        self.pojazd_zwrot_labelframe.grid(column=3, row=0, padx=30, sticky='NEWS')
+        self.pojazd_zwrot_labelframe.grid(column=3, row=0, padx=30, sticky='NEWS', pady=20)
 
         self.pojazd_zwrot_labelframe.columnconfigure(0, minsize=100)
         self.pojazd_zwrot_labelframe.columnconfigure(1, weight=1)
@@ -159,31 +181,36 @@ class App():
         self.pojazd_zwrot_labelframe.columnconfigure(3, minsize=100)
 
             # Tablica rejestracyjna
-        self.pz_tablica_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Numer TR', background='yellow')
-        self.pz_tablica_label.grid(column=1, row=0, sticky='E', pady=20)
+        self.pz_tablica_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Numer TR:', background='yellow')
+        self.pz_tablica_label.grid(column=1, row=0, sticky='E', pady=20, padx=10)
 
-        self.pz_tablica_entry = tk.Entry(self.pojazd_zwrot_labelframe, state='disabled', width=12, justify='center')
-        self.pz_tablica_entry.grid(column=2, row=0, sticky='W')
+        self.pz_tablica_img = tk.PhotoImage(file='tablica.gif')
+        self.pz_tablica_img_label = ttk.Label(self.pojazd_zwrot_labelframe, image=self.pz_tablica_img)
+        self.pz_tablica_img_label.grid(column=2, row=0, sticky='W')
+
+        self.pz_tablica_entry = tk.Entry(self.pojazd_zwrot_labelframe, state='disabled', width=12, justify='center', font='Arial 13 bold')
+        self.pz_tablica_entry.grid(column=2, row=0, sticky='W', padx=14)
 
             # Osoba zwracająca
         self.pz_osoba_values = ['Błażej Prajs',
                                 'Marzena Ciszek',
                                 'Dawid Łuczak']
 
-        self.pz_osoba_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Osoba zwracająca', background='pink')
-        self.pz_osoba_label.grid(column=1, row=1, sticky='E', pady=10)
+        self.pz_osoba_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Osoba zwracająca:', background='pink')
+        self.pz_osoba_label.grid(column=1, row=1, sticky='E', pady=10, padx=10)
 
-        self.pz_osoba_combobox = ttk.Combobox(self.pojazd_zwrot_labelframe, values=self.pp_osoba_values)
+        self.pz_osoba_combobox = ttk.Combobox(self.pojazd_zwrot_labelframe, values=self.pp_osoba_values, state='disabled')
         self.pz_osoba_combobox.grid(column=2, row=1, sticky='W')
 
-            # Inna data pobrania
+            # Inna data zwrotu
         self.pz_data = tk.BooleanVar()
         self.pz_data_check = ttk.Checkbutton(self.pojazd_zwrot_labelframe,
                                              onvalue=True,
                                              offvalue=False,
                                              text='Inna data',
-                                             variable=self.pz_data)
-        self.pz_data_check.grid(column=1, row=2, sticky='E', pady=10)
+                                             variable=self.pz_data,
+                                             command=self.pz_inna_data)
+        self.pz_data_check.grid(column=1, row=2, sticky='E', pady=10, padx=10)
 
         self.pz_data_entry = tk.Entry(self.pojazd_zwrot_labelframe)
         self.pz_data_entry.insert(0, 'RRRR-MM-DD')
@@ -225,14 +252,44 @@ class App():
         self.pojazd_db_view.configure(yscrollcommand=self.pojazd_db_scrollbar.set)
         self.pojazd_db_scrollbar.grid(column=4, row=4, sticky='NS')
 
-
-
         # CLOSE BUTTON
         self.zamknij_button = ttk.Button(self.pojazd, text="Zamknij", command=lambda: self.root.quit())
         self.zamknij_button.grid(column=2, row=6, sticky="WE", padx=10, pady=10)
 
-
         self.root.mainloop()
+
+
+
+    def enable_frames(self, event):
+        # Funkcja aktywująca okienka po wybraniu operatora
+        self.pp_tablica_entry.config(state='normal')
+        self.pp_osoba_combobox.config(state='normal')
+        self.pz_tablica_entry.config(state='normal')
+        self.pz_osoba_combobox.config(state='normal')
+
+
+    def pp_inna_data(self):
+        # Jeśli zaznaczy się checkbox uaktywni się pole na date i przeniesie tam 'focus'
+        if self.pp_data.get():
+            self.pp_data_entry.config(state='normal')
+            self.pp_data_entry.delete(0, "end")
+            self.pp_data_entry.focus_set()
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        if not self.pp_data.get():
+            self.pp_data_entry.insert(0, "RRRR-MM-DD")
+            self.pp_data_entry.config(state="disabled")
+
+
+    def pz_inna_data(self):
+        # Jeśli zaznaczy się checkbox uaktywni się pole na date i przeniesie tam 'focus'
+        if self.pz_data.get():
+            self.pz_data_entry.config(state='normal')
+            self.pz_data_entry.delete(0, "end")
+            self.pz_data_entry.focus_set()
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        if not self.pz_data.get():
+            self.pz_data_entry.insert(0, "RRRR-MM-DD")
+            self.pz_data_entry.config(state="disabled")
 
 if __name__ == '__main__' :
     app = App()
