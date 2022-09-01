@@ -724,7 +724,7 @@ class App:
                                                 command=self.wyszukaj_kierowca_click)
         self.szukaj_wyszukaj_button.grid(column=0, row=0, padx=20, ipadx=10, pady=5)
 
-        self.szukaj_edytuj_button = tk.Button(self.szukaj_przyciski_frame, text='Edytuj')
+        self.szukaj_edytuj_button = tk.Button(self.szukaj_przyciski_frame, text='Edytuj', command=self.edit)
         self.szukaj_edytuj_button.grid(column=1, row=0, padx=20, ipadx=10, pady=5)
 
         self.szukaj_wyczysc_button = tk.Button(self.szukaj_przyciski_frame, text='Wyczyść', command=self.clear_entries)
@@ -781,6 +781,52 @@ class App:
 
         self.root.mainloop()
 
+    def edit(self):
+        for item in self.szukaj_kierowca_db_view.selection():
+            it = self.szukaj_kierowca_db_view.item(item, 'values')
+            print(it)
+        top = tk.Toplevel()
+        top.title('Edycja')
+        napis = tk.Label(top, text='pesel').pack()
+        pesel = tk.Entry(top).pack()
+
+
+
+
+        btn = tk.Button(top, text='close', command=top.destroy).pack()
+
+    def wyszukaj_pojazd_click(self):
+        tr = self.szukaj_tr_entry.get().upper()
+        os_pob = self.szukaj_pojazd_osoba_pobranie_entry.get().title()
+        os_zw = self.szukaj_pojazd_osoba_zwrot_entry.get().title()
+        op_pob = self.szukaj_pojazd_operator_pobranie_entry.get().title()
+        op_zw = self.szukaj_pojazd_operator_zwrot_entry.get().title()
+        data_pob_od = self.szukaj_pojazd_data_od_pobranie_entry.get()
+        data_pob_do = self.szukaj_pojazd_data_do_pobranie_entry.get()
+        data_zw_od = self.szukaj_pojazd_data_od_zwrot_entry.get()
+        data_zw_do = self.szukaj_pojazd_data_do_zwrot_entry.get()
+        keys = ['tr', 'osoba_pobranie', 'operator_pobranie',
+                'osoba_zwrot', 'operator_zwrot', 'data_pobrania', 'data_zwrotu']
+        values = [tr, os_pob, op_pob, os_zw, op_zw]
+        warunki = {k: v for k, v in zip(keys, values)}
+        sql = self.sql_select('pojazdy', **warunki)
+        daty = []
+        if data_pob_od:
+            daty.append(f"data_pobrania >= '{data_pob_od} 00:00'")
+        if data_pob_do:
+            daty.append(f"data_pobrania <= '{data_pob_do} 23:59'")
+        if data_zw_od:
+            daty.append(f"data_zwrotu >= '{data_zw_od} 00:00'")
+        if data_zw_do:
+            daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
+        sql = sql[:-1] + " AND ".join(daty) + ";"
+        print(sql)
+        with sqlite3.connect('archeo.db') as self.db:
+            self.cursor = self.db.cursor()
+        for n in self.cursor.execute(sql):
+            self.szukaj_pojazd_db_view.insert("", tk.END, values=n)
+        self.db.close()
+
     def wyszukaj_kierowca_click(self):
         pesel = self.szukaj_kierowca_pesel_entry.get()
         nr_kk = self.szukaj_kierowca_nr_kk_entry.get()
@@ -799,15 +845,18 @@ class App:
         values = [pesel, nr_kk, imie, nazwisko, op_pob, op_zw, os_pob, os_zw]
         warunki = {k: v for k, v in zip(keys, values)}
         sql = self.sql_select('kierowcy', **warunki)
+        daty = []
         if data_pob_od:
-            sql = sql[:-1] + f" AND data_pobrania >= '{data_pob_od}' "
-        if data_pob_od:
-            sql = sql[:-1] + f" AND data_pobrania <= '{data_pob_do}' "
-        if data_pob_od:
-            sql = sql[:-1] + f" AND data_zwrotu >= '{data_zw_od}' "
-        if data_pob_od:
-            sql = sql[:-1] + f" AND data_zwrotu >= '{data_zw_do}' "
-        sql = sql[:-1] + ";"
+            daty.append(f"data_pobrania >= '{data_pob_od} 00:00'")
+        if data_pob_do:
+            daty.append(f"data_pobrania <= '{data_pob_do} 23:59'")
+        if data_zw_od:
+            daty.append(f"data_zwrotu >= '{data_zw_od} 00:00'")
+        if data_zw_do:
+            daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
+        if len(sql) > 30:
+            sql = sql[:-1] + " AND  "
+        sql = sql[:-1] + " AND ".join(daty) + ";"
         print(sql)
         #self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
@@ -844,11 +893,13 @@ class App:
             self.szukaj_kierowca_wyniki_frame.grid_forget()
             self.wyszukaj_pojazd_frame.grid(column=0, row=0)
             self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
+            self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_pojazd_click)
         else:
             self.wyszukaj_pojazd_frame.grid_forget()
             self.szukaj_pojazd_wyniki_frame.grid_forget()
             self.wyszukaj_kierowca_frame.grid(column=0, row=0)
             self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
+            self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_kierowca_click)
 
     def kp_data_urodzenia(self):
         if self.kp_data_ur_var:
@@ -1013,7 +1064,7 @@ class App:
             self.pp_potwierdzenie_label.image = wrong
 
     def pojazd_zastosuj_pobranie(self):
-        now = datetime.now().strftime("%y-%m-%d %H:%M")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
         teczka = self.pp_tablica_entry.get().upper()
         osoba = self.pp_osoba_combobox.get().title()
         operator = self.operator_combobox.get().title()
@@ -1021,7 +1072,7 @@ class App:
             self.cursor = self.db.cursor()
         if self.pp_data.get():
             if self.format_inna_data(self.pp_data_entry.get()):
-                now = self.pp_data_entry.get()
+                now = self.pp_data_entry.get() + ' 12:00'
             else:
                 return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
@@ -1079,7 +1130,7 @@ class App:
             self.pz_potwierdzenie_label.image = wrong
 
     def pojazd_zastosuj_zwrot(self):
-        now = datetime.now().strftime("%y-%m-%d %H:%M")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
         teczka = self.pz_tablica_entry.get().upper()
         osoba = self.pz_osoba_combobox.get().title()
         operator = self.operator_combobox.get().title()
@@ -1088,7 +1139,7 @@ class App:
             self.cursor = self.db.cursor()
         if self.pz_data.get():
             if self.format_inna_data(self.pz_data_entry.get()):
-                now = self.pz_data_entry.get()
+                now = self.pz_data_entry.get() + ' 12:00'
             else:
                 return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
@@ -1173,7 +1224,7 @@ class App:
             self.kp_potwierdzenie_label.image = wrong
 
     def kierowca_zastosuj_pobranie(self):
-        now = datetime.now().strftime("%y-%m-%d %H:%M")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
         pesel = self.kp_pesel_string.get()
         imie = self.kp_imie_entry.get().title()
         nazwisko = self.kp_nazwisko_entry.get().title()
@@ -1191,7 +1242,7 @@ class App:
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
         if self.kp_data.get():
             if self.format_inna_data(self.kp_data_entry.get()):
-                now = self.kp_data_entry.get()
+                now = self.kp_data_entry.get() + ' 12:00'
             else:
                 return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
@@ -1251,7 +1302,7 @@ class App:
             self.kz_potwierdzenie_label.image = wrong
 
     def kierowca_zastosuj_zwrot(self):
-        now = datetime.now().strftime("%y-%m-%d %H:%M")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
         pesel = self.kz_pesel_string.get()
         # imie = self.kz_imie_entry.get().title()
         # nazwisko = self.kz_nazwisko_entry.get().title()
@@ -1262,7 +1313,7 @@ class App:
             self.cursor = self.db.cursor()
         if self.kz_data.get():
             if self.format_inna_data(self.kz_data_entry.get()):
-                now = self.kz_data_entry.get()
+                now = self.kz_data_entry.get() + ' 12:00'
             else:
                 return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
