@@ -724,7 +724,7 @@ class App:
                                                 command=self.wyszukaj_kierowca_click)
         self.szukaj_wyszukaj_button.grid(column=0, row=0, padx=20, ipadx=10, pady=5)
 
-        self.szukaj_edytuj_button = tk.Button(self.szukaj_przyciski_frame, text='Edytuj', command=self.edit)
+        self.szukaj_edytuj_button = tk.Button(self.szukaj_przyciski_frame, text='Edytuj', command=self.edit_kierowca)
         self.szukaj_edytuj_button.grid(column=1, row=0, padx=20, ipadx=10, pady=5)
 
         self.szukaj_wyczysc_button = tk.Button(self.szukaj_przyciski_frame, text='Wyczyść', command=self.clear_entries)
@@ -732,13 +732,14 @@ class App:
 
         # SZUKAJ DB VIEW FRAME POJAZD
         self.szukaj_pojazd_wyniki_frame = ttk.LabelFrame(self.wyszukiwanie, text='Wyniki wyszukiwania')
-        #self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, pady=10, padx=30, ipadx=10)
+        # self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, pady=10, padx=30, ipadx=10)
 
         # SZUKAJ DATABASE VIEW POJAZD
         self.szukaj_pojazd_db_columns = (
             "id", "TR", "Data pobrania", "Pobierający", "Operator - pobranie", "Data zwrotu",
             "Zwracający", "Operator - zwrot")
-        self.szukaj_pojazd_db_view = ttk.Treeview(self.szukaj_pojazd_wyniki_frame, columns=self.szukaj_pojazd_db_columns,
+        self.szukaj_pojazd_db_view = ttk.Treeview(self.szukaj_pojazd_wyniki_frame,
+                                                  columns=self.szukaj_pojazd_db_columns,
                                                   show='headings', height=25)
         col_width_pojazd = int(self.window_width / 8)
         for column in self.szukaj_pojazd_db_columns:
@@ -760,12 +761,12 @@ class App:
         self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, pady=10, padx=30)
 
         # SZUKAJ DATABASE VIEW KIEROWCA
-        self.szukaj_kierowca_db_columns = ('id', 'pesel', 'nazwisko', 'imię', 'nr_kk', 'data_pobrania', 'Pobierający',
-                                           'operator_pobranie', 'data_zwrotu', 'Zwracający', 'operator_zwrot')
+        self.szukaj_kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'nr_kk', 'Data pobrania', 'Pobierający',
+                                           'Operator pobranie', 'Data zwrotu', 'Zwracający', 'Operator zwrot')
         self.szukaj_kierowca_db_view = ttk.Treeview(self.szukaj_kierowca_wyniki_frame,
                                                     columns=self.szukaj_kierowca_db_columns, show='headings', height=25)
-        col_width_kier = int(self.window_width / 11)
 
+        col_width_kier = int(self.window_width / 11)
         for column in self.szukaj_kierowca_db_columns:
             self.szukaj_kierowca_db_view.heading(column, text=column, anchor='center')
             self.szukaj_kierowca_db_view.column(column, width=col_width_kier)
@@ -781,19 +782,39 @@ class App:
 
         self.root.mainloop()
 
-    def edit(self):
-        for item in self.szukaj_kierowca_db_view.selection():
-            it = self.szukaj_kierowca_db_view.item(item, 'values')
-            print(it)
-        top = tk.Toplevel()
-        top.title('Edycja')
-        napis = tk.Label(top, text='pesel').pack()
-        pesel = tk.Entry(top).pack()
+    def edit_pojazd(self):
+        """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
+        Function open a new window with fields filled with selected row data.
+        When all search fields are empty show a Showinfo with short message """
+        try:
+            okno_edycji = Edit_pojazd()
+            entries = okno_edycji.entries_frame.winfo_children()
+            for item in self.szukaj_pojazd_db_view.selection():
+                values = self.szukaj_pojazd_db_view.item(item, 'values')
+            for i, entry in enumerate(entries):
+                entry.insert(0, values[i + 1])
+            okno_edycji.id_entry.insert(0, values[0])
+            okno_edycji.id_entry.configure(state='disabled')
+        except UnboundLocalError:
+            okno_edycji.root.destroy()
+            showinfo('Brak danych', 'Nie zaznaczono żadnego wpisu.')
 
-
-
-
-        btn = tk.Button(top, text='close', command=top.destroy).pack()
+    def edit_kierowca(self):
+        """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
+        Function open a new window with fields filled with selected row data.
+        When all search fields are empty show a Showinfo with short message """
+        try:
+            okno_edycji = Edit_kierowca()
+            entries = okno_edycji.entries_frame.winfo_children()
+            for item in self.szukaj_kierowca_db_view.selection():
+                values = self.szukaj_kierowca_db_view.item(item, 'values')
+            for i, entry in enumerate(entries):
+                entry.insert(0, values[i + 1])
+            okno_edycji.id_entry.insert(0, values[0])
+            okno_edycji.id_entry.configure(state='disabled')
+        except UnboundLocalError:
+            okno_edycji.root.destroy()
+            showinfo('Brak danych', 'Nie zaznaczono żadnego wpisu.')
 
     def wyszukaj_pojazd_click(self):
         tr = self.szukaj_tr_entry.get().upper()
@@ -858,7 +879,7 @@ class App:
             sql = sql[:-1] + " AND  "
         sql = sql[:-1] + " AND ".join(daty) + ";"
         print(sql)
-        #self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
+        # self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
         for n in self.cursor.execute(sql):
@@ -886,7 +907,6 @@ class App:
         sql = list()
         sql.append(f"UPDATE {tabela}")
 
-
     def wybierz_rejestr(self):
         if self.selected_value.get():
             self.wyszukaj_kierowca_frame.grid_forget()
@@ -894,12 +914,14 @@ class App:
             self.wyszukaj_pojazd_frame.grid(column=0, row=0)
             self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
             self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_pojazd_click)
+            self.szukaj_edytuj_button.configure(command=self.edit_pojazd)
         else:
             self.wyszukaj_pojazd_frame.grid_forget()
             self.szukaj_pojazd_wyniki_frame.grid_forget()
             self.wyszukaj_kierowca_frame.grid(column=0, row=0)
             self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
             self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_kierowca_click)
+            self.szukaj_edytuj_button.configure(command=self.edit_kierowca)
 
     def kp_data_urodzenia(self):
         if self.kp_data_ur_var:
@@ -1335,6 +1357,159 @@ class App:
 
         self.kierowca_potwierdzenie_zwrotu(pesel, now, osoba, operator)
         self.db.close()
+
+
+class Edit_kierowca(App):
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Edycja wpisu")
+        self.root.attributes('-topmost', 1)
+        self.root.geometry('400x450+400+400')
+
+        self.id_label = tk.Label(self.root, text='ID')
+        self.id_label.grid(column=0, row=0, sticky='E')
+
+        self.id_entry = tk.Entry(self.root, width=10, font='Arial 11')
+        self.id_entry.grid(column=1, row=0, sticky='W', pady=5)
+
+        self.labels_frame = tk.Label(self.root)
+        self.labels_frame.grid(column=0, row=1, ipadx=30)
+
+        self.entries_frame = tk.Label(self.root)
+        self.entries_frame.grid(column=1, row=1, ipadx=50)
+
+        labels = {'pesel': 'PESEL',
+                  'nazwisko': 'Nazwisko',
+                  'imie': 'Imię',
+                  'nr_kk': 'nr_kk',
+                  'data_pob': 'Data pobrania',
+                  'osoba_pob': 'Pobierający',
+                  'operator_pob': 'Operator Pobranie',
+                  'data_zw': 'Data zwrotu',
+                  'osoba_zw': 'Zwracający',
+                  'operator_zw': 'Operator zwrot'}
+        for k, v in labels.items():
+            self.k = tk.Label(self.labels_frame, text=v).pack(anchor='e', pady=5)
+
+        self.pesel_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.pesel_entry.pack(anchor='w', pady=5)
+        self.nazwisko_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.nazwisko_entry.pack(anchor='w', pady=5)
+        self.imie_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.imie_entry.pack(anchor='w', pady=5)
+        self.nr_kk_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.nr_kk_entry.pack(anchor='w', pady=5)
+        self.data_pob_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.data_pob_entry.pack(anchor='w', pady=5)
+        self.osoba_pob_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.osoba_pob_entry.pack(anchor='w', pady=5)
+        self.operator_pob_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.operator_pob_entry.pack(anchor='w', pady=5)
+        self.data_zw_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.data_zw_entry.pack(anchor='w', pady=5)
+        self.osoba_zw_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.osoba_zw_entry.pack(anchor='w', pady=5)
+        self.operator_zw_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.operator_zw_entry.pack(anchor='w', pady=5)
+
+        self.edycja_zamknij_button = ttk.Button(self.root, text='Zamknij', command=lambda: self.root.destroy())
+        self.edycja_zamknij_button.grid(column=0, row=2, pady=10)
+
+        self.edycja_accept_button = ttk.Button(self.root, text='Akceptuj', command=self.accept)
+        self.edycja_accept_button.grid(column=1, row=2, pady=10)
+
+        self.edycja_delete_button = ttk.Button(self.root, text='Usuń', command=self.delete)
+        self.edycja_delete_button.grid(column=1, row=3, pady=10)
+
+    def accept(self):
+        values = []
+        columns = ['pesel', 'nazwisko', 'imie', 'nr_kk', 'data_pobrania', 'osoba_pobranie',
+                   'operator_pobranie', 'data_zwrotu', 'osoba_zwrot', 'operator_zwrot']
+        a = self.entries_frame.winfo_children()
+        for entry1 in a:
+            values.append(entry1.get())
+        pairs = {}
+        for p in zip(columns, values):
+            pairs[p[0]] = p[1]
+        print(self.sql_edit('kierowca', **pairs))
+
+    def delete(self):
+        potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n'
+                                 'Czy na pewno chcesz usunąć ten wpis?')
+        if potwierdzenie:
+            print(self.sql_delete('kierowca'))
+            self.root.destroy()
+
+
+    def sql_edit(self, tabela: str, **kwargs) -> str:
+        db_id = self.id_entry.get()
+        sql = f"UPDATE {tabela} SET "
+        values = []
+        for k, v in kwargs.items():
+            values.append(f"{k} = '{v}'")
+        sql = sql + ", ".join(values) + f" WHERE id = '{db_id}';"
+        return sql
+
+    def sql_delete(self, tabela: str) -> str:
+        db_id = self.id_entry.get()
+        sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
+        return sql
+
+
+class Edit_pojazd(App):
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Edycja wpisu")
+        self.root.attributes('-topmost', 1)
+        self.root.geometry('400x450+400+400')
+
+        self.id_label = tk.Label(self.root, text='ID')
+        self.id_label.grid(column=0, row=0, sticky='E')
+
+        self.id_entry = tk.Entry(self.root, width=10, font='Arial 11')
+        self.id_entry.grid(column=1, row=0, sticky='W', pady=5)
+
+        self.labels_frame = tk.Label(self.root)
+        self.labels_frame.grid(column=0, row=1, ipadx=30)
+
+        self.entries_frame = tk.Label(self.root)
+        self.entries_frame.grid(column=1, row=1, ipadx=50)
+
+        labels = {'tr': 'TR',
+                  'data_pobrania': 'Data pobrania',
+                  'osoba_pobranie': 'Pobierający',
+                  'operator_pobranie': 'Operator pobranie',
+                  'data_zwrotu': 'Data zwrotu',
+                  'osoba_zwrot': 'Zwracający',
+                  'operator_zwrot': 'Operator zwrot'}
+
+        for k, v in labels.items():
+            self.k = tk.Label(self.labels_frame, text=v).pack(anchor='e', pady=5)
+
+        self.tr_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.tr_entry.pack(anchor='w', pady=5)
+        self.data_pob_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.data_pob_entry.pack(anchor='w', pady=5)
+        self.osoba_pob_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.osoba_pob_entry.pack(anchor='w', pady=5)
+        self.operator_pob_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.operator_pob_entry.pack(anchor='w', pady=5)
+        self.data_zw_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.data_zw_entry.pack(anchor='w', pady=5)
+        self.osoba_zw_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.osoba_zw_entry.pack(anchor='w', pady=5)
+        self.operator_zw_entry = tk.Entry(self.entries_frame, width=25, font='Arial 11')
+        self.operator_zw_entry.pack(anchor='w', pady=5)
+
+        self.edycja_zamknij_button = ttk.Button(self.root, text='Zamknij', command=lambda: self.root.destroy())
+        self.edycja_zamknij_button.grid(column=0, row=2, pady=10)
+
+        self.edycja_accept_button = ttk.Button(self.root, text='Akceptuj')
+        self.edycja_accept_button.grid(column=1, row=2, pady=10)
+
+        self.edycja_delete_button = ttk.Button(self.root, text='Usuń',)
+        self.edycja_delete_button.grid(column=1, row=3, pady=10)
+
 
 
 if __name__ == '__main__':
