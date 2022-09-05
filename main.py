@@ -774,11 +774,16 @@ class App:
         self.szukaj_kierowca_db_view.column('id', width=80)
 
         self.szukaj_kierowca_db_view.grid(column=0, row=4, sticky='NEWS')
+
         # SCROLLBAR
         self.szukaj_kierowca_db_scrollbar = ttk.Scrollbar(self.szukaj_kierowca_wyniki_frame, orient=tk.VERTICAL,
                                                           command=self.szukaj_kierowca_db_view.yview)
         self.szukaj_kierowca_db_view.configure(yscrollcommand=self.szukaj_kierowca_db_scrollbar.set)
         self.szukaj_kierowca_db_scrollbar.grid(column=1, row=4, sticky='NS')
+
+        # CLOSE BUTTON
+        self.zamknij_button3 = ttk.Button(self.wyszukiwanie, text="Zamknij", command=lambda: self.root.quit())
+        self.zamknij_button3.grid(column=0, row=6, padx=10, pady=10)
 
         self.root.mainloop()
 
@@ -842,10 +847,15 @@ class App:
             daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
         sql = sql[:-1] + " AND ".join(daty) + ";"
         print(sql)
+        self.szukaj_pojazd_db_view.delete(*self.szukaj_pojazd_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
-        for n in self.cursor.execute(sql):
-            self.szukaj_pojazd_db_view.insert("", tk.END, values=n)
+        try:
+            for n in self.cursor.execute(sql):
+                self.szukaj_pojazd_db_view.insert("", tk.END, values=n)
+        except sqlite3.OperationalError:
+            for n in self.cursor.execute("SELECT * FROM pojazdy"):
+                self.szukaj_pojazd_db_view.insert("", tk.END, values=n)
         self.db.close()
 
     def wyszukaj_kierowca_click(self):
@@ -879,11 +889,15 @@ class App:
             sql = sql[:-1] + " AND  "
         sql = sql[:-1] + " AND ".join(daty) + ";"
         print(sql)
-        # self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
+        self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
-        for n in self.cursor.execute(sql):
-            self.szukaj_kierowca_db_view.insert("", tk.END, values=n)
+        try:
+            for n in self.cursor.execute(sql):
+                self.szukaj_kierowca_db_view.insert("", tk.END, values=n)
+        except sqlite3.OperationalError:
+            for n in self.cursor.execute("SELECT * FROM kierowcy"):
+                self.szukaj_kierowca_db_view.insert("", tk.END, values=n)
         self.db.close()
 
     def clear_entries(self):
@@ -950,6 +964,7 @@ class App:
 
     def show_all(self):
         # Funkcja do przycisku "Pokaż wszystko", żeby wyświetlić wszystkie dane z bazy
+        self.pojazd_db_view.delete(*self.pojazd_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
         for n in self.cursor.execute(""" SELECT * FROM pojazdy """):
@@ -1431,15 +1446,34 @@ class Edit_kierowca(App):
         pairs = {}
         for p in zip(columns, values):
             pairs[p[0]] = p[1]
-        print(self.sql_edit('kierowca', **pairs))
+        print(self.sql_edit('kierowcy', **pairs))
+        try:
+            sql = self.sql_edit('kierowcy', **pairs)
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
+            self.cursor.execute(sql)
+            self.db.commit()
+            self.db.close()
+            showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
+            self.root.destroy()
+        except:
+            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
 
     def delete(self):
         potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n'
-                                 'Czy na pewno chcesz usunąć ten wpis?')
+                                                 'Czy na pewno chcesz usunąć ten wpis?')
         if potwierdzenie:
-            print(self.sql_delete('kierowca'))
-            self.root.destroy()
-
+            try:
+                sql = self.sql_delete('kierowcy')
+                with sqlite3.connect('archeo.db') as self.db:
+                    self.cursor = self.db.cursor()
+                self.cursor.execute(sql)
+                self.db.commit()
+                self.db.close()
+                showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
+                self.root.destroy()
+            except:
+                showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
 
     def sql_edit(self, tabela: str, **kwargs) -> str:
         db_id = self.id_entry.get()
@@ -1504,12 +1538,64 @@ class Edit_pojazd(App):
         self.edycja_zamknij_button = ttk.Button(self.root, text='Zamknij', command=lambda: self.root.destroy())
         self.edycja_zamknij_button.grid(column=0, row=2, pady=10)
 
-        self.edycja_accept_button = ttk.Button(self.root, text='Akceptuj')
+        self.edycja_accept_button = ttk.Button(self.root, text='Akceptuj', command=self.accept)
         self.edycja_accept_button.grid(column=1, row=2, pady=10)
 
-        self.edycja_delete_button = ttk.Button(self.root, text='Usuń',)
+        self.edycja_delete_button = ttk.Button(self.root, text='Usuń', command=self.delete)
         self.edycja_delete_button.grid(column=1, row=3, pady=10)
 
+    def accept(self):
+        values = []
+        columns = ['tr', 'data_pobrania', 'osoba_pobranie',
+                   'operator_pobranie', 'data_zwrotu', 'osoba_zwrot', 'operator_zwrot']
+        a = self.entries_frame.winfo_children()
+        for entry1 in a:
+            values.append(entry1.get())
+        pairs = {}
+        for p in zip(columns, values):
+            pairs[p[0]] = p[1]
+        print(self.sql_edit('pojazdy', **pairs))
+        try:
+            sql = self.sql_edit('pojazdy', **pairs)
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
+            self.cursor.execute(sql)
+            self.db.commit()
+            self.db.close()
+            showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
+            self.root.destroy()
+        except:
+            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
+
+    def delete(self):
+        potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n'
+                                                 'Czy na pewno chcesz usunąć ten wpis?')
+        if potwierdzenie:
+            try:
+                sql = self.sql_delete('pojazdy')
+                with sqlite3.connect('archeo.db') as self.db:
+                    self.cursor = self.db.cursor()
+                self.cursor.execute(sql)
+                self.db.commit()
+                self.db.close()
+                showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
+                self.root.destroy()
+            except:
+                showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
+
+    def sql_edit(self, tabela: str, **kwargs) -> str:
+        db_id = self.id_entry.get()
+        sql = f"UPDATE {tabela} SET "
+        values = []
+        for k, v in kwargs.items():
+            values.append(f"{k} = '{v}'")
+        sql = sql + ", ".join(values) + f" WHERE id = '{db_id}';"
+        return sql
+
+    def sql_delete(self, tabela: str) -> str:
+        db_id = self.id_entry.get()
+        sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
+        return sql
 
 
 if __name__ == '__main__':
