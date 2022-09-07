@@ -65,11 +65,12 @@ class App:
         self.file_menu.add_separator()
         self.file_menu.add_command(label='Zamknij', command=self.root.destroy)
 
-        self.help_menu.add_command(label='Witaj!')
-        self.help_menu.add_command(label='O aplikacji..')
+        self.help_menu.add_command(label='Edytuj operatorów', command=self.edit_operator)
+        self.help_menu.add_command(label='Edytuj osoby - Kierowca')
+        self.help_menu.add_command(label='Edytuj osoby - Pojazd')
 
-        self.menubar.add_cascade(label='Opcje', menu=self.file_menu)
-        self.menubar.add_cascade(label='Więcej', menu=self.help_menu)
+        self.menubar.add_cascade(label='Menu', menu=self.file_menu)
+        self.menubar.add_cascade(label='Opcje', menu=self.help_menu)
 
         # Welcome label
         self.welcome = tk.Label(self.root,
@@ -786,6 +787,12 @@ class App:
         self.zamknij_button3.grid(column=0, row=6, padx=10, pady=10)
 
         self.root.mainloop()
+
+    def edit_operator(self):
+        okno_edycji = EditOperator()
+
+        for name in self.operator_values:
+            okno_edycji.lista_operatorow.insert("", tk.END, values=[name])
 
     def edit_pojazd(self):
         """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
@@ -1596,6 +1603,33 @@ class Edit_pojazd(App):
         db_id = self.id_entry.get()
         sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
         return sql
+
+
+class EditOperator(App):
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Edycja operatorów")
+        self.root.attributes('-topmost', 1)
+        self.root.geometry('400x450+400+400')
+
+        self.lista_operatorow = ttk.Treeview(self.root, columns='Operator', height=8, show='headings')
+        self.lista_operatorow.grid(column=0, row=0, pady=20, sticky='WE', padx=100)
+        self.lista_operatorow.heading(column='Operator', text='Operator', anchor='center')
+
+        self.delete_button = ttk.Button(self.root, text='Usuń')
+        self.delete_button.grid(column=0, row=1, padx=50, pady=10)
+
+        self.dodaj_frame = ttk.LabelFrame(self.root, text="Dodaj operatora")
+        self.dodaj_frame.grid(column=0, row=2, pady=10)
+
+        self.dodaj_label = ttk.Label(self.dodaj_frame, text='Imię i nazwisko')
+        self.dodaj_label.grid(column=0, row=0, pady=10, padx=10)
+
+        self.dodaj_entry = ttk.Entry(self.dodaj_frame, width=25)
+        self.dodaj_entry.grid(column=1, row=0, padx=10)
+
+        self.dodaj_button = ttk.Button(self.dodaj_frame, text='Dodaj')
+        self.dodaj_button.grid(column=0, columnspan=2, row=1, pady=10)
 
 
 if __name__ == '__main__':
