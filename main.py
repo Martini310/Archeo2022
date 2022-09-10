@@ -1,3 +1,4 @@
+import _tkinter
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showerror, askyesno, showinfo, showwarning
@@ -60,14 +61,14 @@ class App:
         self.help_menu = tk.Menu(self.menubar, tearoff=0)
 
         # Menu items
-        self.file_menu.add_command(label='Informacje')
+        self.file_menu.add_command(label='Informacje', command=self.info)
         self.file_menu.add_command(label='Pusty')
         self.file_menu.add_separator()
         self.file_menu.add_command(label='Zamknij', command=self.root.destroy)
 
-        self.help_menu.add_command(label='Edytuj operatorów', command=self.edit_operator)
-        self.help_menu.add_command(label='Edytuj osoby - Kierowca')
-        self.help_menu.add_command(label='Edytuj osoby - Pojazd')
+        self.help_menu.add_command(label='Edytuj operatorów', command=self.operator_edit_window)
+        self.help_menu.add_command(label='Edytuj osoby - Kierowca', command=self.osoba_kierowca_edit_window)
+        self.help_menu.add_command(label='Edytuj osoby - Pojazd', command=self.osoba_pojazd_edit_window)
 
         self.menubar.add_cascade(label='Menu', menu=self.file_menu)
         self.menubar.add_cascade(label='Opcje', menu=self.help_menu)
@@ -788,18 +789,12 @@ class App:
 
         self.root.mainloop()
 
-    def edit_operator(self):
-        okno_edycji = EditOperator()
-
-        for name in self.operator_values:
-            okno_edycji.lista_operatorow.insert("", tk.END, values=[name])
-
     def edit_pojazd(self):
         """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
         Function open a new window with fields filled with selected row data.
         When all search fields are empty show a Showinfo with short message """
         try:
-            okno_edycji = Edit_pojazd()
+            okno_edycji = EditPojazd()
             entries = okno_edycji.entries_frame.winfo_children()
             for item in self.szukaj_pojazd_db_view.selection():
                 values = self.szukaj_pojazd_db_view.item(item, 'values')
@@ -816,7 +811,7 @@ class App:
         Function open a new window with fields filled with selected row data.
         When all search fields are empty show a Showinfo with short message """
         try:
-            okno_edycji = Edit_kierowca()
+            okno_edycji = EditKierowca()
             entries = okno_edycji.entries_frame.winfo_children()
             for item in self.szukaj_kierowca_db_view.selection():
                 values = self.szukaj_kierowca_db_view.item(item, 'values')
@@ -1380,8 +1375,208 @@ class App:
         self.kierowca_potwierdzenie_zwrotu(pesel, now, osoba, operator)
         self.db.close()
 
+    def operator_edit_window(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title("Edycja operatorów")
+        self.window.attributes('-topmost', 1)
+        self.window.geometry('400x450+400+400')
 
-class Edit_kierowca(App):
+        self.lista_operatorow = ttk.Treeview(self.window, columns='Operator', height=8, show='headings')
+        self.lista_operatorow.grid(column=0, row=0, pady=20, sticky='WE', padx=100)
+        self.lista_operatorow.heading(column='Operator', text='Operator', anchor='center')
+
+        self.delete_button = ttk.Button(self.window, text='Usuń', command=self.delete_operator)
+        self.delete_button.grid(column=0, row=1, padx=50, pady=5)
+
+        self.dodaj_frame = ttk.LabelFrame(self.window, text="Dodaj operatora")
+        self.dodaj_frame.grid(column=0, row=2, pady=10)
+
+        self.dodaj_label = ttk.Label(self.dodaj_frame, text='Imię i nazwisko')
+        self.dodaj_label.grid(column=0, row=0, pady=10, padx=10)
+
+        self.dodaj_entry = ttk.Entry(self.dodaj_frame, width=25)
+        self.dodaj_entry.grid(column=1, row=0, padx=10)
+
+        self.dodaj_button = ttk.Button(self.dodaj_frame, text='Dodaj', command=self.add_operator)
+        self.dodaj_button.grid(column=0, columnspan=2, row=1, pady=10)
+
+        self.zamknij_button4 = ttk.Button(self.window, text='Zamknij', command=lambda: self.window.destroy())
+        self.zamknij_button4.grid(column=0, row=4, pady=20)
+
+        for name in self.operator_values:
+            self.lista_operatorow.insert("", tk.END, values=[name])
+
+    def delete_operator(self):
+        ''' Function to removing elements from list of operators'''
+        try:
+            for item in self.lista_operatorow.selection():
+                values = self.lista_operatorow.item(item, 'values')
+            self.operator_values.remove(values[0])
+            self.lista_operatorow.delete(*self.lista_operatorow.get_children())
+            for name in self.operator_values:
+                self.lista_operatorow.insert("", tk.END, values=[name])
+            self.operator_combobox.config(values=self.operator_values)
+        except (_tkinter.TclError, UnboundLocalError, ValueError):
+            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+
+    def add_operator(self):
+        ''' Function to adding elements to the list of operators'''
+        try:
+            oper = self.dodaj_entry.get()
+            self.operator_values.append(oper)
+            self.lista_operatorow.delete(*self.lista_operatorow.get_children())
+            for name in self.operator_values:
+                self.lista_operatorow.insert("", tk.END, values=[name])
+            self.operator_combobox.config(values=self.operator_values)
+            self.dodaj_entry.delete(0, tk.END)
+        except (_tkinter.TclError, UnboundLocalError, ValueError):
+            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+
+    def osoba_pojazd_edit_window(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title("Edycja osób pobierających akta pojazdu")
+        self.window.attributes('-topmost', 1)
+        self.window.geometry('400x450+400+400')
+
+        self.lista_operatorow = ttk.Treeview(self.window, columns='Operator', height=8, show='headings')
+        self.lista_operatorow.grid(column=0, row=0, pady=20, sticky='WE', padx=100)
+        self.lista_operatorow.heading(column='Operator', text='Operator', anchor='center')
+
+        self.delete_button = ttk.Button(self.window, text='Usuń', command=self.delete_pojazd_osoba)
+        self.delete_button.grid(column=0, row=1, padx=50, pady=5)
+
+        self.dodaj_frame = ttk.LabelFrame(self.window, text="Dodaj operatora")
+        self.dodaj_frame.grid(column=0, row=2, pady=10)
+
+        self.dodaj_label = ttk.Label(self.dodaj_frame, text='Imię i nazwisko')
+        self.dodaj_label.grid(column=0, row=0, pady=10, padx=10)
+
+        self.dodaj_entry = ttk.Entry(self.dodaj_frame, width=25)
+        self.dodaj_entry.grid(column=1, row=0, padx=10)
+
+        self.dodaj_button = ttk.Button(self.dodaj_frame, text='Dodaj', command=self.add_pojazd_osoba)
+        self.dodaj_button.grid(column=0, columnspan=2, row=1, pady=10)
+
+        self.zamknij_button4 = ttk.Button(self.window, text='Zamknij', command=lambda: self.window.destroy())
+        self.zamknij_button4.grid(column=0, row=4, pady=20)
+
+        for name in self.pp_osoba_values:
+            self.lista_operatorow.insert("", tk.END, values=[name])
+
+    def delete_pojazd_osoba(self):
+        ''' Function to removing elements from list of persons'''
+        try:
+            for item in self.lista_operatorow.selection():
+                values = self.lista_operatorow.item(item, 'values')
+            self.pp_osoba_values.remove(values[0])
+            self.pz_osoba_values.remove(values[0])
+            self.lista_operatorow.delete(*self.lista_operatorow.get_children())
+            for name in self.pp_osoba_values:
+                self.lista_operatorow.insert("", tk.END, values=[name])
+            self.pp_osoba_combobox.config(values=self.pp_osoba_values)
+            self.pz_osoba_combobox.config(values=self.pz_osoba_values)
+        except (_tkinter.TclError, UnboundLocalError, ValueError):
+            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+
+    def add_pojazd_osoba(self):
+        ''' Function to adding elements to the list of operators'''
+        try:
+            oper = self.dodaj_entry.get()
+            self.pp_osoba_values.append(oper)
+            self.pz_osoba_values.append(oper)
+            self.lista_operatorow.delete(*self.lista_operatorow.get_children())
+            for name in self.pp_osoba_values:
+                self.lista_operatorow.insert("", tk.END, values=[name])
+            self.pp_osoba_combobox.config(values=self.pp_osoba_values)
+            self.pz_osoba_combobox.config(values=self.pz_osoba_values)
+            self.dodaj_entry.delete(0, tk.END)
+        except (_tkinter.TclError, UnboundLocalError, ValueError):
+            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+
+    def osoba_kierowca_edit_window(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title("Edycja osób pobierających akta kierowcy")
+        self.window.attributes('-topmost', 1)
+        self.window.geometry('400x450+400+400')
+
+        self.lista_operatorow = ttk.Treeview(self.window, columns='Operator', height=8, show='headings')
+        self.lista_operatorow.grid(column=0, row=0, pady=20, sticky='WE', padx=100)
+        self.lista_operatorow.heading(column='Operator', text='Operator', anchor='center')
+
+        self.delete_button = ttk.Button(self.window, text='Usuń', command=self.delete_kierowca_osoba)
+        self.delete_button.grid(column=0, row=1, padx=50, pady=5)
+
+        self.dodaj_frame = ttk.LabelFrame(self.window, text="Dodaj osobę")
+        self.dodaj_frame.grid(column=0, row=2, pady=10)
+
+        self.dodaj_label = ttk.Label(self.dodaj_frame, text='Imię i nazwisko')
+        self.dodaj_label.grid(column=0, row=0, pady=10, padx=10)
+
+        self.dodaj_entry = ttk.Entry(self.dodaj_frame, width=25)
+        self.dodaj_entry.grid(column=1, row=0, padx=10)
+
+        self.dodaj_button = ttk.Button(self.dodaj_frame, text='Dodaj', command=self.add_kierowca_osoba)
+        self.dodaj_button.grid(column=0, columnspan=2, row=1, pady=10)
+
+        self.zamknij_button4 = ttk.Button(self.window, text='Zamknij', command=lambda: self.window.destroy())
+        self.zamknij_button4.grid(column=0, row=4, pady=20)
+
+        for name in self.kp_osoba_values:
+            self.lista_operatorow.insert("", tk.END, values=[name])
+
+    def delete_kierowca_osoba(self):
+        ''' Function to removing elements from list of persons'''
+        try:
+            for item in self.lista_operatorow.selection():
+                values = self.lista_operatorow.item(item, 'values')
+            self.kp_osoba_values.remove(values[0])
+            self.kz_osoba_values.remove(values[0])
+            self.lista_operatorow.delete(*self.lista_operatorow.get_children())
+            for name in self.kp_osoba_values:
+                self.lista_operatorow.insert("", tk.END, values=[name])
+            self.kp_osoba_combobox.config(values=self.kp_osoba_values)
+            self.kz_osoba_combobox.config(values=self.kz_osoba_values)
+        except (_tkinter.TclError, UnboundLocalError, ValueError):
+            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+
+    def add_kierowca_osoba(self):
+        ''' Function to adding elements to the list of operators'''
+        try:
+            oper = self.dodaj_entry.get()
+            self.kp_osoba_values.append(oper)
+            self.kz_osoba_values.append(oper)
+            self.lista_operatorow.delete(*self.lista_operatorow.get_children())
+            for name in self.kp_osoba_values:
+                self.lista_operatorow.insert("", tk.END, values=[name])
+            self.kp_osoba_combobox.config(values=self.kp_osoba_values)
+            self.kz_osoba_combobox.config(values=self.kz_osoba_values)
+            self.dodaj_entry.delete(0, tk.END)
+        except (_tkinter.TclError, UnboundLocalError, ValueError):
+            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+
+    def info(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title('Informacje')
+
+        info_label1 = tk.Label(self.window, text='Wersja programu:')
+        info_label3 = tk.Label(self.window, text='Autor:')
+        info_label5 = tk.Label(self.window, text='Data wydania:')
+        info_label1.grid(column=0, row=0, pady=5, sticky='E')
+        info_label3.grid(column=0, row=1, pady=5, sticky='E')
+        info_label5.grid(column=0, row=2, pady=5, sticky='E')
+
+        info_label2 = tk.Label(self.window, text='1.0')
+        info_label4 = tk.Label(self.window, text='Martin Brzeziński')
+        info_label6 = tk.Label(self.window, text='1 października 2022')
+        info_label2.grid(column=1, row=0, pady=5, sticky='W')
+        info_label4.grid(column=1, row=1, pady=5, sticky='W')
+        info_label6.grid(column=1, row=2, pady=5, sticky='W')
+
+        self.window.columnconfigure('all', pad=50)
+        self.window.rowconfigure('all', pad=10)
+
+
+class EditKierowca(App):
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Edycja wpisu")
@@ -1497,7 +1692,7 @@ class Edit_kierowca(App):
         return sql
 
 
-class Edit_pojazd(App):
+class EditPojazd(App):
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Edycja wpisu")
@@ -1603,33 +1798,6 @@ class Edit_pojazd(App):
         db_id = self.id_entry.get()
         sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
         return sql
-
-
-class EditOperator(App):
-    def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("Edycja operatorów")
-        self.root.attributes('-topmost', 1)
-        self.root.geometry('400x450+400+400')
-
-        self.lista_operatorow = ttk.Treeview(self.root, columns='Operator', height=8, show='headings')
-        self.lista_operatorow.grid(column=0, row=0, pady=20, sticky='WE', padx=100)
-        self.lista_operatorow.heading(column='Operator', text='Operator', anchor='center')
-
-        self.delete_button = ttk.Button(self.root, text='Usuń')
-        self.delete_button.grid(column=0, row=1, padx=50, pady=10)
-
-        self.dodaj_frame = ttk.LabelFrame(self.root, text="Dodaj operatora")
-        self.dodaj_frame.grid(column=0, row=2, pady=10)
-
-        self.dodaj_label = ttk.Label(self.dodaj_frame, text='Imię i nazwisko')
-        self.dodaj_label.grid(column=0, row=0, pady=10, padx=10)
-
-        self.dodaj_entry = ttk.Entry(self.dodaj_frame, width=25)
-        self.dodaj_entry.grid(column=1, row=0, padx=10)
-
-        self.dodaj_button = ttk.Button(self.dodaj_frame, text='Dodaj')
-        self.dodaj_button.grid(column=0, columnspan=2, row=1, pady=10)
 
 
 if __name__ == '__main__':
