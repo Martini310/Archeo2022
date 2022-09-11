@@ -5,6 +5,7 @@ from tkinter.messagebox import showerror, askyesno, showinfo, showwarning
 import re
 from datetime import datetime
 import sqlite3
+import json
 
 
 class App:
@@ -153,9 +154,10 @@ class App:
         self.pp_tablica_entry.grid(column=2, row=0, sticky='W', padx=14)
 
         # Osoba pobierająca
-        self.pp_osoba_values = ['Błażej Prajs',
-                                'Marzena Ciszek',
-                                'Dawid Łuczak']
+        plik_json = open('osoby.json')
+        obj = json.load(plik_json)
+        self.pp_osoba_values = obj['pojazd']
+        plik_json.close()
 
         self.pp_osoba_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba pobierająca:', background='pink')
         self.pp_osoba_label.grid(column=1, row=1, sticky='E', pady=10, padx=10)
@@ -310,7 +312,7 @@ class App:
         self.kp_pesel_entry.grid(column=2, row=0, sticky='W')
         self.kp_pesel_entry.bind('<FocusOut>', self.sprawdz_pesel_pobranie)
 
-        # DATA URODZENIA - KIEROWCA (w przypadku braku PESEL)
+        # DATA URODZENIA — KIEROWCA (w przypadku braku PESEL)
         self.kp_data_ur_var = tk.BooleanVar()
         self.kp_data_ur_check = ttk.Checkbutton(self.kierowca_pobranie_labelframe,
                                                 onvalue=True,
@@ -325,7 +327,7 @@ class App:
         self.kp_data_ur_entry.config(state='disabled')
         self.kp_data_ur_entry.grid(column=2, row=0, sticky='E', padx=70)
 
-        # Imię i Nazwisko - POBRANIE AKT
+        # Imię i Nazwisko — POBRANIE AKT
         self.kp_imie_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Imię:')
         self.kp_imie_label.grid(column=1, row=2, sticky='E')
 
@@ -338,7 +340,7 @@ class App:
         self.kp_nazwisko_entry = tk.Entry(self.kierowca_pobranie_labelframe, state='disabled')
         self.kp_nazwisko_entry.grid(column=2, row=2, sticky='E', pady=10, padx=50)
 
-        # NR Karty Kierowcy - POBRANIE AKT
+        # NR Karty Kierowcy — POBRANIE AKT
         self.kp_nr_kk_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Numer Karty Kierowcy:')
         self.kp_nr_kk_label.grid(column=1, row=6, sticky='E')
 
@@ -356,9 +358,10 @@ class App:
         self.kp_uwagi.grid(column=2, row=8, rowspan=2, padx=10, sticky='E')
 
         # Osoba Pobierająca
-        self.kp_osoba_values = ['Renata Taszarek',
-                                'Kamila Mikołajczak',
-                                'Dorota Borowska']
+        plik_json = open('osoby.json')
+        obj = json.load(plik_json)
+        self.kp_osoba_values = obj['kierowca']
+        plik_json.close()
 
         self.kp_osoba_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Osoba pobierająca:')
         self.kp_osoba_label.grid(column=1, row=8, sticky='E', pady=10)
@@ -387,7 +390,7 @@ class App:
                                             width=40, command=self.kierowca_zastosuj_pobranie)
         self.kp_zastosuj_button.grid(column=1, columnspan=2, row=12, pady=10)
 
-        # Potwierdzenie zapisu - Kierowca pobranie
+        # Potwierdzenie zapisu — Kierowca pobranie
         self.kp_potwierdzenie_label = tk.Label(self.kierowca_pobranie_labelframe)
         self.kp_potwierdzenie_label.grid(column=0, columnspan=4, row=14)
 
@@ -414,7 +417,7 @@ class App:
         self.kz_pesel_entry.grid(column=2, row=0, sticky='W')
         self.kz_pesel_entry.bind('<FocusOut>', self.sprawdz_pesel_zwrot)
 
-        # Imię i Nazwisko - ZWROT AKT
+        # Imię i Nazwisko — ZWROT AKT
         # self.kz_imie_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Imię:')
         # self.kz_imie_label.grid(column=1, row=2, sticky='E')
 
@@ -437,9 +440,11 @@ class App:
         # self.kz_nr_kk_entry.config(state='disabled')
 
         # Osoba zwracająca
-        self.kz_osoba_values = ['Renata Taszarek',
-                                'Kamila Mikołajczak',
-                                'Dorota Borowska']
+        plik_json = open('osoby.json')
+        obj = json.load(plik_json)
+        self.kz_osoba_values = obj['kierowca']
+        plik_json.close()
+        # self.kz_osoba_values = ['Renata Taszarek', 'Kamila Mikołajczak', 'Dorota Borowska']
 
         self.kz_osoba_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Osoba zwracająca:')
         self.kz_osoba_label.grid(column=1, row=8, sticky='E', pady=20)
@@ -469,7 +474,7 @@ class App:
                                             width=40, command=self.kierowca_zastosuj_zwrot)
         self.kz_zastosuj_button.grid(column=1, columnspan=2, row=12, pady=10)
 
-        # Potwierdzenie zapisu - Kierowca pobranie
+        # Potwierdzenie zapisu — Kierowca pobranie
         self.kz_potwierdzenie_label = tk.Label(self.kierowca_zwrot_labelframe)
         self.kz_potwierdzenie_label.grid(column=0, columnspan=4, row=14)
 
@@ -718,7 +723,7 @@ class App:
         self.szukaj_kierowca_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=20)
         self.szukaj_kierowca_data_do_zwrot_entry.grid(column=11, row=1)
 
-        # Szukaj - PRZYCISKI
+        # Szukaj — PRZYCISKI
         self.szukaj_przyciski_frame = ttk.LabelFrame(self.wyszukiwanie)
         self.szukaj_przyciski_frame.grid(column=0, row=2, sticky='W', padx=15, ipady=5)
 
@@ -890,7 +895,6 @@ class App:
         if len(sql) > 30:
             sql = sql[:-1] + " AND  "
         sql = sql[:-1] + " AND ".join(daty) + ";"
-        print(sql)
         self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
@@ -915,13 +919,6 @@ class App:
             sql.append(f"WHERE " + " AND ".join(f"{k} = '{v}'" for k, v in kwargs.items() if v != ''))
         sql.append(";")
         return "".join(sql)
-
-    def sql_update(self, tabela, **kwargs):
-        """Update rows in table"""
-        keys = [f"{k}" for k in kwargs]
-        values = [f"{v}" for v in kwargs.values()]
-        sql = list()
-        sql.append(f"UPDATE {tabela}")
 
     def wybierz_rejestr(self):
         if self.selected_value.get():
@@ -1215,6 +1212,7 @@ class App:
         return f'''INSERT INTO kierowcy (pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, operator_pobranie) 
                             VALUES("{pesel}", "{nazwisko}", "{imie}", "{nr_kk}", "{data}", "{osoba}", "{operator}");'''
 
+    # TODO - Poprawić to brzydactwo
     def kierowca_select_query(self, pesel='', imie='', nazwisko='', data='', osoba='', oper='', data_zwrot=''):
         query = "SELECT * FROM kierowcy WHERE"
         if pesel != '':
@@ -1376,6 +1374,7 @@ class App:
         self.db.close()
 
     def operator_edit_window(self):
+        """ Okno edycji operatorów """
         self.window = tk.Toplevel(self.root)
         self.window.title("Edycja operatorów")
         self.window.attributes('-topmost', 1)
@@ -1407,7 +1406,7 @@ class App:
             self.lista_operatorow.insert("", tk.END, values=[name])
 
     def delete_operator(self):
-        ''' Function to removing elements from list of operators'''
+        """ Function to removing elements from list of operators"""
         try:
             for item in self.lista_operatorow.selection():
                 values = self.lista_operatorow.item(item, 'values')
@@ -1420,7 +1419,7 @@ class App:
             showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
 
     def add_operator(self):
-        ''' Function to adding elements to the list of operators'''
+        """ Function to adding elements to the list of operators"""
         try:
             oper = self.dodaj_entry.get()
             self.operator_values.append(oper)
@@ -1433,6 +1432,7 @@ class App:
             showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
 
     def osoba_pojazd_edit_window(self):
+        """ Okno edycji osób pobierający/zwracających teczki pojazdów"""
         self.window = tk.Toplevel(self.root)
         self.window.title("Edycja osób pobierających akta pojazdu")
         self.window.attributes('-topmost', 1)
@@ -1464,36 +1464,65 @@ class App:
             self.lista_operatorow.insert("", tk.END, values=[name])
 
     def delete_pojazd_osoba(self):
-        ''' Function to removing elements from list of persons'''
+        """ Function to removing elements from list of persons
+            'Opcje' -> 'Edytuj osoby - Pojazd' -> 'Usuń'
+        """
+        plik = open('osoby.json', mode='r')  # Otwarcie jsona w trybie odczytu
+        osoby = json.load(plik)  # Przypisanie do zmiennej zawartości pliku
+        plik.close()
+        lista = osoby['pojazd']  # Przypisanie do zmiennej 'lista' listy osób z klucza 'pojazd'
         try:
             for item in self.lista_operatorow.selection():
-                values = self.lista_operatorow.item(item, 'values')
-            self.pp_osoba_values.remove(values[0])
-            self.pz_osoba_values.remove(values[0])
+                values = self.lista_operatorow.item(item, 'values')  # krotka z danymi z zaznaczonego elementu
+            lista.remove(values[0])  # Usunięcie z listy osoby zaznaczonej w widoku
+            nowa_lista = {'pojazd': lista}  # Przypisanie do zmiennej nowej wartości klucza 'pojazd'
+            osoby.update(nowa_lista)  # Aktualizacja zawartości pliku
+            plik = open('osoby.json', mode='w+')  # Otwarcie pliku w trybie zapisu, żeby wyzerować zawartość
+            json.dump(osoby, plik)  # zapisanie w pliku json zmienionych wartości
+
+            self.pp_osoba_values = osoby['pojazd']
+            self.pz_osoba_values = osoby['pojazd']
             self.lista_operatorow.delete(*self.lista_operatorow.get_children())
             for name in self.pp_osoba_values:
                 self.lista_operatorow.insert("", tk.END, values=[name])
             self.pp_osoba_combobox.config(values=self.pp_osoba_values)
             self.pz_osoba_combobox.config(values=self.pz_osoba_values)
+
+            plik.close()
         except (_tkinter.TclError, UnboundLocalError, ValueError):
             showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
 
     def add_pojazd_osoba(self):
-        ''' Function to adding elements to the list of operators'''
+        """ Function to adding elements to the list of operators
+            'Opcje' -> 'Edytuj osoby - Pojazd' -> 'Dodaj'
+        """
+        plik = open('osoby.json', mode='r+')  # Otwarcie jsona w trybie zapis + odczyt
+        osoby = json.load(plik)  # Przypisanie do zmiennej zawartości pliku
+        lista = osoby['pojazd']  # Przypisanie do zmiennej 'lista' listy osób z klucza 'pojazd'
         try:
             oper = self.dodaj_entry.get()
-            self.pp_osoba_values.append(oper)
-            self.pz_osoba_values.append(oper)
+
+            lista.append(oper)  # Dodanie do listy osoby wpisanej przez użytkownika
+            nowa_lista = {'pojazd': lista}  # Przypisanie do zmiennej nowej wartości klucza 'pojazd'
+            osoby.update(nowa_lista)  # Aktualizacja zawartości pliku
+            plik.seek(0)  # Ustawienie pozycji, aby nadpisało wartość, a nie dodało nową na koniec
+            json.dump(osoby, plik)  # zapisanie w pliku json zmienionych wartości
+
+            self.pp_osoba_values = osoby['pojazd']
+            self.pz_osoba_values = osoby['pojazd']
             self.lista_operatorow.delete(*self.lista_operatorow.get_children())
             for name in self.pp_osoba_values:
                 self.lista_operatorow.insert("", tk.END, values=[name])
             self.pp_osoba_combobox.config(values=self.pp_osoba_values)
             self.pz_osoba_combobox.config(values=self.pz_osoba_values)
             self.dodaj_entry.delete(0, tk.END)
+
+            plik.close()
         except (_tkinter.TclError, UnboundLocalError, ValueError):
-            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+            showerror('Błąd', 'Zamknij wszystkie okna i spróbuj ponownie')
 
     def osoba_kierowca_edit_window(self):
+        """ Okno edycji osób pobierający/zwracających teczki kierowców"""
         self.window = tk.Toplevel(self.root)
         self.window.title("Edycja osób pobierających akta kierowcy")
         self.window.attributes('-topmost', 1)
@@ -1525,34 +1554,62 @@ class App:
             self.lista_operatorow.insert("", tk.END, values=[name])
 
     def delete_kierowca_osoba(self):
-        ''' Function to removing elements from list of persons'''
+        """ Function to removing elements from list of persons
+            'Opcje' -> 'Edytuj osoby - Kierowca' -> 'Usuń'
+        """
+        plik = open('osoby.json', mode='r')  # Otwarcie jsona w trybie odczytu
+        osoby = json.load(plik)  # Przypisanie do zmiennej zawartości pliku
+        plik.close()
+        lista = osoby['kierowca']  # Przypisanie do zmiennej 'lista' listy osób z klucza 'kierowca'
         try:
             for item in self.lista_operatorow.selection():
-                values = self.lista_operatorow.item(item, 'values')
-            self.kp_osoba_values.remove(values[0])
-            self.kz_osoba_values.remove(values[0])
+                values = self.lista_operatorow.item(item, 'values')  # krotka z danymi z zaznaczonego elementu
+            lista.remove(values[0])  # Usunięcie z listy osoby zaznaczonej w widoku
+            nowa_lista = {'kierowca': lista}  # Przypisanie do zmiennej nowej wartości klucza 'kierowca'
+            osoby.update(nowa_lista)  # Aktualizacja zawartości pliku
+            plik = open('osoby.json', mode='w+')  # Otwarcie pliku w trybie zapisu, żeby wyzerować zawartość
+            json.dump(osoby, plik)  # zapisanie w pliku json zmienionych wartości
+
+            self.kp_osoba_values = osoby['kierowca']
+            self.kz_osoba_values = osoby['kierowca']
             self.lista_operatorow.delete(*self.lista_operatorow.get_children())
             for name in self.kp_osoba_values:
                 self.lista_operatorow.insert("", tk.END, values=[name])
             self.kp_osoba_combobox.config(values=self.kp_osoba_values)
             self.kz_osoba_combobox.config(values=self.kz_osoba_values)
+
+            plik.close()
         except (_tkinter.TclError, UnboundLocalError, ValueError):
             showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
 
     def add_kierowca_osoba(self):
-        ''' Function to adding elements to the list of operators'''
+        """ Function to adding elements to the list of operators
+            'Opcje' -> 'Edytuj osoby - Kierowca' -> 'Dodaj'
+        """
+        plik = open('osoby.json', mode='r+')  # Otwarcie jsona w trybie zapis + odczyt
+        osoby = json.load(plik)  # Przypisanie do zmiennej zawartości pliku
+        lista = osoby['kierowca']  # Przypisanie do zmiennej 'lista' listy osób z klucza 'pojazd'
         try:
             oper = self.dodaj_entry.get()
-            self.kp_osoba_values.append(oper)
-            self.kz_osoba_values.append(oper)
+
+            lista.append(oper)  # Dodanie do listy osoby wpisanej przez użytkownika
+            nowa_lista = {'kierowca': lista}  # Przypisanie do zmiennej nowej wartości klucza 'pojazd'
+            osoby.update(nowa_lista)  # Aktualizacja zawartości pliku
+            plik.seek(0)  # Ustawienie pozycji, aby nadpisało wartość, a nie dodało nową na koniec
+            json.dump(osoby, plik)  # zapisanie w pliku json zmienionych wartości
+
+            self.kp_osoba_values = osoby['kierowca']
+            self.kz_osoba_values = osoby['kierowca']
             self.lista_operatorow.delete(*self.lista_operatorow.get_children())
             for name in self.kp_osoba_values:
                 self.lista_operatorow.insert("", tk.END, values=[name])
             self.kp_osoba_combobox.config(values=self.kp_osoba_values)
             self.kz_osoba_combobox.config(values=self.kz_osoba_values)
             self.dodaj_entry.delete(0, tk.END)
+
+            plik.close()
         except (_tkinter.TclError, UnboundLocalError, ValueError):
-            showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
+            showerror('Błąd', 'Zamknij wszystkie okna i spróbuj ponownie')
 
     def info(self):
         self.window = tk.Toplevel(self.root)
@@ -1562,14 +1619,14 @@ class App:
         info_label3 = tk.Label(self.window, text='Autor:')
         info_label5 = tk.Label(self.window, text='Data wydania:')
         info_label1.grid(column=0, row=0, pady=5, sticky='E')
-        info_label3.grid(column=0, row=1, pady=5, sticky='E')
+        info_label3.grid(column=0, row=1, sticky='E')
         info_label5.grid(column=0, row=2, pady=5, sticky='E')
 
         info_label2 = tk.Label(self.window, text='1.0')
         info_label4 = tk.Label(self.window, text='Martin Brzeziński')
         info_label6 = tk.Label(self.window, text='1 października 2022')
         info_label2.grid(column=1, row=0, pady=5, sticky='W')
-        info_label4.grid(column=1, row=1, pady=5, sticky='W')
+        info_label4.grid(column=1, row=1, sticky='W')
         info_label6.grid(column=1, row=2, pady=5, sticky='W')
 
         self.window.columnconfigure('all', pad=50)
@@ -1642,8 +1699,8 @@ class EditKierowca(App):
         values = []
         columns = ['pesel', 'nazwisko', 'imie', 'nr_kk', 'data_pobrania', 'osoba_pobranie',
                    'operator_pobranie', 'data_zwrotu', 'osoba_zwrot', 'operator_zwrot']
-        a = self.entries_frame.winfo_children()
-        for entry1 in a:
+        entries = self.entries_frame.winfo_children()
+        for entry1 in entries:
             values.append(entry1.get())
         pairs = {}
         for p in zip(columns, values):
