@@ -12,6 +12,8 @@ class App:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('Archeo 2022')
+        self.icon = tk.PhotoImage(file='ikona2.png')
+        self.root.iconphoto(True, self.icon)
 
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
@@ -51,7 +53,7 @@ class App:
 
         # Window size
         self.window_width = int(self.screen_width * 0.9)
-        self.window_height = int(self.screen_height * 0.88)
+        self.window_height = int(self.screen_height * 0.87)
 
         # Window location
         self.center_x = int(self.screen_width / 2 - self.window_width / 2)
@@ -68,6 +70,8 @@ class App:
         # Menu items
         self.file_menu.add_command(label='Informacje', command=self.info)
         self.file_menu.add_command(label='Statystyki', command=self.statystyki)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label='Pomniejsz', command=self.pomniejsz)
         self.file_menu.add_separator()
         self.file_menu.add_command(label='Zamknij', command=self.root.destroy)
 
@@ -183,11 +187,12 @@ class App:
         self.pp_prow_values = obj['prowadzacy']
         plik_json.close()
 
-        self.pp_prow_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba prowadząca sprawę:', background='pink')
+        self.pp_prow_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba prowadząca sprawę:',
+                                       background='pink')
         self.pp_prow_label.grid(column=1, row=3, sticky='E', pady=2, padx=10)
 
         self.pp_prow_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_prow_values,
-                                              state='disabled', width=30)
+                                             state='disabled', width=30)
         self.pp_prow_combobox.grid(column=2, row=3, sticky='W')
 
         # Inna data pobrania
@@ -253,7 +258,7 @@ class App:
         self.pz_osoba_label.grid(column=1, row=1, sticky='E', pady=10, padx=10)
 
         self.pz_osoba_combobox = ttk.Combobox(self.pojazd_zwrot_labelframe, values=self.pp_osoba_values,
-                                                                            state='disabled')
+                                              state='disabled')
         self.pz_osoba_combobox.grid(column=2, row=1, sticky='W')
 
         # Inna data zwrotu
@@ -287,11 +292,9 @@ class App:
         # DATABASE VIEW
         self.pojazd_db_columns = ("id", "TR", "Data pobrania", "Pobierający", "Prowadzący sprawę",
                                   "Operator - pobranie", "Data zwrotu", "Zwracający", "Operator - zwrot", "Uwagi")
-        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=18)
-
+        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=17)
         for column in self.pojazd_db_columns:
             self.pojazd_db_view.heading(column, text=column, anchor='center')
-
         self.pojazd_db_view.column("id", width=60)
         self.pojazd_db_view.column("TR", width=120)
         self.pojazd_db_view.column("Data pobrania", width=120)
@@ -305,6 +308,10 @@ class App:
         self.pojazd_db_view.configure(yscrollcommand=self.pojazd_db_scrollbar.set)
         self.pojazd_db_scrollbar.grid(column=4, row=4, sticky='NS')
 
+        self.pojazd_db_scrollbar_x = ttk.Scrollbar(self.pojazd, orient=tk.HORIZONTAL, command=self.pojazd_db_view.xview)
+        self.pojazd_db_view.configure(xscrollcommand=self.pojazd_db_scrollbar_x.set)
+        self.pojazd_db_scrollbar_x.grid(column=1, columnspan=3, row=5, sticky='WE')
+
         # CLOSE BUTTON
         self.zamknij_button = ttk.Button(self.pojazd, text="Zamknij", command=lambda: self.root.quit())
         self.zamknij_button.grid(column=2, row=6, sticky="WE", padx=10, pady=10)
@@ -317,9 +324,9 @@ class App:
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
         self.kierowca.columnconfigure(0, minsize=30)
-        self.kierowca.columnconfigure(1, weight=3)
-        self.kierowca.columnconfigure(2, weight=1)
-        self.kierowca.columnconfigure(3, weight=3)
+        self.kierowca.columnconfigure(1, weight=1)
+        self.kierowca.columnconfigure(2, minsize=1)
+        self.kierowca.columnconfigure(3, weight=1)
         self.kierowca.columnconfigure(4, minsize=30)
 
         # POBRANIE AKT KIEROWCY --> kp
@@ -329,62 +336,68 @@ class App:
         self.kierowca_pobranie_labelframe.columnconfigure(0, minsize=50)
         self.kierowca_pobranie_labelframe.columnconfigure(1, weight=1)
         self.kierowca_pobranie_labelframe.columnconfigure(2, weight=1)
-        self.kierowca_pobranie_labelframe.columnconfigure(3, minsize=50)
+        self.kierowca_pobranie_labelframe.columnconfigure(3, minsize=10)
+
+        self.kierowca_pobranie_left_frame = tk.Frame(self.kierowca_pobranie_labelframe)
+        self.kierowca_pobranie_left_frame.grid(column=1, row=0)
+        self.kierowca_pobranie_right_frame = tk.Frame(self.kierowca_pobranie_labelframe)
+        self.kierowca_pobranie_right_frame.grid(column=2, row=0)
 
         # PESEL - KIEROWCA POBRANIE AKT
-        self.kp_pesel_label = ttk.Label(self.kierowca_pobranie_labelframe, text='PESEL:', background='yellow')
-        self.kp_pesel_label.grid(column=1, row=0, sticky='E', pady=10)
+        self.kp_pesel_label = ttk.Label(self.kierowca_pobranie_left_frame, text='PESEL:', background='yellow')
+        self.kp_pesel_label.grid(column=0, row=0, sticky='E', pady=10)
 
         self.kp_pesel_string = tk.StringVar()
-        self.kp_pesel_entry = tk.Entry(self.kierowca_pobranie_labelframe, width=15, state='disabled',
+        self.kp_pesel_entry = tk.Entry(self.kierowca_pobranie_left_frame, width=15, state='disabled',
                                        font='Arial 13 bold', textvariable=self.kp_pesel_string)
-        self.kp_pesel_entry.grid(column=2, row=0, sticky='W')
+        self.kp_pesel_entry.grid(column=1, row=0, sticky='W')
         self.kp_pesel_entry.bind('<FocusOut>', self.sprawdz_pesel_pobranie)
 
         # DATA URODZENIA — KIEROWCA (w przypadku braku PESEL)
         self.kp_data_ur_var = tk.BooleanVar()
-        self.kp_data_ur_check = ttk.Checkbutton(self.kierowca_pobranie_labelframe,
+        self.kp_data_ur_check = ttk.Checkbutton(self.kierowca_pobranie_right_frame,
                                                 onvalue=True,
                                                 offvalue=False,
                                                 text='Data ur.',
                                                 variable=self.kp_data_ur_var,
                                                 command=self.kp_data_urodzenia)
-        self.kp_data_ur_check.grid(column=2, row=0, sticky='W', pady=10, padx=170)
+        self.kp_data_ur_check.grid(column=0, row=0, sticky='E', pady=10)
 
-        self.kp_data_ur_entry = tk.Entry(self.kierowca_pobranie_labelframe)
+        self.kp_data_ur_entry = tk.Entry(self.kierowca_pobranie_right_frame)
         self.kp_data_ur_entry.insert(0, 'RRRR-MM-DD')
         self.kp_data_ur_entry.config(state='disabled')
-        self.kp_data_ur_entry.grid(column=2, row=0, sticky='E', padx=50)
+        self.kp_data_ur_entry.grid(column=1, row=0, sticky='W')
 
         # Imię i Nazwisko — POBRANIE AKT
-        self.kp_imie_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Imię:', background='yellow')
-        self.kp_imie_label.grid(column=1, row=2, sticky='E')
+        self.kp_imie_label = ttk.Label(self.kierowca_pobranie_left_frame, text='Imię:', background='yellow')
+        self.kp_imie_label.grid(column=0, row=1, sticky='E')
 
-        self.kp_imie_entry = tk.Entry(self.kierowca_pobranie_labelframe, state='disabled', width=23)
-        self.kp_imie_entry.grid(column=2, row=2, sticky='W', pady=10)
+        self.kp_imie_entry = tk.Entry(self.kierowca_pobranie_left_frame, state='disabled', width=23)
+        self.kp_imie_entry.grid(column=1, row=1, sticky='W', pady=5)
 
-        self.kp_nazwisko_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Nazwisko:', background='yellow')
-        self.kp_nazwisko_label.grid(column=2, row=2, sticky='W', padx=150)
+        self.kp_nazwisko_label = ttk.Label(self.kierowca_pobranie_left_frame, text='Nazwisko:', background='yellow')
+        self.kp_nazwisko_label.grid(column=0, row=2, sticky='E')
 
-        self.kp_nazwisko_entry = tk.Entry(self.kierowca_pobranie_labelframe, state='disabled')
-        self.kp_nazwisko_entry.grid(column=2, row=2, sticky='E', pady=10, padx=50)
+        self.kp_nazwisko_entry = tk.Entry(self.kierowca_pobranie_left_frame, state='disabled', width=23)
+        self.kp_nazwisko_entry.grid(column=1, row=2, sticky='W', pady=5)
 
         # NR Karty Kierowcy — POBRANIE AKT
-        self.kp_nr_kk_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Numer Karty Kierowcy:', background='yellow')
-        self.kp_nr_kk_label.grid(column=1, row=6, sticky='E')
+        self.kp_nr_kk_label = ttk.Label(self.kierowca_pobranie_right_frame, text='Numer K/K:',
+                                        background='yellow')
+        self.kp_nr_kk_label.grid(column=0, row=1, sticky='E')
 
-        self.kp_nr_kk_entry = tk.Entry(self.kierowca_pobranie_labelframe, width=23)
-        self.kp_nr_kk_entry.grid(column=2, row=6, sticky='W', pady=2)
+        self.kp_nr_kk_entry = tk.Entry(self.kierowca_pobranie_right_frame, width=20)
+        self.kp_nr_kk_entry.grid(column=1, row=1, sticky='W', pady=10)
         self.kp_nr_kk_entry.insert(0, 'B/U')
         self.kp_nr_kk_entry.config(state='disabled')
 
         # UWAGI - KIEROWCA
-        self.kp_uwagi_label = tk.Label(self.kierowca_pobranie_labelframe, text='Uwagi:')
-        self.kp_uwagi_label.grid(column=2, row=8, sticky='E', padx=175)
+        self.kp_uwagi_label = tk.Label(self.kierowca_pobranie_right_frame, text='Uwagi:')
+        self.kp_uwagi_label.grid(column=0, row=4, sticky='E', pady=10)
 
-        self.kp_uwagi = tk.Text(self.kierowca_pobranie_labelframe, height=2, width=20,
+        self.kp_uwagi = tk.Text(self.kierowca_pobranie_right_frame, height=2, width=20,
                                 state='disabled', background='gray90')
-        self.kp_uwagi.grid(column=2, row=8, rowspan=2, padx=10, sticky='E')
+        self.kp_uwagi.grid(column=1, row=4, rowspan=2, sticky='W', pady=30)
 
         # Osoba Pobierająca
         plik_json = open('osoby.json')
@@ -392,12 +405,12 @@ class App:
         self.kp_osoba_values = obj['kierowca']
         plik_json.close()
 
-        self.kp_osoba_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Osoba pobierająca:', background='pink')
-        self.kp_osoba_label.grid(column=1, row=8, sticky='E', pady=10)
+        self.kp_osoba_label = ttk.Label(self.kierowca_pobranie_left_frame, text='Osoba pobierająca:', background='pink')
+        self.kp_osoba_label.grid(column=0, row=3, sticky='E', pady=10)
 
-        self.kp_osoba_combobox = ttk.Combobox(self.kierowca_pobranie_labelframe, values=self.kp_osoba_values,
+        self.kp_osoba_combobox = ttk.Combobox(self.kierowca_pobranie_left_frame, values=self.kp_osoba_values,
                                               state='disabled')
-        self.kp_osoba_combobox.grid(column=2, row=8, sticky='W')
+        self.kp_osoba_combobox.grid(column=1, row=3, sticky='W')
 
         # Osoba prowadząca sprawę
         plik_json = open('osoby.json')
@@ -405,36 +418,37 @@ class App:
         self.kp_prow_values = obj['prowadzacy_kier']
         plik_json.close()
 
-        self.kp_prow_label = ttk.Label(self.kierowca_pobranie_labelframe, text='Osoba prowadząca sprawę:', background='pink')
-        self.kp_prow_label.grid(column=1, row=9, sticky='E', pady=2, padx=0)
+        self.kp_prow_label = ttk.Label(self.kierowca_pobranie_left_frame, text='Osoba prowadząca sprawę:',
+                                       background='pink')
+        self.kp_prow_label.grid(column=0, row=4, sticky='E', pady=2, padx=0)
 
-        self.kp_prow_combobox = ttk.Combobox(self.kierowca_pobranie_labelframe, values=self.kp_prow_values,
-                                              state='disabled', width=20)
-        self.kp_prow_combobox.grid(column=2, row=9, sticky='W')
+        self.kp_prow_combobox = ttk.Combobox(self.kierowca_pobranie_left_frame, values=self.kp_prow_values,
+                                             state='disabled', width=20)
+        self.kp_prow_combobox.grid(column=1, row=4, sticky='W')
 
         # INNA DATA - KIEROWCA POBRANIE
         self.kp_data = tk.BooleanVar()
-        self.kp_data_check = ttk.Checkbutton(self.kierowca_pobranie_labelframe,
+        self.kp_data_check = ttk.Checkbutton(self.kierowca_pobranie_left_frame,
                                              onvalue=True,
                                              offvalue=False,
                                              text='Inna data',
                                              variable=self.kp_data,
                                              command=self.kp_inna_data)
-        self.kp_data_check.grid(column=1, row=10, sticky='E', pady=2, padx=10)
+        self.kp_data_check.grid(column=0, row=5, sticky='E', pady=2, padx=10)
 
-        self.kp_data_entry = tk.Entry(self.kierowca_pobranie_labelframe)
+        self.kp_data_entry = tk.Entry(self.kierowca_pobranie_left_frame)
         self.kp_data_entry.insert(0, 'RRRR-MM-DD')
         self.kp_data_entry.config(state='disabled')
-        self.kp_data_entry.grid(column=2, row=10, sticky='W')
+        self.kp_data_entry.grid(column=1, row=5, sticky='W')
 
         # ŻĄDANIE AKT
         self.kp_zadanie_akt_var = tk.BooleanVar()
-        self.kp_zadanie_akt = ttk.Checkbutton(self.kierowca_pobranie_labelframe,
-                                             onvalue=True,
-                                             offvalue=False,
-                                             text='Żądanie akt',
-                                             variable=self.kp_zadanie_akt_var)
-        self.kp_zadanie_akt.grid(column=2, row=10, pady=2, padx=110, sticky='E')
+        self.kp_zadanie_akt = ttk.Checkbutton(self.kierowca_pobranie_right_frame,
+                                              onvalue=True,
+                                              offvalue=False,
+                                              text='Żądanie akt',
+                                              variable=self.kp_zadanie_akt_var)
+        self.kp_zadanie_akt.grid(column=0, row=6, pady=2, padx=10)
         self.kp_zadanie_akt.state(['!alternate'])
 
         # PRZYCISK ZASTOSUJ - KIEROWCA POBRANIE
@@ -457,10 +471,10 @@ class App:
         self.kierowca_zwrot_labelframe.columnconfigure(0, minsize=100)
         self.kierowca_zwrot_labelframe.columnconfigure(1, weight=1)
         self.kierowca_zwrot_labelframe.columnconfigure(2, weight=1)
-        self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=240)
+        self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=100)
 
         # PESEL - ZWROT AKT
-        self.kz_pesel_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Data ur. / PESEL:')
+        self.kz_pesel_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Data ur. / PESEL:', background='yellow')
         self.kz_pesel_label.grid(column=1, row=0, sticky='E', pady=30)
 
         self.kz_pesel_string = tk.StringVar()
@@ -475,7 +489,7 @@ class App:
         self.kz_osoba_values = obj['kierowca']
         plik_json.close()
 
-        self.kz_osoba_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Osoba zwracająca:')
+        self.kz_osoba_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Osoba zwracająca:', background='pink')
         self.kz_osoba_label.grid(column=1, row=8, sticky='E', pady=20)
 
         self.kz_osoba_combobox = ttk.Combobox(self.kierowca_zwrot_labelframe, values=self.kz_osoba_values,
@@ -515,26 +529,13 @@ class App:
         self.kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'Nr Karty Kierowcy', 'Data pobrania',
                                     'Pobierający', 'Osoba prowadząca', 'Operator - pobranie', 'Data zwrotu',
                                     'Zwracający', 'Operator - zwrot', 'uwagi')
-        self.kierowca_db_view = ttk.Treeview(self.kierowca, columns=self.kierowca_db_columns, show='headings',
-                                             height=16)
+        self.kierowca_db_view = ttk.Treeview(self.kierowca, columns=self.kierowca_db_columns,
+                                             show='headings', height=16)
 
         for column in self.kierowca_db_columns:
             self.kierowca_db_view.heading(column, text=column, anchor='center')
-            self.kierowca_db_view.column(column, width=90
-                                         )
+            self.kierowca_db_view.column(column, width=90)
         self.kierowca_db_view.column("id", width=30)
-
-        '''self.kierowca_db_view.column("PESEL", width=90)
-        self.kierowca_db_view.column("Nazwisko", width=130)
-        self.kierowca_db_view.column("Imię", width=100)
-        self.kierowca_db_view.column("Nr Karty Kierowcy", width=105)
-        self.kierowca_db_view.column("Data pobrania", width=100)
-        self.kierowca_db_view.column("Pobierający")
-        self.kierowca_db_view.column("Operator - pobranie")
-        self.kierowca_db_view.column("Data zwrotu", width=100)
-        self.kierowca_db_view.column("Zwracający")
-        self.kierowca_db_view.column("Operator - zwrot")
-        self.kierowca_db_view.column("uwagi", width=100)'''
 
         self.kierowca_db_view.grid(column=1, columnspan=3, row=4, sticky='NEWS')
 
@@ -543,6 +544,11 @@ class App:
                                                    command=self.kierowca_db_view.yview)
         self.kierowca_db_view.configure(yscrollcommand=self.kierowca_db_scrollbar.set)
         self.kierowca_db_scrollbar.grid(column=4, row=4, sticky='NS')
+
+        self.kierowca_db_scrollbarx = ttk.Scrollbar(self.kierowca, orient=tk.HORIZONTAL,
+                                                    command=self.kierowca_db_view.xview)
+        self.kierowca_db_view.configure(xscrollcommand=self.kierowca_db_scrollbarx.set)
+        self.kierowca_db_scrollbarx.grid(column=1, columnspan=3, row=5, sticky='WE')
 
         # CLOSE BUTTON
         self.zamknij_button2 = ttk.Button(self.kierowca, text="Zamknij", command=lambda: self.root.quit())
@@ -590,7 +596,7 @@ class App:
 
         # Prowadzący sprawę
         self.szukaj_pojazd_prowadzacy_label = ttk.Label(self.wyszukaj_pojazd_frame,
-                                                         text='     Prowadzący sprawę:', font='Arial 10')
+                                                        text='     Prowadzący sprawę:', font='Arial 10')
         self.szukaj_pojazd_prowadzacy_label.grid(column=0, row=1)
 
         self.szukaj_pojazd_prowadzacy_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.pp_osoba_values)
@@ -669,7 +675,7 @@ class App:
         self.szukaj_kierowca_pesel_label = ttk.Label(self.wyszukaj_kierowca_frame, text='     PESEL ')
         self.szukaj_kierowca_pesel_label.grid(column=0, row=0, sticky='E')
 
-        self.szukaj_kierowca_pesel_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=20)
+        self.szukaj_kierowca_pesel_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_pesel_entry.grid(column=1, row=0)
 
         # Szukaj KIEROWCA NR KK
@@ -677,7 +683,7 @@ class App:
                                                      text='     numek KK ', font='Arial 10')
         self.szukaj_kierowca_nr_kk_label.grid(column=0, row=1, pady=10, sticky='E')
 
-        self.szukaj_kierowca_nr_kk_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=20)
+        self.szukaj_kierowca_nr_kk_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_nr_kk_entry.grid(column=1, row=1)
 
         # Szukaj KIEROWCA IMIĘ
@@ -685,7 +691,7 @@ class App:
                                                              text='     Imię ', font='Arial 10')
         self.szukaj_kierowca_imie_pobranie_label.grid(column=2, row=0, sticky='E')
 
-        self.szukaj_kierowca_imie_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=20)
+        self.szukaj_kierowca_imie_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
         self.szukaj_kierowca_imie_pobranie_entry.grid(column=3, row=0)
 
         # Szukaj KIEROWCA NAZWISKO
@@ -693,7 +699,7 @@ class App:
                                                                  text='     Nazwisko ', font='Arial 10')
         self.szukaj_kierowca_nazwisko_pobranie_label.grid(column=2, row=1)
 
-        self.szukaj_kierowca_nazwisko_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=20)
+        self.szukaj_kierowca_nazwisko_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
         self.szukaj_kierowca_nazwisko_pobranie_entry.grid(column=3, row=1)
 
         # Szukaj KIEROWCA Osoba pobierająca
@@ -736,7 +742,7 @@ class App:
                                                                 text='   Data pobrania od ', font='Arial 10')
         self.szukaj_kierowca_data_od_pobranie_label.grid(column=8, row=0, pady=10)
 
-        self.szukaj_kierowca_data_od_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
+        self.szukaj_kierowca_data_od_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_od_pobranie_entry.grid(column=9, row=0)
 
         # Szukaj KIEROWCA Data pobrania do
@@ -744,7 +750,7 @@ class App:
                                                                 text='   Data pobrania do ', font='Arial 10')
         self.szukaj_kierowca_data_do_pobranie_label.grid(column=10, row=0, pady=10)
 
-        self.szukaj_kierowca_data_do_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
+        self.szukaj_kierowca_data_do_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_do_pobranie_entry.grid(column=11, row=0)
 
         # Szukaj KIEROWCA Data zwrotu od
@@ -752,7 +758,7 @@ class App:
                                                              text='   Data zwrotu od ', font='Arial 10')
         self.szukaj_kierowca_data_od_zwrot_label.grid(column=8, row=1, pady=10, sticky='E')
 
-        self.szukaj_kierowca_data_od_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
+        self.szukaj_kierowca_data_od_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_od_zwrot_entry.grid(column=9, row=1)
 
         # Szukaj KIEROWCA Data zwrotu do
@@ -760,12 +766,12 @@ class App:
                                                              text='   Data zwrotu do ', font='Arial 10')
         self.szukaj_kierowca_data_do_zwrot_label.grid(column=10, row=1, pady=10, sticky='E')
 
-        self.szukaj_kierowca_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
+        self.szukaj_kierowca_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_do_zwrot_entry.grid(column=11, row=1)
 
         # Szukaj KIEROWCA Prowadzący sprawę
         self.szukaj_kierowca_prowadzacy_label = ttk.Label(self.wyszukaj_kierowca_frame,
-                                                             text='   Prowadzący sprawę ', font='Arial 10')
+                                                          text='   Prowadzący sprawę ', font='Arial 10')
         self.szukaj_kierowca_prowadzacy_label.grid(column=12, row=0, pady=10, sticky='E')
 
         self.szukaj_kierowca_prowadzacy_entry = ttk.Combobox(self.wyszukaj_kierowca_frame, values=self.kp_prow_values)
@@ -785,6 +791,12 @@ class App:
         self.szukaj_wyczysc_button = tk.Button(self.szukaj_przyciski_frame, text='Wyczyść', command=self.clear_entries)
         self.szukaj_wyczysc_button.grid(column=2, row=0, padx=20, ipadx=10, pady=5)
 
+        self.tylko_niezwr_var = tk.BooleanVar()
+        self.tylko_niezwr = ttk.Checkbutton(self.szukaj_przyciski_frame, text='Tylko niezwrócone',
+                                            onvalue=True, offvalue=False, variable=self.tylko_niezwr_var,
+                                            command=self.tylko_niezwrocone_kier)
+        self.tylko_niezwr.grid(column=0, row=1)
+
         # Informacja o ilości wyszukanych rekordów
         self.informacja_label = tk.Label(self.wyszukiwanie, text=f"")
         self.informacja_label.grid(column=0, row=2, sticky='S')
@@ -799,7 +811,7 @@ class App:
             "Zwracający", "Operator - zwrot", "Uwagi")
         self.szukaj_pojazd_db_view = ttk.Treeview(self.szukaj_pojazd_wyniki_frame,
                                                   columns=self.szukaj_pojazd_db_columns,
-                                                  show='headings', height=25)
+                                                  show='headings', height=22)
         col_width_pojazd = int(self.window_width / 10)
         for column in self.szukaj_pojazd_db_columns:
             self.szukaj_pojazd_db_view.heading(column, text=column, anchor='center')
@@ -828,9 +840,10 @@ class App:
 
         # SZUKAJ DATABASE VIEW KIEROWCA
         self.szukaj_kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'nr_kk', 'Data pobrania', 'Pobierający',
-                    'Prowadzący sprawę', 'Operator pobranie', 'Data zwrotu', 'Zwracający', 'Operator zwrot', 'uwagi')
+                                           'Prowadzący sprawę', 'Operator pobranie', 'Data zwrotu', 'Zwracający',
+                                           'Operator zwrot', 'uwagi')
         self.szukaj_kierowca_db_view = ttk.Treeview(self.szukaj_kierowca_wyniki_frame,
-                                                    columns=self.szukaj_kierowca_db_columns, show='headings', height=25)
+                                                    columns=self.szukaj_kierowca_db_columns, show='headings', height=22)
 
         col_width_kier = int(self.window_width / 13)
         for column in self.szukaj_kierowca_db_columns:
@@ -848,7 +861,6 @@ class App:
             self.szukaj_kierowca_db_view.heading(col, text=col, command=lambda _col=col: self.treeview_sort_column(
                 self.szukaj_kierowca_db_view, _col, False))
 
-
         # SCROLLBAR
         self.szukaj_kierowca_db_scrollbar = ttk.Scrollbar(self.szukaj_kierowca_wyniki_frame, orient=tk.VERTICAL,
                                                           command=self.szukaj_kierowca_db_view.yview)
@@ -860,6 +872,63 @@ class App:
         self.zamknij_button3.grid(column=0, row=6, padx=10, pady=10)
 
         self.root.mainloop()
+
+    def pomniejsz(self):
+        """ Modify size and configuration of rows, entries and labels"""
+        # pojazd
+        self.window_width = int(self.screen_width * 0.95)
+        self.center_x = int(self.screen_width / 2 - self.window_width / 2)
+        self.center_y = int(self.screen_height / 2 - self.window_height / 1.80)
+        self.root.geometry(f'{self.window_width}x{self.window_height}+{self.center_x}+{self.center_y}')
+        self.pojazd_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
+        self.pz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=10)
+        self.pojazd_db_view.configure(height=11)
+        # kierowca
+        self.kierowca_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
+        self.kz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=10)
+        self.kierowca_db_view.configure(height=10)
+        self.kierowca_ver_separator.grid(column=2, row=0, ipady=130, pady=5)
+        self.style.configure('TLabel', font='Helvetica 11 bold')
+        self.kierowca_pobranie_labelframe.columnconfigure(0, minsize=0)
+        self.kierowca_pobranie_labelframe.columnconfigure(3, minsize=0)
+        self.kierowca_zwrot_labelframe.columnconfigure(0, minsize=20)
+        self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=20)
+        self.kz_zastosuj_button.grid(column=1, columnspan=2, row=12)
+        # wyszukiwarka
+        self.szukaj_kierowca_db_view.configure(height=12)
+        self.szukaj_pojazd_db_view.configure(height=14)
+        self.szukaj_kierowca_prowadzacy_label.grid(column=0, row=2, pady=10, sticky='E')
+        self.szukaj_kierowca_prowadzacy_entry.grid(column=1, row=2, sticky='W')
+        self.szukaj_kierowca_data_od_pobranie_label.grid(column=2, row=2, sticky='E')
+        self.szukaj_kierowca_data_od_pobranie_entry.grid(column=3, row=2, sticky='W')
+        self.szukaj_kierowca_data_do_pobranie_label.grid(column=4, row=2, sticky='E')
+        self.szukaj_kierowca_data_do_pobranie_entry.grid(column=5, row=2, sticky='W')
+        self.szukaj_kierowca_data_od_zwrot_label.grid(column=8, row=0, sticky='E')
+        self.szukaj_kierowca_data_od_zwrot_entry.grid(column=9, row=0, sticky='W')
+        self.szukaj_kierowca_data_do_zwrot_label.grid(column=8, row=1, sticky='E')
+        self.szukaj_kierowca_data_do_zwrot_entry.grid(column=9, row=1, sticky='W')
+
+    def tylko_niezwrocone_pojazd(self):
+        """ Add to 'pojazd' sql query condition to search only not returned documents"""
+        if self.tylko_niezwr_var.get():
+            self.szukaj_pojazd_data_do_zwrot_entry.delete(0, tk.END)
+            self.szukaj_pojazd_data_do_zwrot_entry.config(state="disabled")
+            self.szukaj_pojazd_data_od_zwrot_entry.delete(0, tk.END)
+            self.szukaj_pojazd_data_od_zwrot_entry.config(state="disabled")
+        else:
+            self.szukaj_pojazd_data_do_zwrot_entry.config(state="normal")
+            self.szukaj_pojazd_data_od_zwrot_entry.config(state="normal")
+
+    def tylko_niezwrocone_kier(self):
+        """ Add to 'kierowca' sql query condition to search only not returned documents"""
+        if self.tylko_niezwr_var.get():
+            self.szukaj_kierowca_data_do_zwrot_entry.delete(0, tk.END)
+            self.szukaj_kierowca_data_do_zwrot_entry.config(state="disabled")
+            self.szukaj_kierowca_data_od_zwrot_entry.delete(0, tk.END)
+            self.szukaj_kierowca_data_od_zwrot_entry.config(state="disabled")
+        else:
+            self.szukaj_kierowca_data_do_zwrot_entry.config(state="normal")
+            self.szukaj_kierowca_data_od_zwrot_entry.config(state="normal")
 
     def treeview_sort_column(self, tv, col, reverse):
         """Funkcja przypisana do kolumn w wyszukiwarce. Po kliknięciu nagłówka kolumny sortuje zawartość."""
@@ -873,17 +942,15 @@ class App:
         # reverse sort next time
         tv.heading(col, command=lambda _col=col: self.treeview_sort_column(tv, _col, not reverse))
 
-
-
-
     def to_uppercase(self, *args):
+        """Change inputting letter in 'tr entry' to uppercase"""
         self.pp_tr_entry_var.set(self.pp_tr_entry_var.get().upper())
         self.pz_tr_entry_var.set(self.pz_tr_entry_var.get().upper())
 
     def edit_pojazd(self):
         """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
         Function open a new window with fields filled with selected row data.
-        When all search fields are empty show a Showinfo with short message """
+        When all search fields are empty show a Showinfo with short message. """
         try:
             okno_edycji = EditPojazd()
             entries = okno_edycji.entries_frame.winfo_children()
@@ -900,7 +967,7 @@ class App:
     def edit_kierowca(self):
         """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
         Function open a new window with fields filled with selected row data.
-        When all search fields are empty show a Showinfo with short message """
+        When all search fields are empty show a Showinfo with short message. """
         try:
             okno_edycji = EditKierowca()
             entries = okno_edycji.entries_frame.winfo_children()
@@ -939,7 +1006,16 @@ class App:
             daty.append(f"data_zwrotu >= '{data_zw_od} 00:00'")
         if data_zw_do:
             daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
-        sql = sql[:-1] + " AND ".join(daty) + ";"
+        if self.tylko_niezwr_var.get():
+            daty.append("(data_zwrotu IS NULL OR data_zwrotu = '')")
+
+        if daty:
+            if not all(v == "" for v in warunki.values()):
+                sql = sql[:-1] + " AND  "
+                sql = sql[:-1] + " AND ".join(daty) + ";"
+            else:
+                sql = sql[:-1] + " AND ".join(daty) + ";"
+
         self.szukaj_pojazd_db_view.delete(*self.szukaj_pojazd_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
@@ -994,11 +1070,16 @@ class App:
             daty.append(f"data_zwrotu >= '{data_zw_od} 00:00'")
         if data_zw_do:
             daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
-        #if len(sql) > 30:
-         #   sql = sql[:-1] + " AND  "
+        if self.tylko_niezwr_var.get():
+            daty.append("(data_zwrotu IS NULL OR data_zwrotu = '')")
+
         if daty:
-            sql = sql[:-1] + " AND ".join(daty) + ";"
-        print(sql)
+            if not all(v == "" for v in warunki.values()):  # Jeśli są jakieś kryteria wyszukiwania i daty
+                sql = sql[:-1] + " AND  "                   # to dodaje 'AND' pomiędzy.
+                sql = sql[:-1] + " AND ".join(daty) + ";"
+            else:
+                sql = sql[:-1] + " AND ".join(daty) + ";"
+
         self.szukaj_kierowca_db_view.delete(*self.szukaj_kierowca_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
@@ -1034,7 +1115,6 @@ class App:
             if isinstance(widget, ttk.Entry):
                 widget.delete(0, tk.END)
 
-
     def sql_select(self, tabela, **kwargs):
         """Generate SQL queries for a SELECT statement matching the kwargs passed"""
         sql = list()
@@ -1047,28 +1127,35 @@ class App:
     def wybierz_rejestr(self):
         """ Funkcja zmieniająca pola do wyszukiwania po wybraniu odpowiedniego rejestru
          i przypisująca odpowiednie funkcje do klawiszy 'szukaj' i 'edytuj' oraz pokazuje sumę wyników"""
-        if self.selected_value.get():
+        if self.selected_value.get():  # Wybrany POJAZD
             self.wyszukaj_kierowca_frame.grid_forget()
             self.szukaj_kierowca_wyniki_frame.grid_forget()
             self.wyszukaj_pojazd_frame.grid(column=0, row=0)
             self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
             self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_pojazd_click)
             self.szukaj_edytuj_button.configure(command=self.edit_pojazd)
-            #self.informacja_label.grid_forget()
+            # self.informacja_label.grid_forget()
             self.suma_wyniki = len(self.szukaj_pojazd_db_view.get_children())
             self.informacja_label.config(text=f"Liczba znalezionych wyników: {self.suma_wyniki}")
             self.informacja_label.grid(column=0, row=2, sticky='S')
-        else:
+            self.tylko_niezwr.config(command=self.tylko_niezwrocone_pojazd)
+            self.tylko_niezwr_var.set(False)
+            self.tylko_niezwrocone_pojazd()
+
+        else:  # Wybrany KIEROWCA
             self.wyszukaj_pojazd_frame.grid_forget()
             self.szukaj_pojazd_wyniki_frame.grid_forget()
             self.wyszukaj_kierowca_frame.grid(column=0, row=0)
             self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
             self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_kierowca_click)
             self.szukaj_edytuj_button.configure(command=self.edit_kierowca)
-            #self.informacja_label.grid_forget()
+            # self.informacja_label.grid_forget()
             self.suma_wyniki = len(self.szukaj_kierowca_db_view.get_children())
             self.informacja_label.config(text=f"Liczba znalezionych wyników: {self.suma_wyniki}")
             self.informacja_label.grid(column=0, row=2, sticky='S')
+            self.tylko_niezwr.config(command=self.tylko_niezwrocone_kier)
+            self.tylko_niezwr_var.set(False)
+            self.tylko_niezwrocone_kier()
 
     def kp_data_urodzenia(self):
         """ Funkcja aktywująca pole daty urodzenia po zaznaczeniu checkbuttona i ustawiająca tam focus"""
@@ -1145,6 +1232,7 @@ class App:
             self.pp_data_entry.focus_set()
         # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
         if not self.pp_data.get():
+            self.pp_data_entry.delete(0, "end")
             self.pp_data_entry.insert(0, "RRRR-MM-DD")
             self.pp_data_entry.config(state="disabled")
 
@@ -1156,6 +1244,7 @@ class App:
             self.pz_data_entry.focus_set()
         # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
         if not self.pz_data.get():
+            self.pz_data_entry.delete(0, "end")
             self.pz_data_entry.insert(0, "RRRR-MM-DD")
             self.pz_data_entry.config(state="disabled")
 
@@ -1167,6 +1256,7 @@ class App:
             self.kp_data_entry.focus_set()
         # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
         if not self.kp_data.get():
+            self.kp_data_entry.delete(0, "end")
             self.kp_data_entry.insert(0, "RRRR-MM-DD")
             self.kp_data_entry.config(state="disabled")
 
@@ -1178,6 +1268,7 @@ class App:
             self.kz_data_entry.focus_set()
         # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
         if not self.kz_data.get():
+            self.kz_data_entry.delete(0, "end")
             self.kz_data_entry.insert(0, "RRRR-MM-DD")
             self.kz_data_entry.config(state="disabled")
 
@@ -1352,9 +1443,10 @@ class App:
 
     def insert_kierowca_pobranie_to_db(self, pesel, imie, nazwisko, nr_kk, data, osoba, prowadzacy, operator, uwagi):
         return f'''INSERT INTO 
-                    kierowcy (pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, uwagi) 
-                    VALUES("{pesel}", "{nazwisko}", "{imie}", "{nr_kk}", "{data}", "{osoba}", "{prowadzacy}", "{operator}", "{uwagi}");
-                '''
+                            kierowcy (pesel, nazwisko, imie, nr_kk, data_pobrania, 
+                                        osoba_pobranie, prowadzacy, operator_pobranie, uwagi) 
+                            VALUES("{pesel}", "{nazwisko}", "{imie}", "{nr_kk}", "{data}", 
+                                    "{osoba}", "{prowadzacy}", "{operator}", "{uwagi}");'''
 
     # TODO - Poprawić to brzydactwo
     def kierowca_select_query(self, pesel='', imie='', nazwisko='', data='', osoba='', oper='', data_zwrot=''):
@@ -1383,10 +1475,11 @@ class App:
         # jeśli tak to wyświetla go w podglądzie i wyświetla tekst potwierdzający zapisanie danych,
         # jeśli nie to obrazek błędu i tekst o braku zapisu
         wyszukanie_wpisu = self.kierowca_select_query(pesel, imie, nazwisko, data, pobierajacy, operator, 'IS NULL')
-        if self.kp_zadanie_akt_var:
-            wyszukanie_wpisu = self.kierowca_select_query(pesel, imie, nazwisko, data, pobierajacy, operator, 'Żądanie akt')
+        if self.kp_zadanie_akt_var.get():
+            wyszukanie_wpisu = self.kierowca_select_query(pesel, imie, nazwisko, data, pobierajacy, operator,
+                                                          'Żądanie akt')
         self.cursor.execute(wyszukanie_wpisu)
-        if len(self.cursor.fetchall()) == 1:
+        if len(self.cursor.fetchall()) > 0:
             for n in self.cursor.execute(wyszukanie_wpisu):
                 self.kierowca_db_view.insert("", tk.END, values=n)
             img = tk.PhotoImage(file="green_check.png")
@@ -1442,10 +1535,10 @@ class App:
 
         elif self.check_pesel(pesel):
             # Jeśli nr PESEL jest poprawny — wstaw dane do bazy
-                self.cursor.execute(
-                    self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator, uwagi)
-                )
-                self.db.commit()
+            self.cursor.execute(
+                self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator, uwagi)
+            )
+            self.db.commit()
 
         elif not self.check_pesel(pesel):
             # Jeśli nr PESEL jest błędny, pokaż zapytanie.
@@ -1455,11 +1548,13 @@ class App:
             if poprawny_pesel:
                 # Po zatwierdzeniu wprowadzi dane do bazy.
                 self.cursor.execute(
-                    self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator, uwagi))
+                    self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator,
+                                                        uwagi))
                 self.db.commit()
 
-        if self.kp_zadanie_akt_var:
-            self.cursor.execute(f"""UPDATE kierowcy SET data_zwrotu = "Żądanie akt" WHERE pesel = "{pesel}" AND data_pobrania = "{now}"; """)
+        if self.kp_zadanie_akt_var.get():
+            self.cursor.execute(
+                f'UPDATE kierowcy SET data_zwrotu = "Żądanie akt" WHERE pesel = "{pesel}" AND data_pobrania = "{now}";')
             self.db.commit()
 
         self.kp_potwierdzenie_zapisu(pesel, imie, nazwisko, now, osoba, operator)
@@ -1561,7 +1656,7 @@ class App:
             self.lista_operatorow.insert("", tk.END, values=[name])
 
     def delete_operator(self):
-        """ Function to removing elements from list of persons
+        """ Remove elements from list of persons
             'Opcje' -> 'Edytuj osoby - Pojazd' -> 'Usuń'
         """
         plik = open('osoby.json', mode='r')  # Otwarcie jsona w trybie odczytu
@@ -1588,7 +1683,7 @@ class App:
             showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
 
     def add_operator(self):
-        """ Function to adding elements to the list of operators
+        """ Add elements to the list of operators
             'Opcje' -> 'Edytuj osoby - Pojazd' -> 'Dodaj'
         """
         plik = open('osoby.json', mode='r+')  # Otwarcie jsona w trybie zapis + odczyt
@@ -1676,7 +1771,7 @@ class App:
             showerror('Błąd', 'Zamknij inne okna i spróbuj ponownie')
 
     def add_pojazd_osoba(self):
-        """ Function to adding elements to the list of operators
+        """ Adding elements to the list of operators
             'Opcje' -> 'Edytuj osoby - Pojazd' -> 'Dodaj'
         """
         plik = open('osoby.json', mode='r+')  # Otwarcie jsona w trybie zapis + odczyt
@@ -1793,9 +1888,6 @@ class App:
             plik.close()
         except (_tkinter.TclError, UnboundLocalError, ValueError):
             showerror('Błąd', 'Zamknij wszystkie okna i spróbuj ponownie')
-
-
-
 
     def prowadzacy_kierowca_edit_window(self):
         """ Okno edycji osób prowadzących sprawy kierowców"""
@@ -1970,27 +2062,26 @@ class App:
         except (_tkinter.TclError, UnboundLocalError, ValueError):
             showerror('Błąd', 'Zamknij wszystkie okna i spróbuj ponownie')
 
-
     def info(self):
-        self.window = tk.Toplevel(self.root)
-        self.window.title('Informacje')
+        window = tk.Toplevel(self.root)
+        window.title('Informacje')
 
-        info_label1 = tk.Label(self.window, text='Wersja programu:')
-        info_label3 = tk.Label(self.window, text='Autor:')
-        info_label5 = tk.Label(self.window, text='Data wydania:')
+        info_label1 = tk.Label(window, text='Wersja programu:')
+        info_label3 = tk.Label(window, text='Autor:')
+        info_label5 = tk.Label(window, text='Data wydania:')
         info_label1.grid(column=0, row=0, pady=5, sticky='E')
         info_label3.grid(column=0, row=1, sticky='E')
         info_label5.grid(column=0, row=2, pady=5, sticky='E')
 
-        info_label2 = tk.Label(self.window, text='1.0')
-        info_label4 = tk.Label(self.window, text='Martin Brzeziński')
-        info_label6 = tk.Label(self.window, text='1 października 2022')
+        info_label2 = tk.Label(window, text='1.0')
+        info_label4 = tk.Label(window, text='Martin Brzeziński')
+        info_label6 = tk.Label(window, text='1 października 2022')
         info_label2.grid(column=1, row=0, pady=5, sticky='W')
         info_label4.grid(column=1, row=1, sticky='W')
         info_label6.grid(column=1, row=2, pady=5, sticky='W')
 
-        self.window.columnconfigure('all', pad=50)
-        self.window.rowconfigure('all', pad=10)
+        window.columnconfigure('all', pad=50)
+        window.rowconfigure('all', pad=10)
 
     def statystyki(self):
         self.window = tk.Toplevel(self.root)
@@ -2004,49 +2095,59 @@ class App:
         for n in suma:
             suma = n[0]
 
-        suma_niezwr = self.cursor.execute(""" SELECT COUNT(id) FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = "";""")
+        suma_niezwr = self.cursor.execute(
+            """ SELECT COUNT(id) FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = "";""")
         for n in suma_niezwr:
             suma_niezwr = n[0]
 
-        max_czas = self.cursor.execute(""" SELECT MIN(data_pobrania) FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
+        max_czas = self.cursor.execute(
+            """ SELECT MIN(data_pobrania) FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
         for n in max_czas:
             max_czas = n[0]
 
-        t1 = datetime(int(max_czas[:4]), int(max_czas[5:7]), int(max_czas[8:10]), int(max_czas[11:13]), int(max_czas[14:16]))
+        t1 = datetime(int(max_czas[:4]), int(max_czas[5:7]),
+                      int(max_czas[8:10]), int(max_czas[11:13]), int(max_czas[14:16]))
         t2 = datetime.now()
         diff = t2 - t1
 
-        avg = self.cursor.execute(""" SELECT data_pobrania FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
-        list_time = [datetime(int(s[:4]), int(s[5:7]), int(s[8:10]), int(s[11:13]), int(s[14:16])) for a in avg for s in a] # Lista z datami z zapytania SQL
-        list_diff = [t2 - data for data in list_time] # Lista z różnicami dat z zapytania a datą aktualną
+        avg = self.cursor.execute(
+            """ SELECT data_pobrania FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
+        list_time = [datetime(int(s[:4]), int(s[5:7]), int(s[8:10]),
+                              int(s[11:13]), int(s[14:16])) for a in avg for s in a]  # Lista z datami z zapytania SQL
+        list_diff = [t2 - data for data in list_time]  # Lista z różnicami dat z zapytania a datą aktualną
         sum = timedelta(0)
-        for data in list_diff: # Suma wszystkich różnic dat
+        for data in list_diff:  # Suma wszystkich różnic dat
             sum += data
-        avg_time = sum / len(list_diff) # Średnia różnica między datą pobrania a teraz.
+        avg_time = sum / len(list_diff)  # Średnia różnica między datą pobrania a teraz.
 
         # @@@@@@@@@@@@@@@@@@STATYSTYKI KIEROWCY @@@@@@@@@@@@@@
         suma2 = self.cursor.execute(""" SELECT COUNT(id) FROM kierowcy; """)
         for n in suma2:
             suma2 = n[0]
 
-        suma_niezwr2 = self.cursor.execute(""" SELECT COUNT(id) FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = "";""")
+        suma_niezwr2 = self.cursor.execute(
+            """ SELECT COUNT(id) FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = "";""")
         for n in suma_niezwr2:
             suma_niezwr2 = n[0]
 
-        max_czas2 = self.cursor.execute(""" SELECT MIN(data_pobrania) FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
+        max_czas2 = self.cursor.execute(
+            """ SELECT MIN(data_pobrania) FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
         for n in max_czas2:
             max_czas2 = n[0]
 
-        t12 = datetime(int(max_czas2[:4]), int(max_czas2[5:7]), int(max_czas2[8:10]), int(max_czas2[11:13]), int(max_czas2[14:16]))
+        t12 = datetime(int(max_czas2[:4]), int(max_czas2[5:7]), int(max_czas2[8:10]),
+                       int(max_czas2[11:13]), int(max_czas2[14:16]))
         diff2 = t2 - t12
 
-        avg2 = self.cursor.execute(""" SELECT data_pobrania FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
-        list_time2 = [datetime(int(s[:4]), int(s[5:7]), int(s[8:10]), int(s[11:13]), int(s[14:16])) for a in avg2 for s in a] # Lista z datami z zapytania SQL
-        list_diff2 = [t2 - data for data in list_time2] # Lista z różnicami dat z zapytania a datą aktualną
+        avg2 = self.cursor.execute(
+            """ SELECT data_pobrania FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
+        list_time2 = [datetime(int(s[:4]), int(s[5:7]), int(s[8:10]),
+                               int(s[11:13]), int(s[14:16])) for a in avg2 for s in a]  # Lista z datami z zapytania SQL
+        list_diff2 = [t2 - data for data in list_time2]  # Lista z różnicami dat z zapytania a datą aktualną
         sum2 = timedelta(0)
-        for data in list_diff2: # Suma wszystkich różnic dat
+        for data in list_diff2:  # Suma wszystkich różnic dat
             sum2 += data
-        avg_time2 = sum2 / len(list_diff2) # Średnia różnica między datą pobrania a teraz.
+        avg_time2 = sum2 / len(list_diff2)  # Średnia różnica między datą pobrania a teraz.
 
         self.db.close()
 
@@ -2072,13 +2173,13 @@ class App:
 
         info_label2 = tk.Label(self.window, text=suma)
         info_label4 = tk.Label(self.window, text=suma_niezwr)
-        info_label6 = tk.Label(self.window, text=diff)
-        info_label8 = tk.Label(self.window, text=avg_time)
+        info_label6 = tk.Label(self.window, text=str(diff))
+        info_label8 = tk.Label(self.window, text=str(avg_time))
 
         info_label20 = tk.Label(self.window, text=suma2)
         info_label40 = tk.Label(self.window, text=suma_niezwr2)
-        info_label60 = tk.Label(self.window, text=diff2)
-        info_label80 = tk.Label(self.window, text=avg_time2)
+        info_label60 = tk.Label(self.window, text=str(diff2))
+        info_label80 = tk.Label(self.window, text=str(avg_time2))
 
         info_label2.grid(column=1, row=2, pady=0, sticky='W')
         info_label4.grid(column=1, row=3, sticky='W')
@@ -2336,6 +2437,7 @@ class EditPojazd(App):
         sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
         return sql
 
+
 # Dodanie wpisów z pliku csv do tabeli pojazdy
 '''wpisy = open('poj.csv')
 with sqlite3.connect('archeo.db') as db:
@@ -2343,15 +2445,17 @@ with sqlite3.connect('archeo.db') as db:
 for line in wpisy:
     linia = line.split(';')
     q = f"INSERT INTO pojazdy " \
-        f"(tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, data_zwrotu, osoba_zwrot, operator_zwrot, uwagi) " \
-        f"VALUES ('{linia[1]}', '{linia[2]}', '{linia[3]}', '{linia[4]}', '{linia[7]}', '{linia[5]}', '{linia[6]}', '{linia[7]}', '{linia[8]}'); "
+        f"(tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, data_zwrotu, " \
+        f"osoba_zwrot, operator_zwrot, uwagi) " \
+        f"VALUES ('{linia[1]}', '{linia[2]}', '{linia[3]}', '{linia[4]}', '{linia[7]}', " \
+        f"'{linia[5]}', '{linia[6]}', '{linia[7]}', '{linia[8]}'); "
     cursor.execute(q)
     db.commit()
     
 db.close()'''
 
 # Dodanie wpisów z pliku csv do tabeli kierowcy
-'''wpisy = open('kierowca.csv')
+'''wpisy = open('kier.csv')
 with sqlite3.connect('archeo.db') as db:
     cursor = db.cursor()
 for line in wpisy:
@@ -2360,16 +2464,16 @@ for line in wpisy:
     if linia[5]:
         kk = linia[5]
     q = f"INSERT INTO kierowcy " \
-        f"(pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, data_zwrotu, osoba_zwrot, operator_zwrot, uwagi) " \
-        f"VALUES ('{linia[4]}', '{linia[2]}', '{linia[3]}', '{kk}', '{linia[7]}', '{linia[8]}', '{linia[9]}', '{linia[12]}', '{linia[10]}', '{linia[11]}', '{linia[12]}', '{linia[13]}'); "
+        f"(pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, " \
+        f"data_zwrotu, osoba_zwrot, operator_zwrot, uwagi) " \
+        f"VALUES ('{linia[4]}', '{linia[2]}', '{linia[3]}', '{kk}', '{linia[7]}', '{linia[8]}', '{linia[9]}', " \
+        f"'{linia[12]}', '{linia[10]}', '{linia[11]}', '{linia[12]}', '{linia[13]}'); "
     cursor.execute(q)
     db.commit()
 db.close()'''
 
-# TODO sortowanie, kolory, żądanie, prowadzący, uwagi, wyszukiwanie case insensitive i po fragmencie, suma wyników,
-
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
-#  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności,
+#  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności, operator pobranie tam gdzie nie ma zwrotu
 
 if __name__ == '__main__':
     app = App()
