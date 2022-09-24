@@ -599,7 +599,7 @@ class App:
                                                         text='     Prowadzący sprawę:', font='Arial 10')
         self.szukaj_pojazd_prowadzacy_label.grid(column=0, row=1)
 
-        self.szukaj_pojazd_prowadzacy_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.pp_osoba_values)
+        self.szukaj_pojazd_prowadzacy_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.pp_prow_values)
         self.szukaj_pojazd_prowadzacy_entry.grid(column=1, row=1)
 
         # Osoba pobierająca
@@ -1036,8 +1036,8 @@ class App:
                 count += 1
 
         self.informacja_label.grid_forget()
-        self.suma_wyniki = len(self.szukaj_pojazd_db_view.get_children())
-        self.informacja_label = tk.Label(self.wyszukiwanie, text=f"Liczba znalezionych wyników: {self.suma_wyniki}")
+        suma_wyniki = len(self.szukaj_pojazd_db_view.get_children())
+        self.informacja_label = tk.Label(self.wyszukiwanie, text=f"Liczba znalezionych wyników: {suma_wyniki}")
         self.informacja_label.grid(column=0, row=2, sticky='S')
 
         self.db.close()
@@ -1100,8 +1100,8 @@ class App:
                 count += 1
 
         self.informacja_label.grid_forget()
-        self.suma_wyniki = len(self.szukaj_kierowca_db_view.get_children())
-        self.informacja_label = tk.Label(self.wyszukiwanie, text=f"Liczba znalezionych wyników: {self.suma_wyniki}")
+        suma_wyniki = len(self.szukaj_kierowca_db_view.get_children())
+        self.informacja_label = tk.Label(self.wyszukiwanie, text=f"Liczba znalezionych wyników: {suma_wyniki}")
         self.informacja_label.grid(column=0, row=2, sticky='S')
 
         self.db.close()
@@ -2105,15 +2105,13 @@ class App:
         for n in max_czas:
             max_czas = n[0]
 
-        t1 = datetime(int(max_czas[:4]), int(max_czas[5:7]),
-                      int(max_czas[8:10]), int(max_czas[11:13]), int(max_czas[14:16]))
+        t1 = datetime.strptime(max_czas, '%Y-%m-%d %H:%M')
         t2 = datetime.now()
         diff = t2 - t1
 
         avg = self.cursor.execute(
             """ SELECT data_pobrania FROM pojazdy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
-        list_time = [datetime(int(s[:4]), int(s[5:7]), int(s[8:10]),
-                              int(s[11:13]), int(s[14:16])) for a in avg for s in a]  # Lista z datami z zapytania SQL
+        list_time = [datetime.strptime(s, '%Y-%m-%d %H:%M') for a in avg for s in a]  # Lista z datami z zapytania SQL
         list_diff = [t2 - data for data in list_time]  # Lista z różnicami dat z zapytania a datą aktualną
         sum = timedelta(0)
         for data in list_diff:  # Suma wszystkich różnic dat
@@ -2135,14 +2133,12 @@ class App:
         for n in max_czas2:
             max_czas2 = n[0]
 
-        t12 = datetime(int(max_czas2[:4]), int(max_czas2[5:7]), int(max_czas2[8:10]),
-                       int(max_czas2[11:13]), int(max_czas2[14:16]))
-        diff2 = t2 - t12
+        t3 = datetime.strptime(max_czas2, '%Y-%m-%d %H:%M')
+        diff2 = t2 - t3
 
         avg2 = self.cursor.execute(
             """ SELECT data_pobrania FROM kierowcy WHERE data_zwrotu IS NULL OR data_zwrotu = ""; """)
-        list_time2 = [datetime(int(s[:4]), int(s[5:7]), int(s[8:10]),
-                               int(s[11:13]), int(s[14:16])) for a in avg2 for s in a]  # Lista z datami z zapytania SQL
+        list_time2 = [datetime.strptime(s, '%Y-%m-%d %H:%M') for a in avg2 for s in a]  # Lista z datami z zapytania SQL
         list_diff2 = [t2 - data for data in list_time2]  # Lista z różnicami dat z zapytania a datą aktualną
         sum2 = timedelta(0)
         for data in list_diff2:  # Suma wszystkich różnic dat
@@ -2173,13 +2169,13 @@ class App:
 
         info_label2 = tk.Label(self.window, text=suma)
         info_label4 = tk.Label(self.window, text=suma_niezwr)
-        info_label6 = tk.Label(self.window, text=str(diff))
-        info_label8 = tk.Label(self.window, text=str(avg_time))
+        info_label6 = tk.Label(self.window, text=f'{str(diff.days)} dni')
+        info_label8 = tk.Label(self.window, text=f'{str(avg_time.days)} dni')
 
         info_label20 = tk.Label(self.window, text=suma2)
         info_label40 = tk.Label(self.window, text=suma_niezwr2)
-        info_label60 = tk.Label(self.window, text=str(diff2))
-        info_label80 = tk.Label(self.window, text=str(avg_time2))
+        info_label60 = tk.Label(self.window, text=f'{str(diff2.days)} dni')
+        info_label80 = tk.Label(self.window, text=f'{str(avg_time2.days)} dni')
 
         info_label2.grid(column=1, row=2, pady=0, sticky='W')
         info_label4.grid(column=1, row=3, sticky='W')
@@ -2204,12 +2200,12 @@ class App:
         self.window.rowconfigure('all', pad=10)
 
 
-class EditKierowca(App):
+class EditKierowca:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Edycja wpisu")
         self.root.attributes('-topmost', 1)
-        self.root.geometry('450x550+400+400')
+        self.root.geometry('450x550+300+300')
 
         self.id_label = tk.Label(self.root, text='ID')
         self.id_label.grid(column=0, row=0, sticky='E')
@@ -2270,7 +2266,7 @@ class EditKierowca(App):
         self.edycja_accept_button.grid(column=1, row=2, pady=10)
 
         self.edycja_delete_button = ttk.Button(self.root, text='Usuń', command=self.delete)
-        self.edycja_delete_button.grid(column=1, row=3, pady=10)
+        self.edycja_delete_button.grid(column=1, row=3, pady=30)
 
     def accept(self):
         values = []
@@ -2289,14 +2285,16 @@ class EditKierowca(App):
             self.cursor.execute(sql)
             self.db.commit()
             self.db.close()
+            self.root.lower()
             showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
             self.root.destroy()
         except:
             showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
 
     def delete(self):
-        potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n'
-                                                 'Czy na pewno chcesz usunąć ten wpis?')
+        potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n',
+                                 detail='Czy na pewno chcesz usunąć ten wpis?')
+        self.root.lower()
         if potwierdzenie:
             try:
                 sql = self.sql_delete('kierowcy')
@@ -2305,6 +2303,7 @@ class EditKierowca(App):
                 self.cursor.execute(sql)
                 self.db.commit()
                 self.db.close()
+                self.root.lower()
                 showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
                 self.root.destroy()
             except:
@@ -2325,12 +2324,12 @@ class EditKierowca(App):
         return sql
 
 
-class EditPojazd(App):
+class EditPojazd:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Edycja wpisu")
         self.root.attributes('-topmost', 1)
-        self.root.geometry('450x550+400+400')
+        self.root.geometry('450x450+300+300')
 
         self.id_label = tk.Label(self.root, text='ID')
         self.id_label.grid(column=0, row=0, sticky='E')
@@ -2383,7 +2382,7 @@ class EditPojazd(App):
         self.edycja_accept_button.grid(column=1, row=2, pady=10)
 
         self.edycja_delete_button = ttk.Button(self.root, text='Usuń', command=self.delete)
-        self.edycja_delete_button.grid(column=1, row=3, pady=10)
+        self.edycja_delete_button.grid(column=1, row=3, pady=30, sticky='S')
 
     def accept(self):
         values = []
@@ -2402,14 +2401,15 @@ class EditPojazd(App):
             self.cursor.execute(sql)
             self.db.commit()
             self.db.close()
+            self.root.lower()
             showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
             self.root.destroy()
         except:
             showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
 
     def delete(self):
-        potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n'
-                                                 'Czy na pewno chcesz usunąć ten wpis?')
+        potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n',
+                                 detail='Czy na pewno chcesz usunąć ten wpis?')
         if potwierdzenie:
             try:
                 sql = self.sql_delete('pojazdy')
@@ -2418,6 +2418,7 @@ class EditPojazd(App):
                 self.cursor.execute(sql)
                 self.db.commit()
                 self.db.close()
+                self.root.lower()
                 showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
                 self.root.destroy()
             except:
@@ -2444,13 +2445,20 @@ with sqlite3.connect('archeo.db') as db:
     cursor = db.cursor()
 for line in wpisy:
     linia = line.split(';')
-    q = f"INSERT INTO pojazdy " \
-        f"(tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, data_zwrotu, " \
-        f"osoba_zwrot, operator_zwrot, uwagi) " \
-        f"VALUES ('{linia[1]}', '{linia[2]}', '{linia[3]}', '{linia[4]}', '{linia[7]}', " \
-        f"'{linia[5]}', '{linia[6]}', '{linia[7]}', '{linia[8]}'); "
-    cursor.execute(q)
-    db.commit()
+    if linia[5]:
+        q = f"INSERT INTO pojazdy " \
+            f"(tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, data_zwrotu, " \
+            f"osoba_zwrot, operator_zwrot, uwagi) " \
+            f"VALUES ('{linia[1]}', '{linia[2]}', '{linia[3]}', '{linia[4]}', '{linia[7]}', " \
+            f"'{linia[5]}', '{linia[6]}', '{linia[7]}', '{linia[8]}'); "
+        cursor.execute(q)
+        db.commit()
+    else:
+        q = f"INSERT INTO pojazdy " \
+            f"(tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, uwagi) " \
+            f"VALUES ('{linia[1]}', '{linia[2]}', '{linia[3]}', '{linia[4]}', 'Arkadiusz Wieloch', '{linia[8]}'); "
+        cursor.execute(q)
+        db.commit()
     
 db.close()'''
 
@@ -2463,13 +2471,21 @@ for line in wpisy:
     kk = 'B/U'
     if linia[5]:
         kk = linia[5]
-    q = f"INSERT INTO kierowcy " \
-        f"(pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, " \
-        f"data_zwrotu, osoba_zwrot, operator_zwrot, uwagi) " \
-        f"VALUES ('{linia[4]}', '{linia[2]}', '{linia[3]}', '{kk}', '{linia[7]}', '{linia[8]}', '{linia[9]}', " \
-        f"'{linia[12]}', '{linia[10]}', '{linia[11]}', '{linia[12]}', '{linia[13]}'); "
-    cursor.execute(q)
-    db.commit()
+    if linia[10]:
+        q = f"INSERT INTO kierowcy " \
+            f"(pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, " \
+            f"data_zwrotu, osoba_zwrot, operator_zwrot, uwagi) " \
+            f"VALUES ('{linia[4]}', '{linia[2]}', '{linia[3]}', '{kk}', '{linia[7]}', '{linia[8]}', '{linia[9]}', " \
+            f"'{linia[12]}', '{linia[10]}', '{linia[11]}', '{linia[12]}', '{linia[13]}'); "
+        cursor.execute(q)
+        db.commit()
+    else:
+        q = f"INSERT INTO kierowcy " \
+            f"(pesel, nazwisko, imie, nr_kk, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, uwagi) " \
+            f"VALUES ('{linia[4]}', '{linia[2]}', '{linia[3]}', '{kk}', '{linia[7]}', '{linia[8]}', '{linia[9]}', " \
+            f"'Arkadiusz Wieloch', '{linia[13]}'); "
+        cursor.execute(q)
+        db.commit()
 db.close()'''
 
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
