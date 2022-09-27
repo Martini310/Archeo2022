@@ -909,7 +909,7 @@ class App:
         self.szukaj_kierowca_data_do_zwrot_entry.grid(column=9, row=1, sticky='W')
 
     def tylko_niezwrocone_pojazd(self):
-        """ Add to 'pojazd' sql query condition to search only not returned documents"""
+        """ Add to 'pojazd' sql query condition to search only not returned documents."""
         if self.tylko_niezwr_var.get():
             self.szukaj_pojazd_data_do_zwrot_entry.delete(0, tk.END)
             self.szukaj_pojazd_data_do_zwrot_entry.config(state="disabled")
@@ -920,7 +920,7 @@ class App:
             self.szukaj_pojazd_data_od_zwrot_entry.config(state="normal")
 
     def tylko_niezwrocone_kier(self):
-        """ Add to 'kierowca' sql query condition to search only not returned documents"""
+        """ Add to 'kierowca' sql query condition to search only not returned documents."""
         if self.tylko_niezwr_var.get():
             self.szukaj_kierowca_data_do_zwrot_entry.delete(0, tk.END)
             self.szukaj_kierowca_data_do_zwrot_entry.config(state="disabled")
@@ -1301,6 +1301,13 @@ class App:
         return f""" INSERT INTO pojazdy (tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, uwagi) 
                                 VALUES("{tr}", "{data}", "{osoba}", "{prowadzacy}", "{operator}", "{uwagi}"); """
 
+    def clear_tr(self, *args):
+        """Czyści okienka tr, pesel, imie, nazwisko i nr kk po zapisaniu wpisu."""
+        for arg in args:
+            arg.delete(0, "end")
+            if arg == self.kp_nr_kk_entry:
+                arg.insert(0, 'B/U')
+
     def pp_potwierdzenie_zapisu(self, tr, data, pobierajacy, operator):
         # Funkcja wyszukuje czy w bazie jest zapisany podany rekord,
         # jeśli tak to wyświetla go w podglądzie i wyświetla tekst potwierdzający zapisanie danych,
@@ -1321,6 +1328,7 @@ class App:
                 compound="left", font="Helvetica 8"
             )
             self.pp_potwierdzenie_label.image = img
+            self.clear_tr(self.pp_tablica_entry)
         else:
             wrong = tk.PhotoImage(file='wrong.jpg')
             self.pp_potwierdzenie_label.configure(
@@ -1350,19 +1358,19 @@ class App:
             return showerror("Błąd", f"Teczka o nr '{teczka}' została już pobrana i nie odnotowano jej zwrotu.")
 
         if teczka == "" or osoba == "" or prowadzacy == "":
-            # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd
+            # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd.
             return showerror("Błąd", "Pola  'Numer TR', 'Pobierający akta' i 'Osoba prowadząca sprawę' są obowiązkowe!")
 
         elif self.check_tr(teczka):
-            # Jeśli nr TR jest poprawny - wstaw dane do bazy
+            # Jeśli nr TR jest poprawny — wstaw dane do bazy.
             self.cursor.execute(self.insert_pobranie_to_db(teczka, now, osoba, prowadzacy, operator, uwagi))
             self.db.commit()
 
         elif not self.check_tr(teczka):
             # Jeśli nr TR jest błędny pokaż zapytanie
             poprawna_tr = askyesno("Błąd",
-                                   f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemności.\n"
-                                   f"Czy '{teczka}' to na pewno poprawny numer rejestracyjny?")
+                                   f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemności.\n",
+                                   detail=f"Czy '{teczka}' to na pewno poprawny numer rejestracyjny?")
             if poprawna_tr:
                 # Po zatwierdzeniu wprowadzi dane do bazy
                 self.cursor.execute(self.insert_pobranie_to_db(teczka, now, osoba, prowadzacy, operator, uwagi))
@@ -1389,6 +1397,7 @@ class App:
                 compound="left", font="Helvetica 8"
             )
             self.pz_potwierdzenie_label.image = img
+            self.clear_tr(self.pz_tablica_entry)
         else:
             wrong = tk.PhotoImage(file='wrong.jpg')
             self.pz_potwierdzenie_label.configure(
@@ -1490,6 +1499,7 @@ class App:
                 compound="left", font="Helvetica 8"
             )
             self.kp_potwierdzenie_label.image = img
+            self.clear_tr(self.kp_pesel_entry, self.kp_imie_entry, self.kp_nazwisko_entry, self.kp_nr_kk_entry)
         else:
             wrong = tk.PhotoImage(file='wrong.jpg')
             self.kp_potwierdzenie_label.configure(
@@ -1579,6 +1589,7 @@ class App:
                 compound="left", font="Helvetica 8"
             )
             self.kz_potwierdzenie_label.image = img
+            self.clear_tr(self.kz_pesel_entry)
         else:
             wrong = tk.PhotoImage(file='wrong.jpg')
             self.kz_potwierdzenie_label.configure(
