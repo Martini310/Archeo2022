@@ -45,7 +45,15 @@ class App:
 
         # Set LABEL STYLE
         self.style = ttk.Style(self.root)
-        self.style.configure('TLabel', font='Helvetica 12 bold')
+        self.style.configure('TLabel', font='Arial 12 bold')
+        self.tv_style = ttk.Style(self.root)
+        self.tv_style.configure('Treeview', rowheight=25)
+        self.tv_style.configure('Treeview', font=('Tahoma', 11))
+
+
+
+        self.tvh_style = ttk.Style(self.root)
+        self.tvh_style.configure("Treeview.Heading", font="Helvetica 10 bold", foreground="black")
 
         # Screen size
         self.screen_width = self.root.winfo_screenwidth()
@@ -113,7 +121,7 @@ class App:
         self.operator_label.grid(column=0, row=0, sticky="E")
 
         # Operator Combobox
-        self.operator_combobox = ttk.Combobox(self.operator_frame, values=self.operator_values, )
+        self.operator_combobox = ttk.Combobox(self.operator_frame, values=self.operator_values, font='Arial 13 bold')
         self.operator_combobox.grid(column=1, row=0, sticky='W')
 
         self.operator_combobox.bind("<KeyPress>", self.enable_frames)
@@ -139,7 +147,7 @@ class App:
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ POJAZD @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-        self.pojazd.columnconfigure(0, minsize=30)
+        self.pojazd.columnconfigure(0, minsize=10)
         self.pojazd.columnconfigure(1, weight=3)
         self.pojazd.columnconfigure(2, weight=1)
         self.pojazd.columnconfigure(3, weight=3)
@@ -178,7 +186,7 @@ class App:
         self.pp_osoba_label.grid(column=1, row=2, sticky='E', pady=10, padx=10)
 
         self.pp_osoba_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_osoba_values,
-                                              state='disabled', width=30)
+                                              state='disabled', width=25, font='Arial 13 bold')
         self.pp_osoba_combobox.grid(column=2, row=2, sticky='W')
 
         # Osoba prowadząca sprawę
@@ -188,11 +196,11 @@ class App:
         plik_json.close()
 
         self.pp_prow_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Osoba prowadząca sprawę:',
-                                       background='pink')
+                                       background='pink', font='Arial 13 bold')
         self.pp_prow_label.grid(column=1, row=3, sticky='E', pady=2, padx=10)
 
         self.pp_prow_combobox = ttk.Combobox(self.pojazd_pobranie_labelframe, values=self.pp_prow_values,
-                                             state='disabled', width=30)
+                                             state='disabled', width=25, font='Arial 13 bold')
         self.pp_prow_combobox.grid(column=2, row=3, sticky='W')
 
         # Inna data pobrania
@@ -205,7 +213,7 @@ class App:
                                              command=self.pp_inna_data)
         self.pp_data_check.grid(column=1, row=4, sticky='E', pady=10, padx=10)
 
-        self.pp_data_entry = tk.Entry(self.pojazd_pobranie_labelframe)
+        self.pp_data_entry = tk.Entry(self.pojazd_pobranie_labelframe, font='Arial 13 bold')
         self.pp_data_entry.insert(0, 'RRRR-MM-DD')
         self.pp_data_entry.config(state='disabled')
         self.pp_data_entry.grid(column=2, row=4, sticky='W', padx=0)
@@ -214,7 +222,7 @@ class App:
         self.pp_uwagi_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Uwagi:', font="Helvetica 10")
         self.pp_uwagi_label.grid(column=1, row=5, sticky='E', pady=0, padx=10)
 
-        self.pp_uwagi_entry = ttk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=25)
+        self.pp_uwagi_entry = ttk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=25, font='Arial 11')
         self.pp_uwagi_entry.grid(column=2, row=5, sticky='W', padx=0)
 
         # Przycisk 'Zastosuj' POBRANIE
@@ -258,7 +266,7 @@ class App:
         self.pz_osoba_label.grid(column=1, row=1, sticky='E', pady=10, padx=10)
 
         self.pz_osoba_combobox = ttk.Combobox(self.pojazd_zwrot_labelframe, values=self.pp_osoba_values,
-                                              state='disabled')
+                                              state='disabled', font='Arial 13 bold')
         self.pz_osoba_combobox.grid(column=2, row=1, sticky='W')
 
         # Inna data zwrotu
@@ -271,7 +279,7 @@ class App:
                                              command=self.pz_inna_data)
         self.pz_data_check.grid(column=1, row=2, sticky='E', pady=10, padx=10)
 
-        self.pz_data_entry = tk.Entry(self.pojazd_zwrot_labelframe)
+        self.pz_data_entry = tk.Entry(self.pojazd_zwrot_labelframe, font='Arial 13 bold')
         self.pz_data_entry.insert(0, 'RRRR-MM-DD')
         self.pz_data_entry.config(state='disabled')
         self.pz_data_entry.grid(column=2, row=2, sticky='W')
@@ -292,7 +300,7 @@ class App:
         # DATABASE VIEW
         self.pojazd_db_columns = ("id", "TR", "Data pobrania", "Pobierający", "Prowadzący sprawę",
                                   "Operator - pobranie", "Data zwrotu", "Zwracający", "Operator - zwrot", "Uwagi")
-        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=17)
+        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=14)
         for column in self.pojazd_db_columns:
             self.pojazd_db_view.heading(column, text=column, anchor='center')
         self.pojazd_db_view.column("id", width=60)
@@ -363,7 +371,7 @@ class App:
                                                 command=self.kp_data_urodzenia)
         self.kp_data_ur_check.grid(column=0, row=0, sticky='E', pady=10)
 
-        self.kp_data_ur_entry = tk.Entry(self.kierowca_pobranie_right_frame)
+        self.kp_data_ur_entry = tk.Entry(self.kierowca_pobranie_right_frame, font='Arial 13 bold')
         self.kp_data_ur_entry.insert(0, 'RRRR-MM-DD')
         self.kp_data_ur_entry.config(state='disabled')
         self.kp_data_ur_entry.grid(column=1, row=0, sticky='W')
@@ -372,13 +380,13 @@ class App:
         self.kp_imie_label = ttk.Label(self.kierowca_pobranie_left_frame, text='Imię:', background='yellow')
         self.kp_imie_label.grid(column=0, row=1, sticky='E')
 
-        self.kp_imie_entry = tk.Entry(self.kierowca_pobranie_left_frame, state='disabled', width=23)
+        self.kp_imie_entry = tk.Entry(self.kierowca_pobranie_left_frame, state='disabled', width=17, font='Arial 13 bold')
         self.kp_imie_entry.grid(column=1, row=1, sticky='W', pady=5)
 
         self.kp_nazwisko_label = ttk.Label(self.kierowca_pobranie_left_frame, text='Nazwisko:', background='yellow')
         self.kp_nazwisko_label.grid(column=0, row=2, sticky='E')
 
-        self.kp_nazwisko_entry = tk.Entry(self.kierowca_pobranie_left_frame, state='disabled', width=23)
+        self.kp_nazwisko_entry = tk.Entry(self.kierowca_pobranie_left_frame, state='disabled', width=17, font='Arial 13 bold')
         self.kp_nazwisko_entry.grid(column=1, row=2, sticky='W', pady=5)
 
         # NR Karty Kierowcy — POBRANIE AKT
@@ -386,7 +394,7 @@ class App:
                                         background='yellow')
         self.kp_nr_kk_label.grid(column=0, row=1, sticky='E')
 
-        self.kp_nr_kk_entry = tk.Entry(self.kierowca_pobranie_right_frame, width=20)
+        self.kp_nr_kk_entry = tk.Entry(self.kierowca_pobranie_right_frame, width=12, font='Arial 13 bold')
         self.kp_nr_kk_entry.grid(column=1, row=1, sticky='W', pady=10)
         self.kp_nr_kk_entry.insert(0, 'B/U')
         self.kp_nr_kk_entry.config(state='disabled')
@@ -396,7 +404,7 @@ class App:
         self.kp_uwagi_label.grid(column=0, row=4, sticky='E', pady=10)
 
         self.kp_uwagi = tk.Text(self.kierowca_pobranie_right_frame, height=2, width=20,
-                                state='disabled', background='gray90')
+                                state='disabled', background='gray90', font='Arial 11')
         self.kp_uwagi.grid(column=1, row=4, rowspan=2, sticky='W', pady=30)
 
         # Osoba Pobierająca
@@ -409,7 +417,7 @@ class App:
         self.kp_osoba_label.grid(column=0, row=3, sticky='E', pady=10)
 
         self.kp_osoba_combobox = ttk.Combobox(self.kierowca_pobranie_left_frame, values=self.kp_osoba_values,
-                                              state='disabled')
+                                              state='disabled', font='Arial 13 bold', width=17)
         self.kp_osoba_combobox.grid(column=1, row=3, sticky='W')
 
         # Osoba prowadząca sprawę
@@ -423,7 +431,7 @@ class App:
         self.kp_prow_label.grid(column=0, row=4, sticky='E', pady=2, padx=0)
 
         self.kp_prow_combobox = ttk.Combobox(self.kierowca_pobranie_left_frame, values=self.kp_prow_values,
-                                             state='disabled', width=20)
+                                             state='disabled', width=17, font='Arial 13 bold')
         self.kp_prow_combobox.grid(column=1, row=4, sticky='W')
 
         # INNA DATA - KIEROWCA POBRANIE
@@ -436,10 +444,10 @@ class App:
                                              command=self.kp_inna_data)
         self.kp_data_check.grid(column=0, row=5, sticky='E', pady=2, padx=10)
 
-        self.kp_data_entry = tk.Entry(self.kierowca_pobranie_left_frame)
+        self.kp_data_entry = tk.Entry(self.kierowca_pobranie_left_frame, font='Arial 13 bold')
         self.kp_data_entry.insert(0, 'RRRR-MM-DD')
         self.kp_data_entry.config(state='disabled')
-        self.kp_data_entry.grid(column=1, row=5, sticky='W')
+        self.kp_data_entry.grid(column=1, row=5, sticky='W', pady=5)
 
         # ŻĄDANIE AKT
         self.kp_zadanie_akt_var = tk.BooleanVar()
@@ -475,13 +483,23 @@ class App:
 
         # PESEL - ZWROT AKT
         self.kz_pesel_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Data ur. / PESEL:', background='yellow')
-        self.kz_pesel_label.grid(column=1, row=0, sticky='E', pady=30)
+        self.kz_pesel_label.grid(column=1, row=0, sticky='E', pady=20)
 
         self.kz_pesel_string = tk.StringVar()
         self.kz_pesel_entry = tk.Entry(self.kierowca_zwrot_labelframe, width=15, state='disabled',
-                                       font='Arial 13 bold', textvariable=self.kz_pesel_string)
+                                       font='Arial 14 bold', textvariable=self.kz_pesel_string)
         self.kz_pesel_entry.grid(column=2, row=0, sticky='W')
         self.kz_pesel_entry.bind('<FocusOut>', self.sprawdz_pesel_zwrot)
+
+        # NR KK - ZWROT AKT
+        self.kz_nr_kk_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Numer K/K:',
+                                        background='yellow')
+        self.kz_nr_kk_label.grid(column=1, row=2, sticky='E')
+
+        self.kz_nr_kk_entry = tk.Entry(self.kierowca_zwrot_labelframe, width=12, font='Arial 14 bold')
+        self.kz_nr_kk_entry.grid(column=2, row=2, sticky='W', pady=5)
+        # self.kz_nr_kk_entry.insert(0, 'B/U')
+        self.kz_nr_kk_entry.config(state='disabled')
 
         # Osoba zwracająca
         plik_json = open('osoby.json')
@@ -490,10 +508,10 @@ class App:
         plik_json.close()
 
         self.kz_osoba_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Osoba zwracająca:', background='pink')
-        self.kz_osoba_label.grid(column=1, row=8, sticky='E', pady=20)
+        self.kz_osoba_label.grid(column=1, row=8, sticky='E', pady=15)
 
         self.kz_osoba_combobox = ttk.Combobox(self.kierowca_zwrot_labelframe, values=self.kz_osoba_values,
-                                              state='disabled')
+                                              state='disabled', font='Arial 13 bold')
         self.kz_osoba_combobox.grid(column=2, row=8, sticky='W')
 
         # INNA DATA - KIEROWCA ZWROT
@@ -505,9 +523,9 @@ class App:
                                              variable=self.kz_data,
                                              command=self.kz_inna_data
                                              )
-        self.kz_data_check.grid(column=1, row=10, sticky='E', pady=20, padx=10)
+        self.kz_data_check.grid(column=1, row=10, sticky='E', pady=15, padx=10)
 
-        self.kz_data_entry = tk.Entry(self.kierowca_zwrot_labelframe)
+        self.kz_data_entry = tk.Entry(self.kierowca_zwrot_labelframe, font='Arial 13 bold')
         self.kz_data_entry.insert(0, 'RRRR-MM-DD')
         self.kz_data_entry.config(state='disabled')
         self.kz_data_entry.grid(column=2, row=10, sticky='W')
@@ -530,7 +548,7 @@ class App:
                                     'Pobierający', 'Osoba prowadząca', 'Operator - pobranie', 'Data zwrotu',
                                     'Zwracający', 'Operator - zwrot', 'uwagi')
         self.kierowca_db_view = ttk.Treeview(self.kierowca, columns=self.kierowca_db_columns,
-                                             show='headings', height=16)
+                                             show='headings', height=13)
 
         for column in self.kierowca_db_columns:
             self.kierowca_db_view.heading(column, text=column, anchor='center')
@@ -811,13 +829,14 @@ class App:
             "Zwracający", "Operator - zwrot", "Uwagi")
         self.szukaj_pojazd_db_view = ttk.Treeview(self.szukaj_pojazd_wyniki_frame,
                                                   columns=self.szukaj_pojazd_db_columns,
-                                                  show='headings', height=22)
-        col_width_pojazd = int(self.window_width / 10)
+                                                  show='headings', height=18)
+        col_width_pojazd = int(self.window_width / 9.4)
         for column in self.szukaj_pojazd_db_columns:
             self.szukaj_pojazd_db_view.heading(column, text=column, anchor='center')
             self.szukaj_pojazd_db_view.column(column, width=col_width_pojazd)
 
-        self.szukaj_pojazd_db_view.column('id', width=80)
+        self.szukaj_pojazd_db_view.column('id', width=70)
+        self.szukaj_pojazd_db_view.column('TR', width=110)
 
         self.szukaj_pojazd_db_view.grid(column=0, row=4, sticky='NEWS')
 
@@ -843,14 +862,16 @@ class App:
                                            'Prowadzący sprawę', 'Operator pobranie', 'Data zwrotu', 'Zwracający',
                                            'Operator zwrot', 'uwagi')
         self.szukaj_kierowca_db_view = ttk.Treeview(self.szukaj_kierowca_wyniki_frame,
-                                                    columns=self.szukaj_kierowca_db_columns, show='headings', height=22)
+                                                    columns=self.szukaj_kierowca_db_columns, show='headings', height=18)
 
-        col_width_kier = int(self.window_width / 13)
+        col_width_kier = int(self.window_width / 12.2)
         for column in self.szukaj_kierowca_db_columns:
             self.szukaj_kierowca_db_view.heading(column, text=column, anchor='center')
             self.szukaj_kierowca_db_view.column(column, width=col_width_kier)
 
-        self.szukaj_kierowca_db_view.column('id', width=80)
+        self.szukaj_kierowca_db_view.column('id', width=70)
+        self.szukaj_kierowca_db_view.column('nr_kk', width=70)
+        self.szukaj_kierowca_db_view.column('PESEL', width=100)
 
         self.szukaj_kierowca_db_view.grid(column=0, row=4, sticky='NEWS')
 
@@ -882,11 +903,11 @@ class App:
         self.root.geometry(f'{self.window_width}x{self.window_height}+{self.center_x}+{self.center_y}')
         self.pojazd_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
         self.pz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=10)
-        self.pojazd_db_view.configure(height=11)
+        self.pojazd_db_view.configure(height=8)
         # kierowca
         self.kierowca_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
         self.kz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=10)
-        self.kierowca_db_view.configure(height=10)
+        self.kierowca_db_view.configure(height=7)
         self.kierowca_ver_separator.grid(column=2, row=0, ipady=130, pady=5)
         self.style.configure('TLabel', font='Helvetica 11 bold')
         self.kierowca_pobranie_labelframe.columnconfigure(0, minsize=0)
@@ -895,8 +916,8 @@ class App:
         self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=20)
         self.kz_zastosuj_button.grid(column=1, columnspan=2, row=12)
         # wyszukiwarka
-        self.szukaj_kierowca_db_view.configure(height=12)
-        self.szukaj_pojazd_db_view.configure(height=14)
+        self.szukaj_kierowca_db_view.configure(height=9)
+        self.szukaj_pojazd_db_view.configure(height=11)
         self.szukaj_kierowca_prowadzacy_label.grid(column=0, row=2, pady=10, sticky='E')
         self.szukaj_kierowca_prowadzacy_entry.grid(column=1, row=2, sticky='W')
         self.szukaj_kierowca_data_od_pobranie_label.grid(column=2, row=2, sticky='E')
@@ -1223,6 +1244,7 @@ class App:
         self.kp_uwagi.config(state='normal', background='white')
         self.kz_pesel_entry.config(state='normal')
         self.kz_osoba_combobox.config(state='normal')
+        self.kz_nr_kk_entry.config(state='normal')
 
     def pp_inna_data(self):
         # Jeśli zaznaczy się checkbox, uaktywni się pole na date i przeniesie tam 'focus'
@@ -1438,8 +1460,13 @@ class App:
         self.db.close()
 
     def kp_czy_dubel(self, pesel):
-        # Funkcja sprawdza, czy w bazie istnieje już wpis z podanymi danymi bez daty zwrotu
-        wyszukanie_wpisu = self.kierowca_select_query(pesel, '', '', '', '', '', 'IS NULL')
+        # Funkcja sprawdza, czy w bazie istnieje już wpis z podanymi danymi bez daty zwrotu.
+        keys = ['pesel']
+        values = [pesel]
+        warunki = {k: v for k, v in zip(keys, values)}
+        sql = self.kierowca_select_query(**warunki)
+        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+        wyszukanie_wpisu = sql
         self.cursor.execute(wyszukanie_wpisu)
         if len(self.cursor.fetchall()) > 0:
             return True
@@ -1457,36 +1484,26 @@ class App:
                             VALUES("{pesel}", "{nazwisko}", "{imie}", "{nr_kk}", "{data}", 
                                     "{osoba}", "{prowadzacy}", "{operator}", "{uwagi}");'''
 
-    # TODO - Poprawić to brzydactwo
-    def kierowca_select_query(self, pesel='', imie='', nazwisko='', data='', osoba='', oper='', data_zwrot=''):
-        query = "SELECT * FROM kierowcy WHERE"
-        if pesel != '':
-            query += f" pesel = '{pesel}'"
-        if imie != '':
-            query += f" AND imie = '{imie}'"
-        if nazwisko != '':
-            query += f" AND nazwisko = '{nazwisko}'"
-        if data != '':
-            query += f" AND data_pobrania = '{data}'"
-        if osoba != '':
-            query += f" AND osoba_pobranie = '{osoba}'"
-        if oper != '':
-            query += f" AND operator_pobranie = '{oper}'"
-        if data_zwrot != '':
-            if data_zwrot == 'IS NULL':
-                query += " AND data_zwrotu IS NULL"
-            else:
-                query += f" AND data_zwrotu = '{data_zwrot}'"
-        return query
+    def kierowca_select_query(self, **kwargs):
+        sql = list()
+        sql.append("SELECT * FROM kierowcy ")
+        if kwargs:
+            sql.append(f"WHERE " + " AND ".join(f"{k} = '{v}'" for k, v in kwargs.items() if v != ''))
+        sql.append(";")
+        return "".join(sql)
 
     def kp_potwierdzenie_zapisu(self, pesel, imie, nazwisko, data, pobierajacy, operator):
         # Funkcja wyszukuje czy w tabeli kierowcy jest zapisany podany rekord,
         # jeśli tak to wyświetla go w podglądzie i wyświetla tekst potwierdzający zapisanie danych,
         # jeśli nie to obrazek błędu i tekst o braku zapisu
-        wyszukanie_wpisu = self.kierowca_select_query(pesel, imie, nazwisko, data, pobierajacy, operator, 'IS NULL')
+        keys = ['pesel', 'imie', 'nazwisko', 'data_pobrania', 'osoba_pobranie', 'operator_pobranie']
+        values = [pesel, imie, nazwisko, data, pobierajacy, operator]
+        warunki = {k: v for k, v in zip(keys, values)}
+        sql = self.kierowca_select_query(**warunki)
+        sql1 = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+        wyszukanie_wpisu = sql1
         if self.kp_zadanie_akt_var.get():
-            wyszukanie_wpisu = self.kierowca_select_query(pesel, imie, nazwisko, data, pobierajacy, operator,
-                                                          'Żądanie akt')
+            wyszukanie_wpisu = sql[:-1] + " AND data_zwrotu = 'Żądanie akt';"
         self.cursor.execute(wyszukanie_wpisu)
         if len(self.cursor.fetchall()) > 0:
             for n in self.cursor.execute(wyszukanie_wpisu):
@@ -1500,6 +1517,7 @@ class App:
             )
             self.kp_potwierdzenie_label.image = img
             self.clear_tr(self.kp_pesel_entry, self.kp_imie_entry, self.kp_nazwisko_entry, self.kp_nr_kk_entry)
+            self.kp_zadanie_akt_var.set(False)
         else:
             wrong = tk.PhotoImage(file='wrong.jpg')
             self.kp_potwierdzenie_label.configure(
@@ -1571,10 +1589,17 @@ class App:
 
         self.db.close()
 
-    def kierowca_potwierdzenie_zwrotu(self, pesel, data, pobierajacy, operator):
+    def kierowca_potwierdzenie_zwrotu(self, pesel, nr_kk, data, pobierajacy, operator):
         # Funkcja wyszukuje czy podana teczka występuje z podaną datą zwrotu.
-        # Jeśli tak to wyświetla go w podglądzie i wyświetla tekst potwierdzający zapisanie danych
-        wyszukanie_wpisu = f""" SELECT * FROM kierowcy WHERE pesel = "{pesel}" 
+        # Jeśli tak to wyświetla go w podglądzie i wyświetla tekst potwierdzający zapisanie danych.
+        text = ""
+        if pesel and nr_kk:
+            text = f"PESEL: {pesel} i nr KK: {nr_kk}"
+        elif pesel:
+            text = f"PESEL: {pesel}"
+        elif nr_kk:
+            text = f"KK: {nr_kk}"
+        wyszukanie_wpisu = f""" SELECT * FROM kierowcy WHERE (pesel = "{pesel}" OR nr_kk = "{nr_kk}")
                                                         AND data_zwrotu >= "{data}" 
                                                         AND osoba_zwrot = "{pobierajacy}" 
                                                         AND operator_zwrot = "{operator}"; """
@@ -1585,16 +1610,16 @@ class App:
             img = tk.PhotoImage(file="green_check.png")
             self.kz_potwierdzenie_label.configure(
                 image=img,
-                text=f"Prawidłowo odnotowano zwrot teczki osoby o nr PESEL: '{pesel}' przez pracownika {pobierajacy}.",
+                text=f"Prawidłowo odnotowano zwrot teczki osoby o nr {text} przez pracownika {pobierajacy}.",
                 compound="left", font="Helvetica 8"
             )
             self.kz_potwierdzenie_label.image = img
-            self.clear_tr(self.kz_pesel_entry)
+            self.clear_tr(self.kz_pesel_entry, self.kz_nr_kk_entry)
         else:
             wrong = tk.PhotoImage(file='wrong.jpg')
             self.kz_potwierdzenie_label.configure(
                 image=wrong,
-                text=f"   Nie dokonano zapisu teczki osoby o nr PESEL: {pesel}.",
+                text=f"   Nie dokonano zapisu teczki osoby o nr {text}.",
                 compound="left", font="Helvetica 8"
             )
             self.kz_potwierdzenie_label.image = wrong
@@ -1602,8 +1627,7 @@ class App:
     def kierowca_zastosuj_zwrot(self):
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         pesel = self.kz_pesel_string.get()
-        # imie = self.kz_imie_entry.get().title()
-        # nazwisko = self.kz_nazwisko_entry.get().title()
+        nr_kk = self.kz_nr_kk_entry.get()
         osoba = self.kz_osoba_combobox.get().title()
         operator = self.operator_combobox.get().title()
 
@@ -1617,21 +1641,46 @@ class App:
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
 
         if pesel == "":
-            # Jeśli nie wpisze się PESELu  wyskoczy błąd
-            return showerror("Błąd", "Pole 'PESEL' jest obowiązkowe!. W przypadku braku nr PESEL podaj datę urodzenia.")
+            if nr_kk == "":
+                # Jeśli nie wpisze się PESEL-u lub nr KK, wyskoczy błąd.
+                return showerror("Błąd", "Pole 'PESEL' lub 'nr KK' jest obowiązkowe!. "
+                                         "W przypadku braku nr PESEL podaj datę urodzenia.")
         if osoba == "":
             return showerror("Błąd", "Pole 'Osoba zwracająca' jest obowiązkowe!")
 
-        self.cursor.execute(self.kierowca_select_query(pesel, '', '', '', '', '', 'IS NULL'))
+        keys = ['pesel', 'nr_kk']
+        values = [pesel, nr_kk]
+        warunki = {k: v for k, v in zip(keys, values)}
+        sql = self.kierowca_select_query(**warunki)
+        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+        id = f'{sql[:7]}id{sql[8:-1]}'
+
+        print(sql)
+        print(id)
+
+        self.cursor.execute(sql)
         if len(self.cursor.fetchall()) == 0:
-            showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}'.")
+            if pesel and nr_kk:
+                bez_kk = self.kierowca_select_query(**{'pesel': pesel, 'nr_kk': 'B/U'})[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+                self.cursor.execute(bez_kk)
+                if len(self.cursor.fetchall()) == 1:
+                    self.cursor.execute(f""" UPDATE kierowcy 
+                                SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}", nr_kk = "{nr_kk}"
+                                WHERE id = ({bez_kk[:7]}id{bez_kk[8:-1]}); """)
+                    self.db.commit()
+                else:
+                    showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}' i nr kk {nr_kk}.")
+            elif pesel:
+                showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}'.")
+            else:
+                showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr kk: '{nr_kk}'.")
         else:
             self.cursor.execute(f""" UPDATE kierowcy 
             SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
-            WHERE pesel = "{pesel}" AND data_zwrotu IS NULL; """)
+            WHERE id = ({id}); """)
             self.db.commit()
 
-        self.kierowca_potwierdzenie_zwrotu(pesel, now, osoba, operator)
+        self.kierowca_potwierdzenie_zwrotu(pesel, nr_kk, now, osoba, operator)
         self.db.close()
 
     def operator_edit_window(self):
