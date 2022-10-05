@@ -842,6 +842,10 @@ class App:
 
         self.szukaj_pojazd_db_view.tag_configure('oddrow', background='white')
         self.szukaj_pojazd_db_view.tag_configure('evenrow', background='slategray1')
+        '''self.szukaj_pojazd_db_view.tag_configure('returned', background='lightgreen')
+        self.szukaj_pojazd_db_view.tag_configure('notreturned', background='pink')
+        self.szukaj_pojazd_db_view.tag_configure('returned1', background='green')
+        self.szukaj_pojazd_db_view.tag_configure('notreturned1', background='lightred')'''
 
         for col in self.szukaj_pojazd_db_columns:
             self.szukaj_pojazd_db_view.heading(col, text=col, command=lambda _col=col: self.treeview_sort_column(
@@ -1028,7 +1032,7 @@ class App:
         if data_zw_do:
             daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
         if self.tylko_niezwr_var.get():
-            daty.append("(data_zwrotu IS NULL OR data_zwrotu = '')")
+            daty.append("(data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None')")
 
         if daty:
             if not all(v == "" for v in warunki.values()):
@@ -1043,7 +1047,11 @@ class App:
         count = 1
         try:
             for n in self.cursor.execute(sql):
-                if count % 2 == 0:
+                '''n = list(n)
+                for i, m in enumerate(n):
+                    if m == None:
+                        n[i] = ""'''
+                if count % 2 == 0: # and n[6] != ""
                     self.szukaj_pojazd_db_view.insert("", tk.END, values=n, tags=('evenrow',))
                 else:
                     self.szukaj_pojazd_db_view.insert("", tk.END, values=n, tags=('oddrow',))
@@ -1092,7 +1100,7 @@ class App:
         if data_zw_do:
             daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
         if self.tylko_niezwr_var.get():
-            daty.append("(data_zwrotu IS NULL OR data_zwrotu = '')")
+            daty.append("(data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None')")
 
         if daty:
             if not all(v == "" for v in warunki.values()):  # Jeśli są jakieś kryteria wyszukiwania i daty
@@ -1304,7 +1312,8 @@ class App:
 
     def pp_czy_dubel(self, tr):
         # Funkcja sprawdza, czy w bazie istnieje już wpis z podanymi danymi bez daty zwrotu
-        wyszukanie_wpisu = f""" SELECT * FROM pojazdy WHERE tr = "{tr}" AND data_zwrotu IS NULL; """
+        wyszukanie_wpisu = f""" SELECT * FROM pojazdy WHERE tr = "{tr}" AND 
+                                                (data_zwrotu IS NULL OR data_zwrotu = "None" OR data_zwrotu = ""); """
         self.cursor.execute(wyszukanie_wpisu)
         if len(self.cursor.fetchall()) > 0:
             return True
@@ -1448,12 +1457,14 @@ class App:
             # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd
             return showerror("Błąd", "Pola  'Numer TR' i 'Pobierający akta' są obowiązkowe!")
 
-        self.cursor.execute(f""" SELECT * FROM pojazdy WHERE data_zwrotu IS NULL AND tr = "{teczka}"; """)
+        self.cursor.execute(f""" SELECT * FROM pojazdy WHERE 
+                            (data_zwrotu IS NULL OR data_zwrotu = "None" OR data_zwrotu = "") AND tr = "{teczka}"; """)
         if len(self.cursor.fetchall()) == 0:
             showerror("Błąd", f"Nie znaleziono niezwróconej teczki o nr '{teczka}'.")
         else:
-            self.cursor.execute(f""" UPDATE pojazdy SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", 
-            operator_zwrot = "{operator}" WHERE tr = "{teczka}" AND data_zwrotu IS NULL; """)
+            self.cursor.execute(f""" UPDATE pojazdy 
+                    SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
+                    WHERE tr = "{teczka}" AND (data_zwrotu IS NULL OR data_zwrotu = "" OR data_zwrotu = "None"); """)
             self.db.commit()
 
         self.pojazd_potwierdzenie_zwrotu(teczka, now, osoba, operator)
@@ -1465,7 +1476,7 @@ class App:
         values = [pesel]
         warunki = {k: v for k, v in zip(keys, values)}
         sql = self.kierowca_select_query(**warunki)
-        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
         wyszukanie_wpisu = sql
         self.cursor.execute(wyszukanie_wpisu)
         if len(self.cursor.fetchall()) > 0:
@@ -1633,6 +1644,7 @@ class App:
 
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
+        # Jeśli zaznaczona 'Inna data' sprawdź format, jeśli jest dobry ustaw jako 'now' jeśli nie 'showerror'.
         if self.kz_data.get():
             if self.format_inna_data(self.kz_data_entry.get()):
                 now = self.kz_data_entry.get() + ' 12:00'
@@ -1642,7 +1654,7 @@ class App:
 
         if pesel == "":
             if nr_kk == "":
-                # Jeśli nie wpisze się PESEL-u lub nr KK, wyskoczy błąd.
+                # Jeśli nie wpisze się PESEL-u lub nr 'KK', wyskoczy błąd.
                 return showerror("Błąd", "Pole 'PESEL' lub 'nr KK' jest obowiązkowe!. "
                                          "W przypadku braku nr PESEL podaj datę urodzenia.")
         if osoba == "":
@@ -1652,29 +1664,31 @@ class App:
         values = [pesel, nr_kk]
         warunki = {k: v for k, v in zip(keys, values)}
         sql = self.kierowca_select_query(**warunki)
-        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
         id = f'{sql[:7]}id{sql[8:-1]}'
-
-        print(sql)
-        print(id)
 
         self.cursor.execute(sql)
         if len(self.cursor.fetchall()) == 0:
+            # Jeśli nie znajdzie wpisu z podanym nr PESEL i 'KK' wyszuka wpis z podanym PESEL i nr 'KK' = 'B/U'.
             if pesel and nr_kk:
-                bez_kk = self.kierowca_select_query(**{'pesel': pesel, 'nr_kk': 'B/U'})[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '');"
+                bez_kk = self.kierowca_select_query(**{'pesel': pesel, 'nr_kk': 'B/U'})[:-1] + \
+                         " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
                 self.cursor.execute(bez_kk)
+                # Zaktualizuje wpis o dane zwrotu i nr 'KK' podany przez operatora.
                 if len(self.cursor.fetchall()) == 1:
                     self.cursor.execute(f""" UPDATE kierowcy 
-                                SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}", nr_kk = "{nr_kk}"
-                                WHERE id = ({bez_kk[:7]}id{bez_kk[8:-1]}); """)
+                    SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}", nr_kk = "{nr_kk}"
+                    WHERE id = ({bez_kk[:7]}id{bez_kk[8:-1]}); """)
                     self.db.commit()
                 else:
-                    showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}' i nr kk {nr_kk}.")
+                    showinfo("Informacja",
+                             f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}' i nr kk {nr_kk}.")
             elif pesel:
                 showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}'.")
             else:
                 showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr kk: '{nr_kk}'.")
         else:
+            # Jeśli podany tylko PESEL lub nr 'KK' zaktualizuje tę pozycje o zwrot.
             self.cursor.execute(f""" UPDATE kierowcy 
             SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
             WHERE id = ({id}); """)
@@ -2550,6 +2564,6 @@ db.close()'''
 
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
 #  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności, operator pobranie tam gdzie nie ma zwrotu
-
+# TODO kolorki zwróconych i niezwróconych
 if __name__ == '__main__':
     app = App()
