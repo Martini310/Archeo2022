@@ -6,6 +6,7 @@ import re
 from datetime import datetime, timedelta
 import sqlite3
 import json
+import shutil
 
 
 class App:
@@ -2627,6 +2628,13 @@ for line in wpisy:
         cursor.execute(q)
         db.commit()
 db.close()"""
+
+# Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
+original = r'archeo.db'
+target = r'..\..\kierowca\archeo.db'
+
+shutil.copyfile(original, target)
+
 
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
 #  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności, operator pobranie tam gdzie nie ma zwrotu
