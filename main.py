@@ -1062,7 +1062,7 @@ class App:
         if data_zw_od:
             daty.append(f"data_zwrotu >= '{data_zw_od} 00:00'")
         if data_zw_do:
-            daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
+            daty.append(f"data_zwrotu <= '{data_zw_do} 23:59'")
         if self.tylko_niezwr_var.get():
             daty.append("(data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None')")
 
@@ -1144,7 +1144,7 @@ class App:
         if data_zw_od:
             daty.append(f"data_zwrotu >= '{data_zw_od} 00:00'")
         if data_zw_do:
-            daty.append(f"data_zwrotu >= '{data_zw_do} 23:59'")
+            daty.append(f"data_zwrotu <= '{data_zw_do} 23:59'")
         if self.tylko_niezwr_var.get():
             daty.append("(data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None')")
 
@@ -2629,12 +2629,63 @@ for line in wpisy:
         db.commit()
 db.close()"""
 
+'''with sqlite3.connect('archeo.db') as db:
+    cursor = db.cursor()
+cursor.execute("SELECT id, data_pobrania FROM pojazdy WHERE LENGTH(data_pobrania) < 12;")
+dates = []
+for n in cursor:
+    print(n)
+    dates.append(n)
+
+for d in dates:
+    cursor.execute(f"""UPDATE pojazdy SET data_pobrania = '{d[1] + " 12:00"}' WHERE id == {d[0]}""")
+    db.commit()
+db.close()'''
+
+'''with sqlite3.connect('archeo.db') as db:
+    cursor = db.cursor()
+cursor.execute("SELECT id, data_pobrania FROM kierowcy WHERE LENGTH(data_pobrania) < 12;")
+dates2 = []
+for n in cursor:
+    # print(n)
+    dates2.append(n)
+
+for d in dates2:
+    cursor.execute(f"""UPDATE kierowcy SET data_pobrania = '{d[1] + " 12:00"}' WHERE id == {d[0]}""")
+    db.commit()
+db.close()'''
+
+'''with sqlite3.connect('archeo.db') as db:
+    cursor = db.cursor()
+cursor.execute("SELECT id, data_zwrotu FROM kierowcy WHERE LENGTH(data_zwrotu) < 12 AND data_zwrotu != 'Żądanie akt' ;")
+dates2 = []
+for n in cursor:
+    # print(n)
+    dates2.append(n)
+
+for d in dates2:
+    cursor.execute(f"""UPDATE kierowcy SET data_zwrotu = '{d[1] + " 12:00"}' WHERE id == {d[0]}""")
+    db.commit()
+db.close()'''
+
+'''with sqlite3.connect('archeo.db') as db:
+    cursor = db.cursor()
+cursor.execute("SELECT id, data_zwrotu FROM pojazdy WHERE LENGTH(data_zwrotu) < 12;")
+dates2 = []
+for n in cursor:
+    # print(n)
+    dates2.append(n)
+
+for d in dates2:
+    cursor.execute(f"""UPDATE pojazdy SET data_zwrotu = '{d[1] + " 12:00"}' WHERE id == {d[0]}""")
+    db.commit()
+db.close()'''
+
 # Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
-original = r'archeo.db'
-target = r'..\..\kierowca\archeo.db'
+# original = r'archeo.db'
+# target = r'..\..\..\kierowca\DB\archeo.db'
 
-shutil.copyfile(original, target)
-
+# shutil.copyfile(original, target)
 
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
 #  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności, operator pobranie tam gdzie nie ma zwrotu
