@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import sqlite3
 import json
 import shutil
+import os
 
 
 class App:
@@ -727,7 +728,7 @@ class App:
         self.szukaj_kierowca_nazwisko_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
         self.szukaj_kierowca_nazwisko_pobranie_entry.grid(column=3, row=1)
 
-        # Szukaj KIEROWCA Osoba pobierająca
+        # Szukaj KIEROWCA Osoba pobierająca.
         self.szukaj_kierowca_osoba_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                               text='     Osoba pobierająca ', font='Arial 10')
         self.szukaj_kierowca_osoba_pobranie_label.grid(column=4, row=0)
@@ -736,7 +737,7 @@ class App:
                                                                  values=self.kp_osoba_values)
         self.szukaj_kierowca_osoba_pobranie_entry.grid(column=5, row=0)
 
-        # Szukaj KIEROWCA Osoba zwracająca
+        # Szukaj KIEROWCA Osoba zwracająca.
         self.szukaj_kierowca_osoba_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                            text='     Osoba zwracająca ', font='Arial 10')
         self.szukaj_kierowca_osoba_zwrot_label.grid(column=4, row=1)
@@ -744,7 +745,7 @@ class App:
         self.szukaj_kierowca_osoba_zwrot_entry = ttk.Combobox(self.wyszukaj_kierowca_frame, values=self.kz_osoba_values)
         self.szukaj_kierowca_osoba_zwrot_entry.grid(column=5, row=1)
 
-        # Szukaj KIEROWCA Operator pobranie
+        # Szukaj KIEROWCA Operator pobranie.
         self.szukaj_kierowca_operator_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                  text='     Operator pobranie ', font='Arial 10')
         self.szukaj_kierowca_operator_pobranie_label.grid(column=6, row=0)
@@ -753,7 +754,7 @@ class App:
                                                                     values=self.operator_values)
         self.szukaj_kierowca_operator_pobranie_entry.grid(column=7, row=0)
 
-        # Szukaj KIEROWCA Operator zwrot
+        # Szukaj KIEROWCA Operator zwrot.
         self.szukaj_kierowca_operator_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                               text='     Operator zwrot ', font='Arial 10')
         self.szukaj_kierowca_operator_zwrot_label.grid(column=6, row=1, sticky='E')
@@ -762,7 +763,7 @@ class App:
                                                                  values=self.operator_values)
         self.szukaj_kierowca_operator_zwrot_entry.grid(column=7, row=1)
 
-        # Szukaj KIEROWCA Data pobrania od
+        # Szukaj KIEROWCA Data pobrania od.
         self.szukaj_kierowca_data_od_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                 text='   Data pobrania od ', font='Arial 10')
         self.szukaj_kierowca_data_od_pobranie_label.grid(column=8, row=0, pady=10)
@@ -770,7 +771,7 @@ class App:
         self.szukaj_kierowca_data_od_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_od_pobranie_entry.grid(column=9, row=0)
 
-        # Szukaj KIEROWCA Data pobrania do
+        # Szukaj KIEROWCA Data pobrania do.
         self.szukaj_kierowca_data_do_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                 text='   Data pobrania do ', font='Arial 10')
         self.szukaj_kierowca_data_do_pobranie_label.grid(column=10, row=0, pady=10)
@@ -778,7 +779,7 @@ class App:
         self.szukaj_kierowca_data_do_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_do_pobranie_entry.grid(column=11, row=0)
 
-        # Szukaj KIEROWCA Data zwrotu od
+        # Szukaj KIEROWCA Data zwrotu od.
         self.szukaj_kierowca_data_od_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                              text='   Data zwrotu od ', font='Arial 10')
         self.szukaj_kierowca_data_od_zwrot_label.grid(column=8, row=1, pady=10, sticky='E')
@@ -786,7 +787,7 @@ class App:
         self.szukaj_kierowca_data_od_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_od_zwrot_entry.grid(column=9, row=1)
 
-        # Szukaj KIEROWCA Data zwrotu do
+        # Szukaj KIEROWCA Data zwrotu do.
         self.szukaj_kierowca_data_do_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                              text='   Data zwrotu do ', font='Arial 10')
         self.szukaj_kierowca_data_do_zwrot_label.grid(column=10, row=1, pady=10, sticky='E')
@@ -794,7 +795,7 @@ class App:
         self.szukaj_kierowca_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_do_zwrot_entry.grid(column=11, row=1)
 
-        # Szukaj KIEROWCA Prowadzący sprawę
+        # Szukaj KIEROWCA Prowadzący sprawę.
         self.szukaj_kierowca_prowadzacy_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                           text='   Prowadzący sprawę ', font='Arial 10')
         self.szukaj_kierowca_prowadzacy_label.grid(column=12, row=0, pady=10, sticky='E')
@@ -917,16 +918,16 @@ class App:
             with sqlite3.connect('archeo.db') as self.db:
                 self.cursor = self.db.cursor()
             self.cursor.execute(f"SELECT nazwisko, imie FROM kierowcy WHERE pesel='{pesel}'")
-            for e in self.cursor:
-                dane = " ".join([f for f in e])
+            for element in self.cursor:
+                dane = " ".join([f for f in element])
             self.kz_dane.config(text=dane)
             self.db.close()
         if kk:
             with sqlite3.connect('archeo.db') as self.db:
                 self.cursor = self.db.cursor()
             self.cursor.execute(f"SELECT nazwisko, imie FROM kierowcy WHERE nr_kk='{kk}'")
-            for e in self.cursor:
-                dane = " ".join([f for f in e])
+            for element in self.cursor:
+                dane = " ".join([f for f in element])
             self.kz_dane.config(text=dane)
             self.db.close()
 
@@ -989,11 +990,11 @@ class App:
 
     def treeview_sort_column(self, tv, col, reverse):
         """Funkcja przypisana do kolumn w wyszukiwarce. Po kliknięciu nagłówka kolumny sortuje zawartość."""
-        l = [(tv.set(k, col), k) for k in tv.get_children('')]
-        l.sort(reverse=reverse)
+        lista = [(tv.set(k, col), k) for k in tv.get_children('')]
+        lista.sort(reverse=reverse)
 
         # rearrange items in sorted positions
-        for index, (val, k) in enumerate(l):
+        for index, (val, k) in enumerate(lista):
             tv.move(k, '', index)
 
         # reverse sort next time
@@ -1207,7 +1208,7 @@ class App:
                 widget.delete(0, tk.END)
 
     def sql_select(self, tabela, **kwargs):
-        """Generate SQL queries for a SELECT statement matching the kwargs passed"""
+        """Generate SQL queries for a SELECT statement matching the kwargs passed."""
         sql = list()
         sql.append(f"SELECT * FROM {tabela} ")
         if kwargs:
@@ -1249,13 +1250,13 @@ class App:
             self.tylko_niezwrocone_kier()
 
     def kp_data_urodzenia(self):
-        """ Funkcja aktywująca pole daty urodzenia po zaznaczeniu checkbuttona i ustawiająca tam focus"""
+        """ Funkcja aktywująca pole daty urodzenia po zaznaczeniu checkbutton i ustawiająca tam focus"""
         if self.kp_data_ur_var:
             self.kp_pesel_entry.config(state='disabled')
             self.kp_data_ur_entry.config(state='normal')
             self.kp_data_ur_entry.delete(0, "end")
             self.kp_data_ur_entry.focus_set()
-        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem.
         if not self.kp_data_ur_var.get():
             self.kp_data_ur_entry.insert(0, "RRRR-MM-DD")
             self.kp_data_ur_entry.config(state="disabled")
@@ -1263,14 +1264,14 @@ class App:
             self.kp_pesel_entry.focus_set()
 
     def sprawdz_pesel_pobranie(self, event):
-        """ Funkcja zmieniająca kolor tła PESEL-u na zielony, jeśli ma 11 znaków i różowy w pozostałych przypadkach"""
+        """ Funkcja zmieniająca kolor tła PESEL-u na zielony, jeśli ma 11 znaków i różowy w pozostałych przypadkach."""
         if len(self.kp_pesel_string.get()) == 11:
             self.kp_pesel_entry.configure(background='light green')
         else:
             self.kp_pesel_entry.configure(background='pink')
 
     def sprawdz_pesel_zwrot(self, event):
-        """ Funkcja zmieniająca kolor tła PESEL-u na zielony, jeśli ma 11 znaków i różowy w pozostałych przypadkach"""
+        """ Funkcja zmieniająca kolor tła PESEL-u na zielony, jeśli ma 11 znaków i różowy w pozostałych przypadkach."""
         if len(self.kz_pesel_string.get()) == 11:
             self.kz_pesel_entry.configure(background='light green')
         else:
@@ -1278,7 +1279,7 @@ class App:
 
     def show_all(self):
         """ Funkcja do przycisku "Pokaż wszystko" w zakładce 'pojazd',
-            żeby wyświetlić wszystkie dane z tabeli pojazdów"""
+            żeby wyświetlić wszystkie dane z tabeli pojazdów."""
         self.pojazd_db_view.delete(*self.pojazd_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
@@ -1288,7 +1289,7 @@ class App:
 
     def show_all_kierowca(self):
         """ Funkcja do przycisku "Pokaż wszystko" w zakładce 'kierowca',
-            żeby wyświetlić wszystkie dane z tabeli kierowca"""
+            żeby wyświetlić wszystkie dane z tabeli kierowca."""
         self.kierowca_db_view.delete(*self.kierowca_db_view.get_children())
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
@@ -1322,7 +1323,7 @@ class App:
             self.pp_data_entry.config(state='normal')
             self.pp_data_entry.delete(0, "end")
             self.pp_data_entry.focus_set()
-        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem.
         if not self.pp_data.get():
             self.pp_data_entry.delete(0, "end")
             self.pp_data_entry.insert(0, "RRRR-MM-DD")
@@ -1334,7 +1335,7 @@ class App:
             self.pz_data_entry.config(state='normal')
             self.pz_data_entry.delete(0, "end")
             self.pz_data_entry.focus_set()
-        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem.
         if not self.pz_data.get():
             self.pz_data_entry.delete(0, "end")
             self.pz_data_entry.insert(0, "RRRR-MM-DD")
@@ -1346,7 +1347,7 @@ class App:
             self.kp_data_entry.config(state='normal')
             self.kp_data_entry.delete(0, "end")
             self.kp_data_entry.focus_set()
-        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem.
         if not self.kp_data.get():
             self.kp_data_entry.delete(0, "end")
             self.kp_data_entry.insert(0, "RRRR-MM-DD")
@@ -1358,7 +1359,7 @@ class App:
             self.kz_data_entry.config(state='normal')
             self.kz_data_entry.delete(0, "end")
             self.kz_data_entry.focus_set()
-        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem
+        # Po odznaczeniu zablokuje pole daty i wypełni prawidłowym formatem.
         if not self.kz_data.get():
             self.kz_data_entry.delete(0, "end")
             self.kz_data_entry.insert(0, "RRRR-MM-DD")
@@ -1373,7 +1374,7 @@ class App:
             return False
 
     def pp_czy_dubel(self, tr):
-        # Funkcja sprawdza, czy w bazie istnieje już wpis z podanymi danymi bez daty zwrotu
+        # Funkcja sprawdza, czy w bazie istnieje już wpis z podanymi danymi bez daty zwrotu.
         wyszukanie_wpisu = f""" SELECT * FROM pojazdy WHERE tr = "{tr}" AND 
                                                 (data_zwrotu IS NULL OR data_zwrotu = "None" OR data_zwrotu = ""); """
         self.cursor.execute(wyszukanie_wpisu)
@@ -1383,7 +1384,7 @@ class App:
             return False
 
     def format_inna_data(self, data):
-        # Funkcja sprawdzająca, czy podana data ma prawidłowy format
+        # Funkcja sprawdzająca, czy podana data ma prawidłowy format.
         format_daty = re.compile(r"^[1-2][019]\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])$")
         if format_daty.search(data):
             return True
@@ -1627,7 +1628,7 @@ class App:
                                          "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
 
         if pesel == '' or osoba == '' or imie == '' or nazwisko == '':
-            # Jeśli nie wpisze się PESELu lub pobierającego, lum imienia lub nazwiska wyskoczy błąd
+            # Jeśli nie wpisze się PESEL-u lub pobierającego, lum imienia lub nazwiska wyskoczy błąd.
             return showinfo("Błąd", "Pola 'PESEL', 'Imię', 'Nazwisko' i 'Osoba pobierająca' są obowiązkowe!")
 
         elif self.kp_czy_dubel(pesel):
@@ -1879,7 +1880,7 @@ class App:
             self.lista_operatorow.insert("", tk.END, values=[name])
 
     def delete_pojazd_osoba(self):
-        """ Function to removing elements from list of persons
+        """ Remove elements from list of persons
             'Opcje' -> 'Edytuj osoby - Pojazd' -> 'Usuń'
         """
         plik = open('osoby.json', mode='r')  # Otwarcie jsona w trybie odczytu
@@ -1969,7 +1970,7 @@ class App:
             self.lista_operatorow.insert("", tk.END, values=[name])
 
     def delete_kierowca_osoba(self):
-        """ Function to removing elements from list of persons
+        """ Remove elements from list of persons
             'Opcje' -> 'Edytuj osoby - Kierowca' -> 'Usuń'
         """
         plik = open('osoby.json', mode='r')  # Otwarcie jsona w trybie odczytu
@@ -2429,8 +2430,8 @@ class EditKierowca:
             self.root.lower()
             showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
             self.root.destroy()
-        except:
-            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
+        except Exception as E:
+            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', details=f'{E}')
 
     def delete(self):
         potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n',
@@ -2447,8 +2448,8 @@ class EditKierowca:
                 self.root.lower()
                 showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
                 self.root.destroy()
-            except:
-                showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
+            except Exception as E:
+                showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', detail=f'{E}')
 
     def sql_edit(self, tabela: str, **kwargs) -> str:
         db_id = self.id_entry.get()
@@ -2545,8 +2546,8 @@ class EditPojazd:
             self.root.lower()
             showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
             self.root.destroy()
-        except:
-            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
+        except Exception as E:
+            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', details=f'{E}')
 
     def delete(self):
         potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n',
@@ -2562,8 +2563,8 @@ class EditPojazd:
                 self.root.lower()
                 showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
                 self.root.destroy()
-            except:
-                showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.')
+            except Exception as E:
+                showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', detail=f'{E}')
 
     def sql_edit(self, tabela: str, **kwargs) -> str:
         db_id = self.id_entry.get()
@@ -2680,12 +2681,21 @@ for d in dates2:
     cursor.execute(f"""UPDATE pojazdy SET data_zwrotu = '{d[1] + " 12:00"}' WHERE id == {d[0]}""")
     db.commit()
 db.close()'''
+try:
+    size1 = os.path.getsize('archeo.db')  # Rozmiar oryginalnej bazy danych.
+    size2 = os.path.getsize(r'\\fs1spp\kierowca\DB\archeo.db')  # Rozmiar kopii bazy danych.
+    time1 = os.path.getmtime('archeo.db')  # Data modyfikacji oryg. bazy danych
+    time2 = os.path.getmtime(r'\\fs1spp\kierowca\DB\archeo.db')  # Data modyfikacji kopii bazy danych.
 
-# Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
-# original = r'archeo.db'
-# target = r'..\..\..\kierowca\DB\archeo.db'
+    # Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
+    original = r'archeo.db'
+    # target = r'W:\DB\archeo.db'
+    target = r'\\fs1spp\kierowca\DB\archeo.db'
+    if time1 > time2 and size1 > size2:
+        shutil.copyfile(original, target)
+except Exception as E:
+    showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')
 
-# shutil.copyfile(original, target)
 
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
 #  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności, operator pobranie tam gdzie nie ma zwrotu
