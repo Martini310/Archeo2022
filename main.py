@@ -155,7 +155,7 @@ class App:
 
         # POBRANIE AKT POJAZDU --> pp
         self.pojazd_pobranie_labelframe = tk.LabelFrame(self.pojazd, text='Pobranie akt pojazdu')
-        self.pojazd_pobranie_labelframe.grid(column=1, row=0, padx=30, sticky='NEWS', pady=20)
+        self.pojazd_pobranie_labelframe.grid(column=1, row=0, padx=30, sticky='NEWS', pady=10)
 
         self.pojazd_pobranie_labelframe.columnconfigure(0, minsize=0)
         self.pojazd_pobranie_labelframe.columnconfigure(1, weight=2)
@@ -240,7 +240,7 @@ class App:
 
         # ZWROT AKT POJAZDU --> pz
         self.pojazd_zwrot_labelframe = tk.LabelFrame(self.pojazd, text='Zwrot akt pojazdu')
-        self.pojazd_zwrot_labelframe.grid(column=3, row=0, padx=30, sticky='NEWS', pady=20)
+        self.pojazd_zwrot_labelframe.grid(column=3, row=0, padx=30, sticky='NEWS', pady=10)
 
         self.pojazd_zwrot_labelframe.columnconfigure(0, minsize=50)
         self.pojazd_zwrot_labelframe.columnconfigure(1, weight=1)
@@ -295,12 +295,17 @@ class App:
 
         # HORIZONTAL SEPARATOR
         self.pojazd_hor_separator = ttk.Separator(self.pojazd, orient='horizontal')
-        self.pojazd_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=30)
+        self.pojazd_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=15)
+
+        # SET TABLE HEIGHT BASED ON RESOLUTION
+        self.notebook.update()
+        note = self.notebook.winfo_reqheight()
+        tab_poj = int((self.window_height - (140 + note)) / 30)
 
         # DATABASE VIEW
         self.pojazd_db_columns = ("id", "TR", "Data pobrania", "Pobierający", "Prowadzący sprawę",
                                   "Operator - pobranie", "Data zwrotu", "Zwracający", "Operator - zwrot", "Uwagi")
-        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=14)
+        self.pojazd_db_view = ttk.Treeview(self.pojazd, columns=self.pojazd_db_columns, show='headings', height=tab_poj)
         for column in self.pojazd_db_columns:
             self.pojazd_db_view.heading(column, text=column, anchor='center')
         self.pojazd_db_view.column("id", width=60)
@@ -331,17 +336,17 @@ class App:
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ KIEROWCA @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-        self.kierowca.columnconfigure(0, minsize=30)
+        self.kierowca.columnconfigure(0, minsize=10)
         self.kierowca.columnconfigure(1, weight=1)
         self.kierowca.columnconfigure(2, minsize=1)
         self.kierowca.columnconfigure(3, weight=1)
-        self.kierowca.columnconfigure(4, minsize=30)
+        self.kierowca.columnconfigure(4, minsize=10)
 
         # POBRANIE AKT KIEROWCY --> kp
         self.kierowca_pobranie_labelframe = tk.LabelFrame(self.kierowca, text='Pobranie akt kierowcy')
-        self.kierowca_pobranie_labelframe.grid(column=1, row=0, padx=30, sticky='NEWS', pady=20)
+        self.kierowca_pobranie_labelframe.grid(column=1, row=0, padx=10, sticky='NEWS', pady=10)
 
-        self.kierowca_pobranie_labelframe.columnconfigure(0, minsize=50)
+        self.kierowca_pobranie_labelframe.columnconfigure(0, minsize=10)
         self.kierowca_pobranie_labelframe.columnconfigure(1, weight=1)
         self.kierowca_pobranie_labelframe.columnconfigure(2, weight=1)
         self.kierowca_pobranie_labelframe.columnconfigure(3, minsize=10)
@@ -476,12 +481,12 @@ class App:
 
         # ZWROT AKT KIEROWCY --> kz
         self.kierowca_zwrot_labelframe = tk.LabelFrame(self.kierowca, text='Zwrot akt kierowcy')
-        self.kierowca_zwrot_labelframe.grid(column=3, row=0, padx=30, sticky='NEWS', pady=20)
+        self.kierowca_zwrot_labelframe.grid(column=3, row=0, padx=20, sticky='NEWS', pady=10)
 
-        self.kierowca_zwrot_labelframe.columnconfigure(0, minsize=100)
+        self.kierowca_zwrot_labelframe.columnconfigure(0, minsize=20)
         self.kierowca_zwrot_labelframe.columnconfigure(1, weight=1)
         self.kierowca_zwrot_labelframe.columnconfigure(2, weight=1)
-        self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=100)
+        self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=20)
 
         # PESEL - ZWROT AKT
         self.kz_pesel_label = ttk.Label(self.kierowca_zwrot_labelframe, text='Data ur. / PESEL:', background='yellow')
@@ -549,14 +554,19 @@ class App:
 
         # KIEROWCA HORIZONTAL SEPARATOR
         self.kierowca_hor_separator = ttk.Separator(self.kierowca, orient='horizontal')
-        self.kierowca_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=20)
+        self.kierowca_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
+
+        self.kierowca.update()
+        note = self.kierowca.winfo_reqheight()
+        tab_kier = int((self.window_height - (140 + note)) / 30)
+        print(tab_kier, note)
 
         # KIEROWCA DATABASE VIEW
         self.kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'Nr Karty Kierowcy', 'Data pobrania',
                                     'Pobierający', 'Osoba prowadząca', 'Operator - pobranie', 'Data zwrotu',
                                     'Zwracający', 'Operator - zwrot', 'uwagi')
         self.kierowca_db_view = ttk.Treeview(self.kierowca, columns=self.kierowca_db_columns,
-                                             show='headings', height=13)
+                                             show='headings', height=tab_kier)
 
         for column in self.kierowca_db_columns:
             self.kierowca_db_view.heading(column, text=column, anchor='center')
@@ -578,7 +588,7 @@ class App:
 
         # CLOSE BUTTON
         self.zamknij_button2 = ttk.Button(self.kierowca, text="Zamknij", command=lambda: self.root.quit())
-        self.zamknij_button2.grid(column=2, row=6, sticky="WE", padx=10, pady=10)
+        self.zamknij_button2.grid(column=2, row=6, sticky="WE", padx=10, pady=0)
 
         self.pokaz_wszystko2 = ttk.Button(self.kierowca, text='Pokaż wszystko', command=self.show_all_kierowca)
         self.pokaz_wszystko2.grid(column=3, row=6)
@@ -623,75 +633,75 @@ class App:
         # Prowadzący sprawę
         self.szukaj_pojazd_prowadzacy_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                         text='     Prowadzący sprawę:', font='Arial 10')
-        self.szukaj_pojazd_prowadzacy_label.grid(column=0, row=1)
+        self.szukaj_pojazd_prowadzacy_label.grid(column=2, row=0)
 
         self.szukaj_pojazd_prowadzacy_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.pp_prow_values)
-        self.szukaj_pojazd_prowadzacy_entry.grid(column=1, row=1)
+        self.szukaj_pojazd_prowadzacy_entry.grid(column=3, row=0)
 
         # Osoba pobierająca
         self.szukaj_pojazd_osoba_pobranie_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                             text='     Osoba pobierająca:', font='Arial 10')
-        self.szukaj_pojazd_osoba_pobranie_label.grid(column=2, row=0)
+        self.szukaj_pojazd_osoba_pobranie_label.grid(column=0, row=1)
 
         self.szukaj_pojazd_osoba_pobranie_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.pp_osoba_values)
-        self.szukaj_pojazd_osoba_pobranie_entry.grid(column=3, row=0)
+        self.szukaj_pojazd_osoba_pobranie_entry.grid(column=1, row=1)
 
         # Osoba zwracająca
         self.szukaj_pojazd_osoba_zwrot_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                          text='     Osoba zwracająca:', font='Arial 10')
-        self.szukaj_pojazd_osoba_zwrot_label.grid(column=2, row=1)
+        self.szukaj_pojazd_osoba_zwrot_label.grid(column=0, row=2)
 
         self.szukaj_pojazd_osoba_zwrot_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.pp_osoba_values)
-        self.szukaj_pojazd_osoba_zwrot_entry.grid(column=3, row=1)
+        self.szukaj_pojazd_osoba_zwrot_entry.grid(column=1, row=2)
 
         # Operator pobranie
         self.szukaj_pojazd_operator_pobranie_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                                text='     Operator pobranie:', font='Arial 10')
-        self.szukaj_pojazd_operator_pobranie_label.grid(column=4, row=0)
+        self.szukaj_pojazd_operator_pobranie_label.grid(column=2, row=1)
 
         self.szukaj_pojazd_operator_pobranie_entry = ttk.Combobox(self.wyszukaj_pojazd_frame,
                                                                   values=self.operator_values)
-        self.szukaj_pojazd_operator_pobranie_entry.grid(column=5, row=0)
+        self.szukaj_pojazd_operator_pobranie_entry.grid(column=3, row=1)
 
         # Operator zwrot
         self.szukaj_pojazd_operator_zwrot_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                             text='     Operator zwrot:', font='Arial 10')
-        self.szukaj_pojazd_operator_zwrot_label.grid(column=4, row=1, sticky='E')
+        self.szukaj_pojazd_operator_zwrot_label.grid(column=2, row=2, sticky='E')
 
         self.szukaj_pojazd_operator_zwrot_entry = ttk.Combobox(self.wyszukaj_pojazd_frame, values=self.operator_values)
-        self.szukaj_pojazd_operator_zwrot_entry.grid(column=5, row=1)
+        self.szukaj_pojazd_operator_zwrot_entry.grid(column=3, row=2)
 
         # Data pobrania od
         self.szukaj_pojazd_data_od_pobranie_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                               text='   Data pobrania od:', font='Arial 10')
-        self.szukaj_pojazd_data_od_pobranie_label.grid(column=6, row=0, pady=10)
+        self.szukaj_pojazd_data_od_pobranie_label.grid(column=4, row=1, pady=10)
 
         self.szukaj_pojazd_data_od_pobranie_entry = ttk.Entry(self.wyszukaj_pojazd_frame, width=20)
-        self.szukaj_pojazd_data_od_pobranie_entry.grid(column=7, row=0)
+        self.szukaj_pojazd_data_od_pobranie_entry.grid(column=5, row=1)
 
         # Data pobrania do
         self.szukaj_pojazd_data_do_pobranie_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                               text='   Data pobrania do:', font='Arial 10')
-        self.szukaj_pojazd_data_do_pobranie_label.grid(column=8, row=0, pady=10)
+        self.szukaj_pojazd_data_do_pobranie_label.grid(column=6, row=1, pady=10)
 
         self.szukaj_pojazd_data_do_pobranie_entry = ttk.Entry(self.wyszukaj_pojazd_frame, width=20)
-        self.szukaj_pojazd_data_do_pobranie_entry.grid(column=9, row=0)
+        self.szukaj_pojazd_data_do_pobranie_entry.grid(column=7, row=1)
 
         # Data zwrotu od
         self.szukaj_pojazd_data_od_zwrot_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                            text='   Data zwrotu od:', font='Arial 10')
-        self.szukaj_pojazd_data_od_zwrot_label.grid(column=6, row=1, pady=10, sticky='E')
+        self.szukaj_pojazd_data_od_zwrot_label.grid(column=4, row=2, pady=10, sticky='E')
 
         self.szukaj_pojazd_data_od_zwrot_entry = ttk.Entry(self.wyszukaj_pojazd_frame, width=20)
-        self.szukaj_pojazd_data_od_zwrot_entry.grid(column=7, row=1)
+        self.szukaj_pojazd_data_od_zwrot_entry.grid(column=5, row=2)
 
         # Data zwrotu do
         self.szukaj_pojazd_data_do_zwrot_label = ttk.Label(self.wyszukaj_pojazd_frame,
                                                            text='   Data zwrotu do:', font='Arial 10')
-        self.szukaj_pojazd_data_do_zwrot_label.grid(column=8, row=1, pady=10, sticky='E')
+        self.szukaj_pojazd_data_do_zwrot_label.grid(column=6, row=2, pady=10, sticky='E')
 
         self.szukaj_pojazd_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_pojazd_frame, width=20)
-        self.szukaj_pojazd_data_do_zwrot_entry.grid(column=9, row=1)
+        self.szukaj_pojazd_data_do_zwrot_entry.grid(column=7, row=2)
 
         # @@@@ KIEROWCA @@@
         self.wyszukaj_kierowca_frame = tk.Frame(self.wyszukiwanie_options)
@@ -714,7 +724,7 @@ class App:
 
         # Szukaj KIEROWCA IMIĘ
         self.szukaj_kierowca_imie_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
-                                                             text='     Imię ', font='Arial 10')
+                                                             text='Imię ', font='Arial 10')
         self.szukaj_kierowca_imie_pobranie_label.grid(column=2, row=0, sticky='E')
 
         self.szukaj_kierowca_imie_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
@@ -722,8 +732,8 @@ class App:
 
         # Szukaj KIEROWCA NAZWISKO
         self.szukaj_kierowca_nazwisko_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
-                                                                 text='     Nazwisko ', font='Arial 10')
-        self.szukaj_kierowca_nazwisko_pobranie_label.grid(column=2, row=1)
+                                                                 text='Nazwisko ', font='Arial 10')
+        self.szukaj_kierowca_nazwisko_pobranie_label.grid(column=2, row=1, sticky='E')
 
         self.szukaj_kierowca_nazwisko_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=15)
         self.szukaj_kierowca_nazwisko_pobranie_entry.grid(column=3, row=1)
@@ -766,42 +776,42 @@ class App:
         # Szukaj KIEROWCA Data pobrania od.
         self.szukaj_kierowca_data_od_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                 text='   Data pobrania od ', font='Arial 10')
-        self.szukaj_kierowca_data_od_pobranie_label.grid(column=8, row=0, pady=10)
+        self.szukaj_kierowca_data_od_pobranie_label.grid(column=0, row=2, pady=10)
 
         self.szukaj_kierowca_data_od_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
-        self.szukaj_kierowca_data_od_pobranie_entry.grid(column=9, row=0)
+        self.szukaj_kierowca_data_od_pobranie_entry.grid(column=1, row=2)
 
         # Szukaj KIEROWCA Data pobrania do.
         self.szukaj_kierowca_data_do_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                 text='   Data pobrania do ', font='Arial 10')
-        self.szukaj_kierowca_data_do_pobranie_label.grid(column=10, row=0, pady=10)
+        self.szukaj_kierowca_data_do_pobranie_label.grid(column=2, row=2, pady=10)
 
         self.szukaj_kierowca_data_do_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
-        self.szukaj_kierowca_data_do_pobranie_entry.grid(column=11, row=0)
+        self.szukaj_kierowca_data_do_pobranie_entry.grid(column=3, row=2)
 
         # Szukaj KIEROWCA Data zwrotu od.
         self.szukaj_kierowca_data_od_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                              text='   Data zwrotu od ', font='Arial 10')
-        self.szukaj_kierowca_data_od_zwrot_label.grid(column=8, row=1, pady=10, sticky='E')
+        self.szukaj_kierowca_data_od_zwrot_label.grid(column=0, row=3, pady=10, sticky='E')
 
         self.szukaj_kierowca_data_od_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
-        self.szukaj_kierowca_data_od_zwrot_entry.grid(column=9, row=1)
+        self.szukaj_kierowca_data_od_zwrot_entry.grid(column=1, row=3)
 
         # Szukaj KIEROWCA Data zwrotu do.
         self.szukaj_kierowca_data_do_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                              text='   Data zwrotu do ', font='Arial 10')
-        self.szukaj_kierowca_data_do_zwrot_label.grid(column=10, row=1, pady=10, sticky='E')
+        self.szukaj_kierowca_data_do_zwrot_label.grid(column=2, row=3, pady=10, sticky='E')
 
         self.szukaj_kierowca_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
-        self.szukaj_kierowca_data_do_zwrot_entry.grid(column=11, row=1)
+        self.szukaj_kierowca_data_do_zwrot_entry.grid(column=3, row=3)
 
         # Szukaj KIEROWCA Prowadzący sprawę.
         self.szukaj_kierowca_prowadzacy_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                           text='   Prowadzący sprawę ', font='Arial 10')
-        self.szukaj_kierowca_prowadzacy_label.grid(column=12, row=0, pady=10, sticky='E')
+        self.szukaj_kierowca_prowadzacy_label.grid(column=4, row=2, pady=10, sticky='E')
 
         self.szukaj_kierowca_prowadzacy_entry = ttk.Combobox(self.wyszukaj_kierowca_frame, values=self.kp_prow_values)
-        self.szukaj_kierowca_prowadzacy_entry.grid(column=13, row=0)
+        self.szukaj_kierowca_prowadzacy_entry.grid(column=5, row=2)
 
         # Szukaj — PRZYCISKI
         self.szukaj_przyciski_frame = ttk.LabelFrame(self.wyszukiwanie)
@@ -831,13 +841,19 @@ class App:
         self.szukaj_pojazd_wyniki_frame = ttk.LabelFrame(self.wyszukiwanie, text='Wyniki wyszukiwania')
         # self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, pady=10, padx=30, ipadx=10)
 
+        # Set table height
+        self.wyszukiwanie.update()
+        note = self.wyszukiwanie.winfo_reqheight()
+        tab_wysz_poj = int((self.window_height - (140 + note)) / 30)
+
         # SZUKAJ DATABASE VIEW POJAZD
         self.szukaj_pojazd_db_columns = (
             "id", "TR", "Data pobrania", "Pobierający", "Prowadzący sprawę", "Operator - pobranie", "Data zwrotu",
             "Zwracający", "Operator - zwrot", "Uwagi")
         self.szukaj_pojazd_db_view = ttk.Treeview(self.szukaj_pojazd_wyniki_frame,
                                                   columns=self.szukaj_pojazd_db_columns,
-                                                  show='headings', height=18)
+                                                  show='headings',
+                                                  height=tab_wysz_poj)
         col_width_pojazd = int(self.window_width / 9.4)
         for column in self.szukaj_pojazd_db_columns:
             self.szukaj_pojazd_db_view.heading(column, text=column, anchor='center')
@@ -848,8 +864,6 @@ class App:
 
         self.szukaj_pojazd_db_view.grid(column=0, row=4, sticky='NEWS')
 
-        # self.szukaj_pojazd_db_view.tag_configure('oddrow', background='white')
-        # self.szukaj_pojazd_db_view.tag_configure('evenrow', background='slategray1')
         self.szukaj_pojazd_db_view.tag_configure('returnedodd', background='DarkSeaGreen1')
         self.szukaj_pojazd_db_view.tag_configure('notreturnedodd', background='MistyRose1')
         self.szukaj_pojazd_db_view.tag_configure('returnedeven', background='PaleGreen')
@@ -865,16 +879,28 @@ class App:
         self.szukaj_pojazd_db_view.configure(yscrollcommand=self.szukaj_pojazd_db_scrollbar.set)
         self.szukaj_pojazd_db_scrollbar.grid(column=2, row=4, sticky='NS')
 
+        self.szukaj_pojazd_db_scrollbar_x = ttk.Scrollbar(self.szukaj_pojazd_wyniki_frame, orient=tk.HORIZONTAL,
+                                                          command=self.szukaj_pojazd_db_view.xview)
+        self.szukaj_pojazd_db_view.configure(xscrollcommand=self.szukaj_pojazd_db_scrollbar_x.set)
+        self.szukaj_pojazd_db_scrollbar_x.grid(column=0, columnspan=3, row=5, sticky='WE')
+
         # SZUKAJ DB VIEW FRAME KIEROWCA
         self.szukaj_kierowca_wyniki_frame = ttk.LabelFrame(self.wyszukiwanie, text='Wyniki wyszukiwania')
         self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, pady=10, padx=30)
+
+        # Set table height
+        self.wyszukiwanie.update()
+        note = self.wyszukiwanie.winfo_reqheight()
+        tab_wysz_kier = int((self.window_height - (140 + note)) / 30)
 
         # SZUKAJ DATABASE VIEW KIEROWCA
         self.szukaj_kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'nr_kk', 'Data pobrania', 'Pobierający',
                                            'Prowadzący sprawę', 'Operator pobranie', 'Data zwrotu', 'Zwracający',
                                            'Operator zwrot', 'uwagi')
         self.szukaj_kierowca_db_view = ttk.Treeview(self.szukaj_kierowca_wyniki_frame,
-                                                    columns=self.szukaj_kierowca_db_columns, show='headings', height=18)
+                                                    columns=self.szukaj_kierowca_db_columns,
+                                                    show='headings',
+                                                    height=tab_wysz_kier)
 
         col_width_kier = int(self.window_width / 12.2)
         for column in self.szukaj_kierowca_db_columns:
@@ -887,8 +913,6 @@ class App:
 
         self.szukaj_kierowca_db_view.grid(column=0, row=4, sticky='NEWS')
 
-        # self.szukaj_kierowca_db_view.tag_configure('oddrow', background='white')
-        # self.szukaj_kierowca_db_view.tag_configure('evenrow', background='slategray1')
         self.szukaj_kierowca_db_view.tag_configure('returnedodd', background='DarkSeaGreen1')
         self.szukaj_kierowca_db_view.tag_configure('notreturnedodd', background='MistyRose1')
         self.szukaj_kierowca_db_view.tag_configure('returnedeven', background='PaleGreen')
@@ -904,9 +928,14 @@ class App:
         self.szukaj_kierowca_db_view.configure(yscrollcommand=self.szukaj_kierowca_db_scrollbar.set)
         self.szukaj_kierowca_db_scrollbar.grid(column=1, row=4, sticky='NS')
 
+        self.szukaj_kierowca_db_scrollbar_x = ttk.Scrollbar(self.szukaj_kierowca_wyniki_frame, orient=tk.HORIZONTAL,
+                                                          command=self.szukaj_kierowca_db_view.xview)
+        self.szukaj_kierowca_db_view.configure(xscrollcommand=self.szukaj_kierowca_db_scrollbar_x.set)
+        self.szukaj_kierowca_db_scrollbar_x.grid(column=0, columnspan=3, row=5, sticky='WE')
+
         # CLOSE BUTTON
         self.zamknij_button3 = ttk.Button(self.wyszukiwanie, text="Zamknij", command=lambda: self.root.quit())
-        self.zamknij_button3.grid(column=0, row=6, padx=10, pady=10)
+        self.zamknij_button3.grid(column=0, row=6, padx=10, pady=0)
 
         self.root.mainloop()
 
@@ -2681,20 +2710,20 @@ for d in dates2:
     cursor.execute(f"""UPDATE pojazdy SET data_zwrotu = '{d[1] + " 12:00"}' WHERE id == {d[0]}""")
     db.commit()
 db.close()'''
-try:
-    size1 = os.path.getsize('archeo.db')  # Rozmiar oryginalnej bazy danych.
-    size2 = os.path.getsize(r'\\fs1spp\kierowca\DB\archeo.db')  # Rozmiar kopii bazy danych.
-    time1 = os.path.getmtime('archeo.db')  # Data modyfikacji oryg. bazy danych
-    time2 = os.path.getmtime(r'\\fs1spp\kierowca\DB\archeo.db')  # Data modyfikacji kopii bazy danych.
-
-    # Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
-    original = r'archeo.db'
-    # target = r'W:\DB\archeo.db'
-    target = r'\\fs1spp\kierowca\DB\archeo.db'
-    if time1 > time2 and size1 > size2:
-        shutil.copyfile(original, target)
-except Exception as E:
-    showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')
+# try:
+#     size1 = os.path.getsize('archeo.db')  # Rozmiar oryginalnej bazy danych.
+#     size2 = os.path.getsize(r'\\fs1spp\kierowca\DB\archeo.db')  # Rozmiar kopii bazy danych.
+#     time1 = os.path.getmtime('archeo.db')  # Data modyfikacji oryg. bazy danych
+#     time2 = os.path.getmtime(r'\\fs1spp\kierowca\DB\archeo.db')  # Data modyfikacji kopii bazy danych.
+#
+#     # Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
+#     original = r'archeo.db'
+#     # target = r'W:\DB\archeo.db'
+#     target = r'\\fs1spp\kierowca\DB\archeo.db'
+#     if time1 > time2 and size1 > size2:
+#         shutil.copyfile(original, target)
+# except Exception as E:
+#     showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')
 
 
 # TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
