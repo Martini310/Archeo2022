@@ -570,18 +570,22 @@ class App:
 
         for column in self.kierowca_db_columns:
             self.kierowca_db_view.heading(column, text=column, anchor='center')
-            self.kierowca_db_view.column(column, width=90)
-        self.kierowca_db_view.column("id", width=30)
+            self.kierowca_db_view.column(column, width=150)
+        self.kierowca_db_view.column("id", width=50)
+        self.kierowca_db_view.column("PESEL", width=100)
+        self.kierowca_db_view.column("Imię", width=100)
 
         self.kierowca_db_view.grid(column=1, columnspan=3, row=4, sticky='NEWS')
 
         # KIEROWCA SCROLLBAR
-        self.kierowca_db_scrollbar = ttk.Scrollbar(self.kierowca, orient=tk.VERTICAL,
+        self.kierowca_db_scrollbar = ttk.Scrollbar(self.kierowca,
+                                                   orient=tk.VERTICAL,
                                                    command=self.kierowca_db_view.yview)
         self.kierowca_db_view.configure(yscrollcommand=self.kierowca_db_scrollbar.set)
         self.kierowca_db_scrollbar.grid(column=4, row=4, sticky='NS')
 
-        self.kierowca_db_scrollbarx = ttk.Scrollbar(self.kierowca, orient=tk.HORIZONTAL,
+        self.kierowca_db_scrollbarx = ttk.Scrollbar(self.kierowca,
+                                                    orient=tk.HORIZONTAL,
                                                     command=self.kierowca_db_view.xview)
         self.kierowca_db_view.configure(xscrollcommand=self.kierowca_db_scrollbarx.set)
         self.kierowca_db_scrollbarx.grid(column=1, columnspan=3, row=5, sticky='WE')
@@ -596,6 +600,9 @@ class App:
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ WYSZUKIWARKA @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+        self.wyszukiwanie.columnconfigure(0, weight=1)
+        self.wyszukiwanie.columnconfigure(1, minsize=10)
 
         # Pole wyboru rejestru do przeszukania
         self.rejestr_labelframe = ttk.Labelframe(self.wyszukiwanie, text='Wybierz rejestr')
@@ -776,7 +783,7 @@ class App:
         # Szukaj KIEROWCA Data pobrania od.
         self.szukaj_kierowca_data_od_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                 text='   Data pobrania od ', font='Arial 10')
-        self.szukaj_kierowca_data_od_pobranie_label.grid(column=0, row=2, pady=10)
+        self.szukaj_kierowca_data_od_pobranie_label.grid(column=0, row=2, pady=6)
 
         self.szukaj_kierowca_data_od_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_od_pobranie_entry.grid(column=1, row=2)
@@ -784,7 +791,7 @@ class App:
         # Szukaj KIEROWCA Data pobrania do.
         self.szukaj_kierowca_data_do_pobranie_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                                 text='   Data pobrania do ', font='Arial 10')
-        self.szukaj_kierowca_data_do_pobranie_label.grid(column=2, row=2, pady=10)
+        self.szukaj_kierowca_data_do_pobranie_label.grid(column=2, row=2, pady=6)
 
         self.szukaj_kierowca_data_do_pobranie_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_do_pobranie_entry.grid(column=3, row=2)
@@ -792,7 +799,7 @@ class App:
         # Szukaj KIEROWCA Data zwrotu od.
         self.szukaj_kierowca_data_od_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                              text='   Data zwrotu od ', font='Arial 10')
-        self.szukaj_kierowca_data_od_zwrot_label.grid(column=0, row=3, pady=10, sticky='E')
+        self.szukaj_kierowca_data_od_zwrot_label.grid(column=0, row=3, pady=6, sticky='E')
 
         self.szukaj_kierowca_data_od_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_od_zwrot_entry.grid(column=1, row=3)
@@ -800,7 +807,7 @@ class App:
         # Szukaj KIEROWCA Data zwrotu do.
         self.szukaj_kierowca_data_do_zwrot_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                              text='   Data zwrotu do ', font='Arial 10')
-        self.szukaj_kierowca_data_do_zwrot_label.grid(column=2, row=3, pady=10, sticky='E')
+        self.szukaj_kierowca_data_do_zwrot_label.grid(column=2, row=3, pady=6, sticky='E')
 
         self.szukaj_kierowca_data_do_zwrot_entry = ttk.Entry(self.wyszukaj_kierowca_frame, width=13)
         self.szukaj_kierowca_data_do_zwrot_entry.grid(column=3, row=3)
@@ -808,7 +815,7 @@ class App:
         # Szukaj KIEROWCA Prowadzący sprawę.
         self.szukaj_kierowca_prowadzacy_label = ttk.Label(self.wyszukaj_kierowca_frame,
                                                           text='   Prowadzący sprawę ', font='Arial 10')
-        self.szukaj_kierowca_prowadzacy_label.grid(column=4, row=2, pady=10, sticky='E')
+        self.szukaj_kierowca_prowadzacy_label.grid(column=4, row=2, pady=6, sticky='E')
 
         self.szukaj_kierowca_prowadzacy_entry = ttk.Combobox(self.wyszukaj_kierowca_frame, values=self.kp_prow_values)
         self.szukaj_kierowca_prowadzacy_entry.grid(column=5, row=2)
@@ -831,15 +838,11 @@ class App:
         self.tylko_niezwr = ttk.Checkbutton(self.szukaj_przyciski_frame, text='Tylko niezwrócone',
                                             onvalue=True, offvalue=False, variable=self.tylko_niezwr_var,
                                             command=self.tylko_niezwrocone_kier)
-        self.tylko_niezwr.grid(column=0, row=1)
+        self.tylko_niezwr.grid(column=0, row=1, columnspan=3, padx=20, sticky='W')
 
         # Informacja o ilości wyszukanych rekordów
         self.informacja_label = tk.Label(self.wyszukiwanie, text=f"")
         self.informacja_label.grid(column=0, row=2, sticky='S')
-
-        # SZUKAJ DB VIEW FRAME POJAZD
-        self.szukaj_pojazd_wyniki_frame = ttk.LabelFrame(self.wyszukiwanie, text='Wyniki wyszukiwania')
-        # self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, pady=10, padx=30, ipadx=10)
 
         # Set table height
         self.wyszukiwanie.update()
@@ -850,19 +853,19 @@ class App:
         self.szukaj_pojazd_db_columns = (
             "id", "TR", "Data pobrania", "Pobierający", "Prowadzący sprawę", "Operator - pobranie", "Data zwrotu",
             "Zwracający", "Operator - zwrot", "Uwagi")
-        self.szukaj_pojazd_db_view = ttk.Treeview(self.szukaj_pojazd_wyniki_frame,
+        self.szukaj_pojazd_db_view = ttk.Treeview(self.wyszukiwanie,
                                                   columns=self.szukaj_pojazd_db_columns,
                                                   show='headings',
                                                   height=tab_wysz_poj)
-        col_width_pojazd = int(self.window_width / 9.4)
+
         for column in self.szukaj_pojazd_db_columns:
             self.szukaj_pojazd_db_view.heading(column, text=column, anchor='center')
-            self.szukaj_pojazd_db_view.column(column, width=col_width_pojazd)
+            self.szukaj_pojazd_db_view.column(column, width=180)
 
         self.szukaj_pojazd_db_view.column('id', width=70)
         self.szukaj_pojazd_db_view.column('TR', width=110)
 
-        self.szukaj_pojazd_db_view.grid(column=0, row=4, sticky='NEWS')
+        # self.szukaj_pojazd_db_view.grid(column=0, row=4, sticky='NEWS')
 
         self.szukaj_pojazd_db_view.tag_configure('returnedodd', background='DarkSeaGreen1')
         self.szukaj_pojazd_db_view.tag_configure('notreturnedodd', background='MistyRose1')
@@ -874,19 +877,22 @@ class App:
                 self.szukaj_pojazd_db_view, _col, False))
 
         # SCROLLBAR
-        self.szukaj_pojazd_db_scrollbar = ttk.Scrollbar(self.szukaj_pojazd_wyniki_frame, orient=tk.VERTICAL,
+        self.szukaj_pojazd_db_scrollbar = ttk.Scrollbar(self.wyszukiwanie,
+                                                        orient=tk.VERTICAL,
                                                         command=self.szukaj_pojazd_db_view.yview)
+
         self.szukaj_pojazd_db_view.configure(yscrollcommand=self.szukaj_pojazd_db_scrollbar.set)
-        self.szukaj_pojazd_db_scrollbar.grid(column=2, row=4, sticky='NS')
+        # self.szukaj_pojazd_db_scrollbar.grid(column=1, row=4, sticky='NS')
 
-        self.szukaj_pojazd_db_scrollbar_x = ttk.Scrollbar(self.szukaj_pojazd_wyniki_frame, orient=tk.HORIZONTAL,
+        self.szukaj_pojazd_db_scrollbar_x = ttk.Scrollbar(self.wyszukiwanie,
+                                                          orient=tk.HORIZONTAL,
                                                           command=self.szukaj_pojazd_db_view.xview)
-        self.szukaj_pojazd_db_view.configure(xscrollcommand=self.szukaj_pojazd_db_scrollbar_x.set)
-        self.szukaj_pojazd_db_scrollbar_x.grid(column=0, columnspan=3, row=5, sticky='WE')
 
-        # SZUKAJ DB VIEW FRAME KIEROWCA
-        self.szukaj_kierowca_wyniki_frame = ttk.LabelFrame(self.wyszukiwanie, text='Wyniki wyszukiwania')
-        self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, pady=10, padx=30)
+        self.szukaj_pojazd_db_view.configure(xscrollcommand=self.szukaj_pojazd_db_scrollbar_x.set)
+        # self.szukaj_pojazd_db_scrollbar_x.grid(column=0, row=5, sticky='WE')
+
+        self.wyniki_label = tk.Label(self.wyszukiwanie, text="  Wyniki wyszukiwania")
+        self.wyniki_label.grid(column=0, row=3, sticky='W')
 
         # Set table height
         self.wyszukiwanie.update()
@@ -897,21 +903,21 @@ class App:
         self.szukaj_kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'nr_kk', 'Data pobrania', 'Pobierający',
                                            'Prowadzący sprawę', 'Operator pobranie', 'Data zwrotu', 'Zwracający',
                                            'Operator zwrot', 'uwagi')
-        self.szukaj_kierowca_db_view = ttk.Treeview(self.szukaj_kierowca_wyniki_frame,
+        self.szukaj_kierowca_db_view = ttk.Treeview(self.wyszukiwanie,
                                                     columns=self.szukaj_kierowca_db_columns,
                                                     show='headings',
                                                     height=tab_wysz_kier)
 
-        col_width_kier = int(self.window_width / 12.2)
         for column in self.szukaj_kierowca_db_columns:
             self.szukaj_kierowca_db_view.heading(column, text=column, anchor='center')
-            self.szukaj_kierowca_db_view.column(column, width=col_width_kier)
+            self.szukaj_kierowca_db_view.column(column, width=150)
 
-        self.szukaj_kierowca_db_view.column('id', width=70)
+        self.szukaj_kierowca_db_view.column('id', width=60)
         self.szukaj_kierowca_db_view.column('nr_kk', width=70)
         self.szukaj_kierowca_db_view.column('PESEL', width=100)
+        self.szukaj_kierowca_db_view.column('Imię', width=120)
 
-        self.szukaj_kierowca_db_view.grid(column=0, row=4, sticky='NEWS')
+        self.szukaj_kierowca_db_view.grid(column=0, row=4, sticky='NEWS', padx=10)
 
         self.szukaj_kierowca_db_view.tag_configure('returnedodd', background='DarkSeaGreen1')
         self.szukaj_kierowca_db_view.tag_configure('notreturnedodd', background='MistyRose1')
@@ -923,19 +929,21 @@ class App:
                 self.szukaj_kierowca_db_view, _col, False))
 
         # SCROLLBAR
-        self.szukaj_kierowca_db_scrollbar = ttk.Scrollbar(self.szukaj_kierowca_wyniki_frame, orient=tk.VERTICAL,
+        self.szukaj_kierowca_db_scrollbar = ttk.Scrollbar(self.wyszukiwanie,
+                                                          orient=tk.VERTICAL,
                                                           command=self.szukaj_kierowca_db_view.yview)
         self.szukaj_kierowca_db_view.configure(yscrollcommand=self.szukaj_kierowca_db_scrollbar.set)
         self.szukaj_kierowca_db_scrollbar.grid(column=1, row=4, sticky='NS')
 
-        self.szukaj_kierowca_db_scrollbar_x = ttk.Scrollbar(self.szukaj_kierowca_wyniki_frame, orient=tk.HORIZONTAL,
-                                                          command=self.szukaj_kierowca_db_view.xview)
+        self.szukaj_kierowca_db_scrollbar_x = ttk.Scrollbar(self.wyszukiwanie,
+                                                            orient=tk.HORIZONTAL,
+                                                            command=self.szukaj_kierowca_db_view.xview)
         self.szukaj_kierowca_db_view.configure(xscrollcommand=self.szukaj_kierowca_db_scrollbar_x.set)
-        self.szukaj_kierowca_db_scrollbar_x.grid(column=0, columnspan=3, row=5, sticky='WE')
+        self.szukaj_kierowca_db_scrollbar_x.grid(column=0, row=5, sticky='WE')
 
         # CLOSE BUTTON
         self.zamknij_button3 = ttk.Button(self.wyszukiwanie, text="Zamknij", command=lambda: self.root.quit())
-        self.zamknij_button3.grid(column=0, row=6, padx=10, pady=0)
+        self.zamknij_button3.grid(column=0, row=6, padx=10, pady=10)
 
         self.root.mainloop()
 
@@ -1248,13 +1256,13 @@ class App:
     def wybierz_rejestr(self):
         """ Funkcja zmieniająca pola do wyszukiwania po wybraniu odpowiedniego rejestru
          i przypisująca odpowiednie funkcje do klawiszy 'szukaj' i 'edytuj' oraz pokazuje sumę wyników"""
-        if self.selected_value.get():  # Wybrany POJAZD
-            self.wyszukaj_kierowca_frame.grid_forget()
-            self.szukaj_kierowca_wyniki_frame.grid_forget()
-            self.wyszukaj_pojazd_frame.grid(column=0, row=0)
-            self.szukaj_pojazd_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
-            self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_pojazd_click)
-            self.szukaj_edytuj_button.configure(command=self.edit_pojazd)
+        if self.selected_value.get():  # Selected POJAZD
+            self.wyszukaj_kierowca_frame.grid_forget()  # forget kierowca search inputs
+            self.szukaj_kierowca_db_view.grid_forget()  # forget kierowca results table
+            self.wyszukaj_pojazd_frame.grid(column=0, row=0)  # set pojazd search inputs
+            self.szukaj_pojazd_db_view.grid(column=0, row=4, sticky='NEWS', padx=10)  # set pojazd result table
+            self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_pojazd_click)  # set pojazd search button command
+            self.szukaj_edytuj_button.configure(command=self.edit_pojazd)  # set pojazd edit button command
             # self.informacja_label.grid_forget()
             self.suma_wyniki = len(self.szukaj_pojazd_db_view.get_children())
             self.informacja_label.config(text=f"Liczba znalezionych wyników: {self.suma_wyniki}")
@@ -1262,14 +1270,18 @@ class App:
             self.tylko_niezwr.config(command=self.tylko_niezwrocone_pojazd)
             self.tylko_niezwr_var.set(False)
             self.tylko_niezwrocone_pojazd()
+            self.szukaj_kierowca_db_scrollbar_x.grid_forget()
+            self.szukaj_kierowca_db_scrollbar.grid_forget()
+            self.szukaj_pojazd_db_scrollbar.grid(column=1, row=4, sticky='NS')
+            self.szukaj_pojazd_db_scrollbar_x.grid(column=0, row=5, sticky='WE')
 
-        else:  # Wybrany KIEROWCA
-            self.wyszukaj_pojazd_frame.grid_forget()
-            self.szukaj_pojazd_wyniki_frame.grid_forget()
-            self.wyszukaj_kierowca_frame.grid(column=0, row=0)
-            self.szukaj_kierowca_wyniki_frame.grid(column=0, row=3, sticky='NEWS', pady=10, padx=30)
-            self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_kierowca_click)
-            self.szukaj_edytuj_button.configure(command=self.edit_kierowca)
+        else:  # Selected KIEROWCA
+            self.wyszukaj_pojazd_frame.grid_forget()  # forget pojazd search inputs
+            self.szukaj_pojazd_db_view.grid_forget()  # forget pojazd results table
+            self.wyszukaj_kierowca_frame.grid(column=0, row=0)  # set kierowca search inputs
+            self.szukaj_kierowca_db_view.grid(column=0, row=4, sticky='NEWS', padx=10)  # set kierowca res tab
+            self.szukaj_wyszukaj_button.configure(command=self.wyszukaj_kierowca_click)  # set search button command
+            self.szukaj_edytuj_button.configure(command=self.edit_kierowca)  # set kierowca edit button command
             # self.informacja_label.grid_forget()
             self.suma_wyniki = len(self.szukaj_kierowca_db_view.get_children())
             self.informacja_label.config(text=f"Liczba znalezionych wyników: {self.suma_wyniki}")
@@ -1277,6 +1289,10 @@ class App:
             self.tylko_niezwr.config(command=self.tylko_niezwrocone_kier)
             self.tylko_niezwr_var.set(False)
             self.tylko_niezwrocone_kier()
+            self.szukaj_pojazd_db_scrollbar_x.grid_forget()
+            self.szukaj_pojazd_db_scrollbar.grid_forget()
+            self.szukaj_kierowca_db_scrollbar.grid(column=1, row=4, sticky='NS')
+            self.szukaj_kierowca_db_scrollbar_x.grid(column=0, row=5, sticky='WE')
 
     def kp_data_urodzenia(self):
         """ Funkcja aktywująca pole daty urodzenia po zaznaczeniu checkbutton i ustawiająca tam focus"""
