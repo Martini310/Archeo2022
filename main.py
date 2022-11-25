@@ -14,7 +14,7 @@ class App:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('Archeo 2022')
-        self.icon = tk.PhotoImage(file='ikona2.png')
+        self.icon = tk.PhotoImage(file='graphics/ikona2.png')
         self.root.iconphoto(True, self.icon)
 
         with sqlite3.connect('archeo.db') as self.db:
@@ -166,7 +166,7 @@ class App:
         self.pp_tablica_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Numer TR:', background='yellow')
         self.pp_tablica_label.grid(column=1, row=0, sticky='E', pady=20, padx=10)
 
-        self.pp_tablica_img = tk.PhotoImage(file='tablica.gif')
+        self.pp_tablica_img = tk.PhotoImage(file='graphics/tablica.gif')
         self.pp_tablica_img_label = ttk.Label(self.pojazd_pobranie_labelframe, image=self.pp_tablica_img)
         self.pp_tablica_img_label.grid(column=2, row=0, sticky='W')
 
@@ -251,7 +251,7 @@ class App:
         self.pz_tablica_label = ttk.Label(self.pojazd_zwrot_labelframe, text='Numer TR:', background='yellow')
         self.pz_tablica_label.grid(column=1, row=0, sticky='E', pady=20, padx=10)
 
-        self.pz_tablica_img = tk.PhotoImage(file='tablica.gif')
+        self.pz_tablica_img = tk.PhotoImage(file='graphics/tablica.gif')
         self.pz_tablica_img_label = ttk.Label(self.pojazd_zwrot_labelframe, image=self.pz_tablica_img)
         self.pz_tablica_img_label.grid(column=2, row=0, sticky='W')
 
@@ -425,8 +425,8 @@ class App:
         self.kp_uwagi_label = tk.Label(self.kierowca_pobranie_right_frame, text='Uwagi:')
         self.kp_uwagi_label.grid(column=0, row=4, sticky='E', pady=10, padx=5)
 
-        self.kp_uwagi = tk.Text(self.kierowca_pobranie_right_frame, height=2, width=16,
-                                state='disabled', background='gray90', font='Arial 11')
+        self.kp_uwagi = tk.Entry(self.kierowca_pobranie_right_frame, width=16,
+                                 state='disabled', background='gray90', font='Arial 15')
         self.kp_uwagi.grid(column=1, row=4, rowspan=2, sticky='W', pady=30)
 
         # Osoba Pobierająca
@@ -559,7 +559,6 @@ class App:
         self.kierowca.update()
         note = self.kierowca.winfo_reqheight()
         tab_kier = int((self.window_height - (140 + note)) / 30)
-        print(tab_kier, note)
 
         # KIEROWCA DATABASE VIEW
         self.kierowca_db_columns = ('id', 'PESEL', 'Nazwisko', 'Imię', 'Nr Karty Kierowcy', 'Data pobrania',
@@ -1460,7 +1459,7 @@ class App:
         if len(self.cursor.fetchall()) == 1:
             for n in self.cursor.execute(wyszukanie_wpisu):
                 self.pojazd_db_view.insert("", 0, values=n)
-            img = tk.PhotoImage(file="green_check.png")
+            img = tk.PhotoImage(file="graphics/green_check.png")
             self.pp_potwierdzenie_label.configure(
                 image=img,
                 text=f"   Prawidłowo zapisano pobranie teczki o nr '{tr}' przez pracownika {pobierajacy}.",
@@ -1469,7 +1468,7 @@ class App:
             self.pp_potwierdzenie_label.image = img
             self.clear_tr(self.pp_tablica_entry)
         else:
-            wrong = tk.PhotoImage(file='wrong.jpg')
+            wrong = tk.PhotoImage(file='graphics/wrong.jpg')
             self.pp_potwierdzenie_label.configure(
                 image=wrong,
                 text=f"   Nie dokonano zapisu teczki o nr {tr}.",
@@ -1529,7 +1528,7 @@ class App:
         if len(self.cursor.fetchall()) >= 1:
             for n in self.cursor.execute(wyszukanie_wpisu):
                 self.pojazd_db_view.insert("", 0, values=n)
-            img = tk.PhotoImage(file="green_check.png")
+            img = tk.PhotoImage(file="graphics/green_check.png")
             self.pz_potwierdzenie_label.configure(
                 image=img,
                 text=f"Prawidłowo odnotowano zwrot teczki o nr '{tr}' przez pracownika {pobierajacy}.",
@@ -1538,7 +1537,7 @@ class App:
             self.pz_potwierdzenie_label.image = img
             self.clear_tr(self.pz_tablica_entry)
         else:
-            wrong = tk.PhotoImage(file='wrong.jpg')
+            wrong = tk.PhotoImage(file='graphics/wrong.jpg')
             self.pz_potwierdzenie_label.configure(
                 image=wrong,
                 text=f"   Nie dokonano zapisu teczki o nr {tr}.",
@@ -1627,7 +1626,7 @@ class App:
         if len(self.cursor.fetchall()) > 0:
             for n in self.cursor.execute(wyszukanie_wpisu):
                 self.kierowca_db_view.insert("", 0, values=n)
-            img = tk.PhotoImage(file="green_check.png")
+            img = tk.PhotoImage(file="graphics/green_check.png")
             self.kp_potwierdzenie_label.configure(
                 image=img,
                 text=f"   Prawidłowo zapisano pobranie teczki osoby o "
@@ -1638,7 +1637,7 @@ class App:
             self.clear_tr(self.kp_pesel_entry, self.kp_imie_entry, self.kp_nazwisko_entry, self.kp_nr_kk_entry)
             self.kp_zadanie_akt_var.set(False)
         else:
-            wrong = tk.PhotoImage(file='wrong.jpg')
+            wrong = tk.PhotoImage(file='graphics/wrong.jpg')
             self.kp_potwierdzenie_label.configure(
                 image=wrong,
                 text=f"   Nie dokonano zapisu teczki o nr PESEL: {pesel}.",
@@ -1655,11 +1654,13 @@ class App:
         osoba = self.kp_osoba_combobox.get().title()
         prow = self.kp_prow_combobox.get().title()
         operator = self.operator_combobox.get().title()
-        uwagi = self.kp_uwagi.get(1.0, tk.END)
+        uwagi = self.kp_uwagi.get()
         with sqlite3.connect('archeo.db') as self.db:
             self.cursor = self.db.cursor()
 
+        # Check if birthdate checkbox is checked.
         if self.kp_data_ur_var.get():
+            # Check if format of given date is valid.
             if self.format_inna_data(self.kp_data_ur_entry.get()):
                 pesel = self.kp_data_ur_entry.get()
             else:
@@ -1726,7 +1727,7 @@ class App:
         if len(self.cursor.fetchall()) >= 1:
             for n in self.cursor.execute(wyszukanie_wpisu):
                 self.kierowca_db_view.insert("", 0, values=n)
-            img = tk.PhotoImage(file="green_check.png")
+            img = tk.PhotoImage(file="graphics/green_check.png")
             self.kz_potwierdzenie_label.configure(
                 image=img,
                 text=f"Prawidłowo odnotowano zwrot teczki osoby o nr {text} przez pracownika {pobierajacy}.",
@@ -1736,7 +1737,7 @@ class App:
             self.clear_tr(self.kz_pesel_entry, self.kz_nr_kk_entry)
             self.kz_dane.config(text="")
         else:
-            wrong = tk.PhotoImage(file='wrong.jpg')
+            wrong = tk.PhotoImage(file='graphics/wrong.jpg')
             self.kz_potwierdzenie_label.configure(
                 image=wrong,
                 text=f"   Nie dokonano zapisu teczki osoby o nr {text}.",
