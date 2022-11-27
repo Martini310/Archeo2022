@@ -80,8 +80,8 @@ class App:
         self.file_menu.add_command(label='Informacje', command=self.info)
         self.file_menu.add_command(label='Statystyki', command=self.statystyki)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label='Pomniejsz', command=self.pomniejsz)
-        self.file_menu.add_separator()
+        # self.file_menu.add_command(label='Pomniejsz', command=self.pomniejsz)
+        # self.file_menu.add_separator()
         self.file_menu.add_command(label='Zamknij', command=self.root.destroy)
 
         # Options items
@@ -2669,9 +2669,6 @@ try:
 except Exception as E:
     showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')
 
-
-# TODO Excel przed migracją: format daty, zmienić format daty urodzenia obcokrajowców,
-#  Imię i Nazwisko operatora i innych ustawić w dobrej kolejności, operator pobranie tam gdzie nie ma zwrotu
 
 if __name__ == '__main__':
     app = App()
