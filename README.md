@@ -137,6 +137,8 @@ After save by clicking the 'Zastosuj' button you will see the confirmation messa
 <details>
 <summary><b>Kierowca</b></summary>
 
+<br>
+    
 ![9](https://user-images.githubusercontent.com/108935246/205386257-d34a29d3-921e-4fff-b829-281be2ef2b3f.png)
 
 <ol>
@@ -225,17 +227,17 @@ to make sure you entered them correctly</ul>
 </details>
 
 <details>
-<summary>Search engine</summary>
-You can find any record you want using this search engine. Check the correctness of the data and edit or delete them.
-You have many options to chose from to find the record by full or just a part of data.<br>
-You can also sort the results by any column ascent and descent.<br>
-Above table is a found results counter.<br>
+    <summary><b>Search engine</b></summary>
+    <br>
+    <ul>You can find any record you want using this search engine. Check the correctness of the data and edit or delete them.</ul>
+    <ul>You have many options to chose from to find the record by full or just a part of data.<br></ul>
+    <ul>You can also sort the results by any column ascent and descent.<br></ul>
+    <ul>Above table is a found results counter.<br></ul>
 
 </details>
 
 ## Inspiration & Sources
-This App is my original idea to improve productivity in my company and entry to the 21st century, </br>
-say '<b>goodbye</b>' to old-school paper registries and say '<b>hello</b>' to computer. Even for pre-retirement employers.
+This App is my original idea to improve productivity in my company and bring the office into the 21st century, to say '<b>goodbye</b>' to old-school paper registries and to say '<b>hello</b>' to computer. Even for pre-retirement employers.
 
 I'm the beginner, so I couldn't write this without help.</br>
 My main source of invaluable help was ```Codemy.com``` YouTube Channel</br>
