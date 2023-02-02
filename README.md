@@ -230,9 +230,9 @@ to make sure you entered them correctly</ul>
     <summary><b>Search engine</b></summary>
     <br>
     <ul>You can find any record you want using this search engine. Check the correctness of the data and edit or delete them.</ul>
-    <ul>You have many options to chose from to find the record by full or just a part of data.<br></ul>
-    <ul>You can also sort the results by any column ascent and descent.<br></ul>
-    <ul>Above table is a found results counter.<br></ul>
+    <ul>You have many options to chose from to find the record by full or just a part of data.</ul>
+    <ul>You can also sort the results by any column ascent and descent.</ul>
+    <ul>Above table is a found results counter.</ul>
 
 </details>
 
@@ -244,5 +244,9 @@ My main source of invaluable help was ```Codemy.com``` YouTube Channel</br>
 A good documentation of a ```Tkinter``` was also helpfully. 
 
 ## Contact
-If you have any questions or ideas for development fell free to contact me via email:</br>
+If you have any questions or ideas for development feel free to contact me via email:</br>
 ```maritn.brzezinski@wp.eu```
+
+### Update
+#### Version 1.3 
+* Added a checkbox which is set when taken files will not be returned to the archive.
