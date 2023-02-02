@@ -212,24 +212,33 @@ class App:
                                              text='Inna data',
                                              variable=self.pp_data,
                                              command=self.pp_inna_data)
-        self.pp_data_check.grid(column=1, row=4, sticky='E', pady=10, padx=10)
+        self.pp_data_check.grid(column=1, row=4, sticky='E', pady=8, padx=10)
 
         self.pp_data_entry = tk.Entry(self.pojazd_pobranie_labelframe, font='Arial 13 bold')
         self.pp_data_entry.insert(0, 'RRRR-MM-DD')
         self.pp_data_entry.config(state='disabled')
         self.pp_data_entry.grid(column=2, row=4, sticky='W', padx=0)
 
+        # Bez zwrotu
+        self.pp_bezzwrotnie_var = tk.BooleanVar()
+        self.pp_bezzwrotnie_check = ttk.Checkbutton(self.pojazd_pobranie_labelframe,
+                                                    onvalue=True,
+                                                    offvalue=False,
+                                                    text="Pobranie bezzwrotne",
+                                                    variable=self.pp_bezzwrotnie_var)
+        self.pp_bezzwrotnie_check.grid(column=1, columnspan=2, row=5, sticky='', pady=1, padx=10)
+
         # Uwagi
         self.pp_uwagi_label = ttk.Label(self.pojazd_pobranie_labelframe, text='Uwagi:', font="Helvetica 10")
-        self.pp_uwagi_label.grid(column=1, row=5, sticky='E', pady=0, padx=10)
+        self.pp_uwagi_label.grid(column=1, row=6, sticky='E', pady=0, padx=10)
 
         self.pp_uwagi_entry = ttk.Entry(self.pojazd_pobranie_labelframe, state='disabled', width=25, font='Arial 11')
-        self.pp_uwagi_entry.grid(column=2, row=5, sticky='W', padx=0)
+        self.pp_uwagi_entry.grid(column=2, row=6, sticky='W', padx=0)
 
         # Przycisk 'Zastosuj' POBRANIE
         self.pp_zastosuj_button = tk.Button(self.pojazd_pobranie_labelframe, text='Zastosuj', width=40,
                                             command=self.pojazd_zastosuj_pobranie)
-        self.pp_zastosuj_button.grid(column=1, columnspan=2, row=6, pady=10)
+        self.pp_zastosuj_button.grid(column=1, columnspan=2, row=7, pady=10)
 
         # Potwierdzenie zapisu
         self.pp_potwierdzenie_label = tk.Label(self.pojazd_pobranie_labelframe)
@@ -1472,7 +1481,9 @@ class App:
                                                         AND data_pobrania >= "{data}" 
                                                         AND osoba_pobranie = "{pobierajacy}" 
                                                         AND operator_pobranie = "{operator}" 
-                                                        AND data_zwrotu IS NULL; """
+                                                        AND (data_zwrotu IS NULL); """
+        if self.pp_bezzwrotnie_var.get():
+            wyszukanie_wpisu = wyszukanie_wpisu[:-3] + ' OR data_zwrotu = "Bezzwrotnie");'
         self.cursor.execute(wyszukanie_wpisu)
         # jeśli tak to wyświetla go w podglądzie i wyświetla tekst potwierdzający zapisanie danych,
         if len(self.cursor.fetchall()) == 1:
@@ -1517,7 +1528,7 @@ class App:
             return showerror("Błąd", f"Teczka o nr '{teczka}' została już pobrana i nie odnotowano jej zwrotu.")
 
         if teczka == "" or osoba == "" or prowadzacy == "":
-            # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd.
+            # Jeśli nie wpisze się TR, prowadzącego sprawę lub pobierającego teczkę wyskoczy błąd.
             return showerror("Błąd", "Pola  'Numer TR', 'Pobierający akta' i 'Osoba prowadząca sprawę' są obowiązkowe!")
 
         elif self.check_tr(teczka):
@@ -1535,7 +1546,14 @@ class App:
                 self.cursor.execute(self.insert_pobranie_to_db(teczka, now, osoba, prowadzacy, operator, uwagi))
                 self.db.commit()
 
+        if self.pp_bezzwrotnie_var.get():
+            self.cursor.execute(
+                f'UPDATE pojazdy SET data_zwrotu = "Bezzwrotnie" WHERE tr = "{teczka}" AND data_pobrania = "{now}";')
+            self.db.commit()
+
         self.pp_potwierdzenie_zapisu(teczka, now, osoba, operator)
+        self.pp_bezzwrotnie_var.set(False)
+
         self.db.close()
 
     def pojazd_potwierdzenie_zwrotu(self, tr, data, pobierajacy, operator):
@@ -2283,10 +2301,10 @@ class App:
         info_label5.grid(column=0, row=2, pady=5, sticky='E')
         info_label7.grid(column=0, row=3, pady=5, sticky='E')
 
-        info_label2 = tk.Label(window, text='1.2')
+        info_label2 = tk.Label(window, text='1.3')
         info_label4 = tk.Label(window, text='Martin Brzeziński')
         info_label6 = tk.Label(window, text='1 października 2022')
-        info_label8 = tk.Label(window, text='28 listopada 2022')
+        info_label8 = tk.Label(window, text='1 lutego 2023')
         info_label2.grid(column=1, row=0, pady=5, sticky='W')
         info_label4.grid(column=1, row=1, sticky='W')
         info_label6.grid(column=1, row=2, pady=5, sticky='W')
@@ -2413,7 +2431,7 @@ class App:
 
 
 class EditKierowca:
-    """This class create new window to edit records in DB in 'kierowcy' table"""
+    """This class create a new window to edit records in DB in 'kierowcy' table."""
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Edycja wpisu")
@@ -2538,7 +2556,7 @@ class EditKierowca:
 
 
 class EditPojazd:
-    """This class create new window to edit records in DB in 'pojazdy' table"""
+    """This class create a new window to edit records in DB in 'pojazdy' table."""
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Edycja wpisu")
@@ -2653,21 +2671,21 @@ class EditPojazd:
         return sql
 
 
-# Create copy of DB in light version location for read-only users
-try:
+# Create a copy of DB in light version location for read-only users.
+r'''try:
     size1 = os.path.getsize('archeo.db')  # Rozmiar oryginalnej bazy danych.
     size2 = os.path.getsize(r'\\fs1spp\kierowca\DB\archeo.db')  # Rozmiar kopii bazy danych.
-    time1 = os.path.getmtime('archeo.db')  # Data modyfikacji oryg. bazy danych
+    time1 = os.path.getmtime('archeo.db')  # Data modyfikacji oryginalnej bazy danych
     time2 = os.path.getmtime(r'\\fs1spp\kierowca\DB\archeo.db')  # Data modyfikacji kopii bazy danych.
 
     # Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
-    original = r'archeo.db'
+    original = 'archeo.db'
     # target = r'W:\DB\archeo.db'
     target = r'\\fs1spp\kierowca\DB\archeo.db'
     if time1 > time2 and size1 > size2:
         shutil.copyfile(original, target)
 except Exception as E:
-    showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')
+    showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')'''
 
 
 if __name__ == '__main__':
