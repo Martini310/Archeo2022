@@ -247,6 +247,8 @@ A good documentation of a ```Tkinter``` was also helpfully.
 If you have any questions or ideas for development feel free to contact me via email:</br>
 ```maritn.brzezinski@wp.eu```
 
-### Update
+### Changelog
+#### Version 1.4 - 2023-04-14
+* Add new window in options to enter a path to copy of DB in 'kierowca' localization.
 #### Version 1.3 
-* Added a checkbox which is set when taken files will not be returned to the archive.
+* Add a checkbox which is set when taken files will not be returned to the archive.

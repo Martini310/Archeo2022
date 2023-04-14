@@ -79,6 +79,7 @@ class App:
         # Menu items
         self.file_menu.add_command(label='Informacje', command=self.info)
         self.file_menu.add_command(label='Statystyki', command=self.statystyki)
+        self.file_menu.add_command(label='Adres kopii Bazy Danych', command=self.kopia_db_link_window)
         self.file_menu.add_separator()
         # self.file_menu.add_command(label='Pomniejsz', command=self.pomniejsz)
         # self.file_menu.add_separator()
@@ -2301,10 +2302,10 @@ class App:
         info_label5.grid(column=0, row=2, pady=5, sticky='E')
         info_label7.grid(column=0, row=3, pady=5, sticky='E')
 
-        info_label2 = tk.Label(window, text='1.3')
+        info_label2 = tk.Label(window, text='1.4')
         info_label4 = tk.Label(window, text='Martin Brzeziński')
         info_label6 = tk.Label(window, text='1 października 2022')
-        info_label8 = tk.Label(window, text='1 lutego 2023')
+        info_label8 = tk.Label(window, text='14 kwietnia 2023')
         info_label2.grid(column=1, row=0, pady=5, sticky='W')
         info_label4.grid(column=1, row=1, sticky='W')
         info_label6.grid(column=1, row=2, pady=5, sticky='W')
@@ -2428,6 +2429,39 @@ class App:
 
         self.window.columnconfigure('all', pad=50)
         self.window.rowconfigure('all', pad=10)
+
+    def kopia_db_link_window(self):
+        self.window = tk.Toplevel(self.root)
+        self.window.title('Link do kopii Bazy Danych')
+        self.window.attributes('-topmost', 1)
+        self.window.geometry('600x250+400+400')
+
+        self.db_link_label = ttk.Label(self.window, text="Link do kopii Bazy Danych w folderze Kierowca")
+        self.db_link_label.grid(column=0, row=0, padx=20, pady=10)
+
+        self.db_link_label2 = ttk.Label(self.window, text="wklej pełną ścieżkę do folderu z plikiem 'archeo.db' w folderze Kierowca")
+        self.db_link_label2.grid(column=0, row=1, padx=20, pady=10)
+
+        self.db_link_entry = ttk.Entry(self.window, width=80)
+        self.db_link_entry.grid(column=0, row=2, padx=20, pady=10)
+
+        self.dodaj_button = ttk.Button(self.window, text='Zapisz', command=self.change_db_link)
+        self.dodaj_button.grid(column=0, row=3, pady=10)
+
+        self.zamknij_button5 = ttk.Button(self.window, text='Zamknij', command=lambda: self.window.destroy())
+        self.zamknij_button5.grid(column=0, row=4, pady=10)
+
+        with open('db_link.txt', 'r') as link:
+            self.db_link_entry.insert(0, link.read())
+
+    def change_db_link(self):
+        try:
+            link = self.db_link_entry.get()
+            with open('db_link.txt', 'w') as plik:
+                plik.write(link)
+                self.window.destroy()
+        except Exception as e:
+            showerror('Błąd', 'Wystąpił błąd' + f" {e}")
 
 
 class EditKierowca:
@@ -2672,21 +2706,22 @@ class EditPojazd:
 
 
 # Create a copy of DB in light version location for read-only users.
-r'''try:
+try:
+    with open('db_link.txt', 'r') as plik:
+        target = plik.read()
     size1 = os.path.getsize('archeo.db')  # Rozmiar oryginalnej bazy danych.
-    size2 = os.path.getsize(r'\\fs1spp\kierowca\DB\archeo.db')  # Rozmiar kopii bazy danych.
+    size2 = os.path.getsize(target + 'archeo.db')  # Rozmiar kopii bazy danych.
     time1 = os.path.getmtime('archeo.db')  # Data modyfikacji oryginalnej bazy danych
-    time2 = os.path.getmtime(r'\\fs1spp\kierowca\DB\archeo.db')  # Data modyfikacji kopii bazy danych.
+    time2 = os.path.getmtime(target + 'archeo.db')  # Data modyfikacji kopii bazy danych.
 
     # Utworzenie kopii bazy danych dla wyszukiwarki w folderze kierowca.
     original = 'archeo.db'
-    # target = r'W:\DB\archeo.db'
-    target = r'\\fs1spp\kierowca\DB\archeo.db'
     if time1 > time2 and size1 > size2:
-        shutil.copyfile(original, target)
+        shutil.copy(original, target)
 except Exception as E:
-    showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')'''
+    showerror('Błąd', 'Wystąpił problem ze skopiowaniem bazy danych do folderu "kierowca".', detail=f'{E}')
 
+# pyinstaller --windowed --onefile --icon=graphics/ikona4.ico main.py
 
 if __name__ == '__main__':
     app = App()
