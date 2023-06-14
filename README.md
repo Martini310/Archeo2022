@@ -225,7 +225,7 @@ After save by clicking the 'Zastosuj' button you will see the confirmation messa
 to make sure you entered them correctly</ul>
 
 </details>
-
+[main.py](main.py)
 <details>
     <summary><b>Search engine</b></summary>
     <br>
@@ -248,6 +248,9 @@ If you have any questions or ideas for development feel free to contact me via e
 ```maritn.brzezinski@wp.eu```
 
 ### Changelog
+#### Version 1.5 - 2023-06-14
+* Refactor code and add 'try-finally' statements where db connection is executed.
+* Set sqlite timeout to 10000ms. 
 #### Version 1.4 - 2023-04-14
 * Add new window in options to enter a path to copy of DB in 'kierowca' localization.
 #### Version 1.3 

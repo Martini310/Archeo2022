@@ -8,7 +8,7 @@ import sqlite3
 import json
 import shutil
 import os
-
+sqlite3.SQLITE_BUSY_TIMEOUT = 10000
 
 class App:
     def __init__(self):
@@ -81,8 +81,6 @@ class App:
         self.file_menu.add_command(label='Statystyki', command=self.statystyki)
         self.file_menu.add_command(label='Adres kopii Bazy Danych', command=self.kopia_db_link_window)
         self.file_menu.add_separator()
-        # self.file_menu.add_command(label='Pomniejsz', command=self.pomniejsz)
-        # self.file_menu.add_separator()
         self.file_menu.add_command(label='Zamknij', command=self.root.destroy)
 
         # Options items
@@ -972,6 +970,9 @@ class App:
 
         self.root.mainloop()
 
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
     def zwrot_podglad(self, event):
         """Show name preview after entry pesel or nr KK"""
         pesel = self.kz_pesel_entry.get()
@@ -984,7 +985,7 @@ class App:
             for element in self.cursor:
                 dane = " ".join([f for f in element])
             self.kz_dane.config(text=dane)
-            self.db.close()
+
         if kk:
             with sqlite3.connect('archeo.db') as self.db:
                 self.cursor = self.db.cursor()
@@ -992,42 +993,7 @@ class App:
             for element in self.cursor:
                 dane = " ".join([f for f in element])
             self.kz_dane.config(text=dane)
-            self.db.close()
-
-    def pomniejsz(self):
-        """ Modify size and configuration of rows, entries and labels"""
-        # pojazd
-        self.window_width = int(self.screen_width * 0.95)
-        self.center_x = int(self.screen_width / 2 - self.window_width / 2)
-        self.center_y = int(self.screen_height / 2 - self.window_height / 1.80)
-        self.root.geometry(f'{self.window_width}x{self.window_height}+{self.center_x}+{self.center_y}')
-        self.pojazd_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
-        self.pz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=10)
-        self.pojazd_db_view.configure(height=8)
-        # kierowca
-        self.kierowca_hor_separator.grid(column=1, columnspan=3, row=2, ipadx=self.window_width, pady=10)
-        self.kz_zastosuj_button.grid(column=1, columnspan=2, row=3, pady=10)
-        self.kierowca_db_view.configure(height=7)
-        self.kierowca_ver_separator.grid(column=2, row=0, ipady=130, pady=5)
-        self.style.configure('TLabel', font='Helvetica 11 bold')
-        self.kierowca_pobranie_labelframe.columnconfigure(0, minsize=0)
-        self.kierowca_pobranie_labelframe.columnconfigure(3, minsize=0)
-        self.kierowca_zwrot_labelframe.columnconfigure(0, minsize=20)
-        self.kierowca_zwrot_labelframe.columnconfigure(3, minsize=20)
-        self.kz_zastosuj_button.grid(column=1, columnspan=2, row=12)
-        # wyszukiwarka
-        self.szukaj_kierowca_db_view.configure(height=9)
-        self.szukaj_pojazd_db_view.configure(height=11)
-        self.szukaj_kierowca_prowadzacy_label.grid(column=0, row=2, pady=10, sticky='E')
-        self.szukaj_kierowca_prowadzacy_entry.grid(column=1, row=2, sticky='W')
-        self.szukaj_kierowca_data_od_pobranie_label.grid(column=2, row=2, sticky='E')
-        self.szukaj_kierowca_data_od_pobranie_entry.grid(column=3, row=2, sticky='W')
-        self.szukaj_kierowca_data_do_pobranie_label.grid(column=4, row=2, sticky='E')
-        self.szukaj_kierowca_data_do_pobranie_entry.grid(column=5, row=2, sticky='W')
-        self.szukaj_kierowca_data_od_zwrot_label.grid(column=8, row=0, sticky='E')
-        self.szukaj_kierowca_data_od_zwrot_entry.grid(column=9, row=0, sticky='W')
-        self.szukaj_kierowca_data_do_zwrot_label.grid(column=8, row=1, sticky='E')
-        self.szukaj_kierowca_data_do_zwrot_entry.grid(column=9, row=1, sticky='W')
+        self.db.close()
 
     def tylko_niezwrocone_pojazd(self):
         """Disable/Enable return date entries in 'pojazd'"""
@@ -1069,7 +1035,7 @@ class App:
         self.pz_tr_entry_var.set(self.pz_tr_entry_var.get().upper())
 
     def edit_pojazd(self):
-        """Function to update data in DB. Binded to 'Edytuj' button in 'kierowca' searching engine.
+        """Function to update data in DB. Binded to 'Edytuj' button in 'pojazd' searching engine.
         Function open a new window with fields filled with selected row data.
         When all search fields are empty show a Showinfo with short message. """
         try:
@@ -1279,7 +1245,7 @@ class App:
         sql = list()
         sql.append(f"SELECT * FROM {tabela} ")
         if kwargs:
-            sql.append(f"WHERE " + " AND ".join(f"{k} LIKE '%{v}%'" for k, v in kwargs.items() if v != ''))
+            sql.append("WHERE " + " AND ".join(f"{k} LIKE '%{v}%'" for k, v in kwargs.items() if v != ''))
         sql.append(";")
         return "".join(sql)
 
@@ -1444,8 +1410,7 @@ class App:
         pattern = re.compile(r"^[A-Z]{1,3}\s[A-Z\d]{3,5}$|^[A-Z]\d\s[A-Z\d]{3,5}$")
         if pattern.search(nr_rej):
             return True
-        else:
-            return False
+        return False
 
     def pp_czy_dubel(self, tr):
         """Check if given register plate number exists in DB with no return date"""
@@ -1454,16 +1419,14 @@ class App:
         self.cursor.execute(wyszukanie_wpisu)
         if len(self.cursor.fetchall()) > 0:
             return True
-        else:
-            return False
+        return False
 
     def format_inna_data(self, data):
         """Check if date format is valid"""
         format_daty = re.compile(r"^[1-2][019]\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])$")
         if format_daty.search(data):
             return True
-        else:
-            return False
+        return False
 
     def insert_pobranie_to_db(self, tr, data, osoba, prowadzacy, operator, uwagi):
         return f""" INSERT INTO pojazdy (tr, data_pobrania, osoba_pobranie, prowadzacy, operator_pobranie, uwagi) 
@@ -1516,46 +1479,47 @@ class App:
         operator = self.operator_combobox.get().title()
         prowadzacy = self.pp_prow_combobox.get().title()
         uwagi = self.pp_uwagi_entry.get()
-        with sqlite3.connect('archeo.db') as self.db:
-            self.cursor = self.db.cursor()
-        if self.pp_data.get():
-            if self.format_inna_data(self.pp_data_entry.get()):
-                now = self.pp_data_entry.get() + ' 12:00'
-            else:
-                return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
-                                         "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
+        try:
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
+            if self.pp_data.get():
+                if self.format_inna_data(self.pp_data_entry.get()):
+                    now = self.pp_data_entry.get() + ' 12:00'
+                else:
+                    return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
+                                            "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
 
-        if self.pp_czy_dubel(teczka):
-            return showerror("Błąd", f"Teczka o nr '{teczka}' została już pobrana i nie odnotowano jej zwrotu.")
+            if self.pp_czy_dubel(teczka):
+                return showerror("Błąd", f"Teczka o nr '{teczka}' została już pobrana i nie odnotowano jej zwrotu.")
 
-        if teczka == "" or osoba == "" or prowadzacy == "":
-            # Jeśli nie wpisze się TR, prowadzącego sprawę lub pobierającego teczkę wyskoczy błąd.
-            return showerror("Błąd", "Pola  'Numer TR', 'Pobierający akta' i 'Osoba prowadząca sprawę' są obowiązkowe!")
+            if teczka == "" or osoba == "" or prowadzacy == "":
+                # Jeśli nie wpisze się TR, prowadzącego sprawę lub pobierającego teczkę wyskoczy błąd.
+                return showerror("Błąd", "Pola  'Numer TR', 'Pobierający akta' i 'Osoba prowadząca sprawę' są obowiązkowe!")
 
-        elif self.check_tr(teczka):
-            # Jeśli nr TR jest poprawny — wstaw dane do bazy.
-            self.cursor.execute(self.insert_pobranie_to_db(teczka, now, osoba, prowadzacy, operator, uwagi))
-            self.db.commit()
-
-        elif not self.check_tr(teczka):
-            # Jeśli nr TR jest błędny pokaż zapytanie
-            poprawna_tr = askyesno("Błąd",
-                                   f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemności.\n",
-                                   detail=f"Czy '{teczka}' to na pewno poprawny numer rejestracyjny?")
-            if poprawna_tr:
-                # Po zatwierdzeniu wprowadzi dane do bazy
+            elif self.check_tr(teczka):
+                # Jeśli nr TR jest poprawny — wstaw dane do bazy.
                 self.cursor.execute(self.insert_pobranie_to_db(teczka, now, osoba, prowadzacy, operator, uwagi))
                 self.db.commit()
 
-        if self.pp_bezzwrotnie_var.get():
-            self.cursor.execute(
-                f'UPDATE pojazdy SET data_zwrotu = "Bezzwrotnie" WHERE tr = "{teczka}" AND data_pobrania = "{now}";')
-            self.db.commit()
+            elif not self.check_tr(teczka):
+                # Jeśli nr TR jest błędny pokaż zapytanie
+                poprawna_tr = askyesno("Błąd",
+                                    f"Numer TR powinien składać się z wyróżnika powiatu, ODSTĘPU i pojemności.\n",
+                                    detail=f"Czy '{teczka}' to na pewno poprawny numer rejestracyjny?")
+                if poprawna_tr:
+                    # Po zatwierdzeniu wprowadzi dane do bazy
+                    self.cursor.execute(self.insert_pobranie_to_db(teczka, now, osoba, prowadzacy, operator, uwagi))
+                    self.db.commit()
 
-        self.pp_potwierdzenie_zapisu(teczka, now, osoba, operator)
-        self.pp_bezzwrotnie_var.set(False)
+            if self.pp_bezzwrotnie_var.get():
+                self.cursor.execute(
+                    f'UPDATE pojazdy SET data_zwrotu = "Bezzwrotnie" WHERE tr = "{teczka}" AND data_pobrania = "{now}";')
+                self.db.commit()
 
-        self.db.close()
+            self.pp_potwierdzenie_zapisu(teczka, now, osoba, operator)
+            self.pp_bezzwrotnie_var.set(False)
+        finally:
+            self.db.close()
 
     def pojazd_potwierdzenie_zwrotu(self, tr, data, pobierajacy, operator):
         """Check if record with given values exists in DB"""
@@ -1592,31 +1556,33 @@ class App:
         osoba = self.pz_osoba_combobox.get().title()
         operator = self.operator_combobox.get().title()
 
-        with sqlite3.connect('archeo.db') as self.db:
-            self.cursor = self.db.cursor()
-        if self.pz_data.get():
-            if self.format_inna_data(self.pz_data_entry.get()):
-                now = self.pz_data_entry.get() + ' 12:00'
+        try:
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
+            if self.pz_data.get():
+                if self.format_inna_data(self.pz_data_entry.get()):
+                    now = self.pz_data_entry.get() + ' 12:00'
+                else:
+                    return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
+                                            "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
+
+            if teczka == "" or osoba == "":
+                # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd
+                return showerror("Błąd", "Pola  'Numer TR' i 'Pobierający akta' są obowiązkowe!")
+
+            self.cursor.execute(f""" SELECT * FROM pojazdy WHERE 
+                                (data_zwrotu IS NULL OR data_zwrotu = "None" OR data_zwrotu = "") AND tr = "{teczka}"; """)
+            if len(self.cursor.fetchall()) == 0:
+                showerror("Błąd", f"Nie znaleziono niezwróconej teczki o nr '{teczka}'.")
             else:
-                return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
-                                         "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
+                self.cursor.execute(f""" UPDATE pojazdy 
+                        SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
+                        WHERE tr = "{teczka}" AND (data_zwrotu IS NULL OR data_zwrotu = "" OR data_zwrotu = "None"); """)
+                self.db.commit()
 
-        if teczka == "" or osoba == "":
-            # Jeśli nie wpisze się TR lub pobierającego wyskoczy błąd
-            return showerror("Błąd", "Pola  'Numer TR' i 'Pobierający akta' są obowiązkowe!")
-
-        self.cursor.execute(f""" SELECT * FROM pojazdy WHERE 
-                            (data_zwrotu IS NULL OR data_zwrotu = "None" OR data_zwrotu = "") AND tr = "{teczka}"; """)
-        if len(self.cursor.fetchall()) == 0:
-            showerror("Błąd", f"Nie znaleziono niezwróconej teczki o nr '{teczka}'.")
-        else:
-            self.cursor.execute(f""" UPDATE pojazdy 
-                    SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
-                    WHERE tr = "{teczka}" AND (data_zwrotu IS NULL OR data_zwrotu = "" OR data_zwrotu = "None"); """)
-            self.db.commit()
-
-        self.pojazd_potwierdzenie_zwrotu(teczka, now, osoba, operator)
-        self.db.close()
+            self.pojazd_potwierdzenie_zwrotu(teczka, now, osoba, operator)
+        finally:
+            self.db.close()
 
     def kp_czy_dubel(self, pesel):
         """Check if given pesel exists in DB with no return date."""
@@ -1629,8 +1595,7 @@ class App:
         self.cursor.execute(wyszukanie_wpisu)
         if len(self.cursor.fetchall()) > 0:
             return True
-        else:
-            return False
+        return False
 
     def check_pesel(self, pesel):
         """Check if PESEL have 11 digits"""
@@ -1697,59 +1662,61 @@ class App:
         prow = self.kp_prow_combobox.get().title()
         operator = self.operator_combobox.get().title()
         uwagi = self.kp_uwagi.get()
-        with sqlite3.connect('archeo.db') as self.db:
-            self.cursor = self.db.cursor()
 
-        # Check if birthdate checkbox is checked.
-        if self.kp_data_ur_var.get():
-            # Check if format of given date is valid.
-            if self.format_inna_data(self.kp_data_ur_entry.get()):
-                pesel = self.kp_data_ur_entry.get()
-            else:
-                return showerror("Błąd", "Sprawdź czy podana data urodzenia jest prawidłowa. "
-                                         "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
-        if self.kp_data.get():
-            if self.format_inna_data(self.kp_data_entry.get()):
-                now = self.kp_data_entry.get() + ' 12:00'
-            else:
-                return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
-                                         "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
+        try:
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
 
-        if pesel == '' or osoba == '' or imie == '' or nazwisko == '':
-            # Jeśli nie wpisze się PESEL-u lub pobierającego, lum imienia lub nazwiska wyskoczy błąd.
-            return showinfo("Błąd", "Pola 'PESEL', 'Imię', 'Nazwisko' i 'Osoba pobierająca' są obowiązkowe!")
+            # Check if birthdate checkbox is checked.
+            if self.kp_data_ur_var.get():
+                # Check if format of given date is valid.
+                if self.format_inna_data(self.kp_data_ur_entry.get()):
+                    pesel = self.kp_data_ur_entry.get()
+                else:
+                    return showerror("Błąd", "Sprawdź czy podana data urodzenia jest prawidłowa. "
+                                            "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
+            if self.kp_data.get():
+                if self.format_inna_data(self.kp_data_entry.get()):
+                    now = self.kp_data_entry.get() + ' 12:00'
+                else:
+                    return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
+                                            "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
 
-        elif self.kp_czy_dubel(pesel):
-            return showwarning("Warning", f"Teczka osoby {imie} {nazwisko} o nr PESEL: '{pesel}' "
-                                          f"została już pobrana i nie odnotowano jej zwrotu.")
+            if pesel == '' or osoba == '' or imie == '' or nazwisko == '':
+                # Jeśli nie wpisze się PESEL-u lub pobierającego, lum imienia lub nazwiska wyskoczy błąd.
+                return showinfo("Błąd", "Pola 'PESEL', 'Imię', 'Nazwisko' i 'Osoba pobierająca' są obowiązkowe!")
 
-        elif self.check_pesel(pesel):
-            # Jeśli nr PESEL jest poprawny — wstaw dane do bazy
-            self.cursor.execute(
-                self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator, uwagi)
-            )
-            self.db.commit()
+            elif self.kp_czy_dubel(pesel):
+                return showwarning("Warning", f"Teczka osoby {imie} {nazwisko} o nr PESEL: '{pesel}' "
+                                            f"została już pobrana i nie odnotowano jej zwrotu.")
 
-        elif not self.check_pesel(pesel):
-            # Jeśli nr PESEL jest błędny, pokaż zapytanie.
-            poprawny_pesel = askyesno("Błąd",
-                                      f"Numer PESEL powinien składać się z 11 cyfr.\n"
-                                      f"Czy nr PESEL: '{pesel}' jest prawidłowy?")
-            if poprawny_pesel:
-                # Po zatwierdzeniu wprowadzi dane do bazy.
+            elif self.check_pesel(pesel):
+                # Jeśli nr PESEL jest poprawny — wstaw dane do bazy
                 self.cursor.execute(
-                    self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator,
-                                                        uwagi))
+                    self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator, uwagi)
+                )
                 self.db.commit()
 
-        if self.kp_zadanie_akt_var.get():
-            self.cursor.execute(
-                f'UPDATE kierowcy SET data_zwrotu = "Żądanie akt" WHERE pesel = "{pesel}" AND data_pobrania = "{now}";')
-            self.db.commit()
+            elif not self.check_pesel(pesel):
+                # Jeśli nr PESEL jest błędny, pokaż zapytanie.
+                poprawny_pesel = askyesno("Błąd",
+                                        f"Numer PESEL powinien składać się z 11 cyfr.\n"
+                                        f"Czy nr PESEL: '{pesel}' jest prawidłowy?")
+                if poprawny_pesel:
+                    # Po zatwierdzeniu wprowadzi dane do bazy.
+                    self.cursor.execute(
+                        self.insert_kierowca_pobranie_to_db(pesel, imie, nazwisko, nr_kk, now, osoba, prow, operator,
+                                                            uwagi))
+                    self.db.commit()
 
-        self.kp_potwierdzenie_zapisu(pesel, imie, nazwisko, now, osoba, operator)
+            if self.kp_zadanie_akt_var.get():
+                self.cursor.execute(
+                    f'UPDATE kierowcy SET data_zwrotu = "Żądanie akt" WHERE pesel = "{pesel}" AND data_pobrania = "{now}";')
+                self.db.commit()
 
-        self.db.close()
+            self.kp_potwierdzenie_zapisu(pesel, imie, nazwisko, now, osoba, operator)
+        finally:
+            self.db.close()
 
     def kierowca_potwierdzenie_zwrotu(self, pesel, nr_kk, data, pobierajacy, operator):
         # Funkcja wyszukuje czy podana teczka występuje z podaną datą zwrotu.
@@ -1765,27 +1732,32 @@ class App:
                                                         AND data_zwrotu >= "{data}" 
                                                         AND osoba_zwrot = "{pobierajacy}" 
                                                         AND operator_zwrot = "{operator}"; """
-        self.cursor.execute(wyszukanie_wpisu)
-        if len(self.cursor.fetchall()) >= 1:
-            for n in self.cursor.execute(wyszukanie_wpisu):
-                self.kierowca_db_view.insert("", 0, values=n)
-            img = tk.PhotoImage(file="graphics/green_check.png")
-            self.kz_potwierdzenie_label.configure(
-                image=img,
-                text=f"Prawidłowo odnotowano zwrot teczki osoby o nr {text} przez pracownika {pobierajacy}.",
-                compound="left", font="Helvetica 8"
-            )
-            self.kz_potwierdzenie_label.image = img
-            self.clear_tr(self.kz_pesel_entry, self.kz_nr_kk_entry)
-            self.kz_dane.config(text="")
-        else:
-            wrong = tk.PhotoImage(file='graphics/wrong.jpg')
-            self.kz_potwierdzenie_label.configure(
-                image=wrong,
-                text=f"   Nie dokonano zapisu teczki osoby o nr {text}.",
-                compound="left", font="Helvetica 8"
-            )
-            self.kz_potwierdzenie_label.image = wrong
+        try:
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
+            self.cursor.execute(wyszukanie_wpisu)
+            if len(self.cursor.fetchall()) >= 1:
+                for n in self.cursor.execute(wyszukanie_wpisu):
+                    self.kierowca_db_view.insert("", 0, values=n)
+                img = tk.PhotoImage(file="graphics/green_check.png")
+                self.kz_potwierdzenie_label.configure(
+                    image=img,
+                    text=f"Prawidłowo odnotowano zwrot teczki osoby o nr {text} przez pracownika {pobierajacy}.",
+                    compound="left", font="Helvetica 8"
+                )
+                self.kz_potwierdzenie_label.image = img
+                self.clear_tr(self.kz_pesel_entry, self.kz_nr_kk_entry)
+                self.kz_dane.config(text="")
+            else:
+                wrong = tk.PhotoImage(file='graphics/wrong.jpg')
+                self.kz_potwierdzenie_label.configure(
+                    image=wrong,
+                    text=f"   Nie dokonano zapisu teczki osoby o nr {text}.",
+                    compound="left", font="Helvetica 8"
+                )
+                self.kz_potwierdzenie_label.image = wrong
+        finally:
+            self.db.close()
 
     def kierowca_zastosuj_zwrot(self):
         """Apply return"""
@@ -1795,60 +1767,61 @@ class App:
         osoba = self.kz_osoba_combobox.get().title()
         operator = self.operator_combobox.get().title()
 
-        with sqlite3.connect('archeo.db') as self.db:
-            self.cursor = self.db.cursor()
-        # Jeśli zaznaczona 'Inna data' sprawdź format, jeśli jest dobry ustaw jako 'now' jeśli nie 'showerror'.
-        if self.kz_data.get():
-            if self.format_inna_data(self.kz_data_entry.get()):
-                now = self.kz_data_entry.get() + ' 12:00'
-            else:
-                return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
-                                         "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
-
-        if pesel == "":
-            if nr_kk == "":
-                # Jeśli nie wpisze się PESEL-u lub nr 'KK', wyskoczy błąd.
-                return showerror("Błąd", "Pole 'PESEL' lub 'nr KK' jest obowiązkowe!. "
-                                         "W przypadku braku nr PESEL podaj datę urodzenia.")
-        if osoba == "":
-            return showerror("Błąd", "Pole 'Osoba zwracająca' jest obowiązkowe!")
-
-        keys = ['pesel', 'nr_kk']
-        values = [pesel, nr_kk]
-        warunki = {k: v for k, v in zip(keys, values)}
-        sql = self.kierowca_select_query(**warunki)
-        sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
-        db_id = f'{sql[:7]}id{sql[8:-1]}'
-
-        self.cursor.execute(sql)
-        if len(self.cursor.fetchall()) == 0:
-            # Jeśli nie znajdzie wpisu z podanym nr PESEL i 'KK' wyszuka wpis z podanym PESEL i nr 'KK' = 'B/U'.
-            if pesel and nr_kk:
-                bez_kk = self.kierowca_select_query(**{'pesel': pesel, 'nr_kk': 'B/U'})[:-1] + \
-                         " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
-                self.cursor.execute(bez_kk)
-                # Zaktualizuje wpis o dane zwrotu i nr 'KK' podany przez operatora.
-                if len(self.cursor.fetchall()) == 1:
-                    self.cursor.execute(f""" UPDATE kierowcy 
-                    SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}", nr_kk = "{nr_kk}"
-                    WHERE id = ({bez_kk[:7]}id{bez_kk[8:-1]}); """)
-                    self.db.commit()
+        try:
+            with sqlite3.connect('archeo.db') as self.db:
+                self.cursor = self.db.cursor()
+            # Jeśli zaznaczona 'Inna data' sprawdź format, jeśli jest dobry ustaw jako 'now' jeśli nie 'showerror'.
+            if self.kz_data.get():
+                if self.format_inna_data(self.kz_data_entry.get()):
+                    now = self.kz_data_entry.get() + ' 12:00'
                 else:
-                    showinfo("Informacja",
-                             f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}' i nr kk {nr_kk}.")
-            elif pesel:
-                showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}'.")
-            else:
-                showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr kk: '{nr_kk}'.")
-        else:
-            # Jeśli podany tylko PESEL lub nr 'KK' zaktualizuje tę pozycję o zwrot.
-            self.cursor.execute(f""" UPDATE kierowcy 
-            SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
-            WHERE id = ({db_id}); """)
-            self.db.commit()
+                    return showerror("Błąd", "Sprawdź czy podana data jest prawidłowa. "
+                                            "Pamiętaj, aby wpisać ją w formacie rrrr-mm-dd.")
 
-        self.kierowca_potwierdzenie_zwrotu(pesel, nr_kk, now, osoba, operator)
-        self.db.close()
+            if pesel == "":
+                if nr_kk == "":
+                    # Jeśli nie wpisze się PESEL-u lub nr 'KK', wyskoczy błąd.
+                    return showerror("Błąd", "Pole 'PESEL' lub 'nr KK' jest obowiązkowe!. "
+                                            "W przypadku braku nr PESEL podaj datę urodzenia.")
+            if osoba == "":
+                return showerror("Błąd", "Pole 'Osoba zwracająca' jest obowiązkowe!")
+
+            keys = ['pesel', 'nr_kk']
+            values = [pesel, nr_kk]
+            warunki = {k: v for k, v in zip(keys, values)}
+            sql = self.kierowca_select_query(**warunki)
+            sql = sql[:-1] + " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
+            db_id = f'{sql[:7]}id{sql[8:-1]}'
+            self.cursor.execute(sql)
+            if not self.cursor.fetchall():
+                # Jeśli nie znajdzie wpisu z podanym nr PESEL i 'KK' wyszuka wpis z podanym PESEL i nr 'KK' = 'B/U'.
+                if pesel and nr_kk:
+                    bez_kk = self.kierowca_select_query(**{'pesel': pesel, 'nr_kk': 'B/U'})[:-1] + \
+                            " AND (data_zwrotu IS NULL OR data_zwrotu = '' OR data_zwrotu = 'None');"
+                    self.cursor.execute(bez_kk)
+                    # Zaktualizuje wpis o dane zwrotu i nr 'KK' podany przez operatora.
+                    if len(self.cursor.fetchall()) == 1:
+                        self.cursor.execute(f""" UPDATE kierowcy 
+                        SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}", nr_kk = "{nr_kk}"
+                        WHERE id = ({bez_kk[:7]}id{bez_kk[8:-1]}); """)
+                        self.db.commit()
+                    else:
+                        showinfo("Informacja",
+                                f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}' i nr kk {nr_kk}.")
+                elif pesel:
+                    showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr PESEL: '{pesel}'.")
+                else:
+                    showinfo("Informacja", f"Nie znaleziono niezwróconej teczki osoby o nr kk: '{nr_kk}'.")
+            else:
+                # Jeśli podany tylko PESEL lub nr 'KK' zaktualizuje tę pozycję o zwrot.
+                self.cursor.execute(f""" UPDATE kierowcy 
+                SET data_zwrotu = "{now}", osoba_zwrot = "{osoba}", operator_zwrot = "{operator}" 
+                WHERE id = ({db_id}); """)
+                self.db.commit()
+
+            self.kierowca_potwierdzenie_zwrotu(pesel, nr_kk, now, osoba, operator)
+        finally:
+            self.db.close()
 
     def operator_edit_window(self):
         """ Okno edycji operatorów """
@@ -2302,10 +2275,10 @@ class App:
         info_label5.grid(column=0, row=2, pady=5, sticky='E')
         info_label7.grid(column=0, row=3, pady=5, sticky='E')
 
-        info_label2 = tk.Label(window, text='1.4')
+        info_label2 = tk.Label(window, text='1.5')
         info_label4 = tk.Label(window, text='Martin Brzeziński')
         info_label6 = tk.Label(window, text='1 października 2022')
-        info_label8 = tk.Label(window, text='14 kwietnia 2023')
+        info_label8 = tk.Label(window, text='14 czerwca 2023')
         info_label2.grid(column=1, row=0, pady=5, sticky='W')
         info_label4.grid(column=1, row=1, sticky='W')
         info_label6.grid(column=1, row=2, pady=5, sticky='W')
@@ -2549,12 +2522,13 @@ class EditKierowca:
                 self.cursor = self.db.cursor()
             self.cursor.execute(sql)
             self.db.commit()
-            self.db.close()
             self.root.lower()
             showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
             self.root.destroy()
         except Exception as E:
-            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', details=f'{E}')
+            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', detail=f'{E}')
+        finally:
+            self.db.close()
 
     def delete(self):
         potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n',
@@ -2567,12 +2541,13 @@ class EditKierowca:
                     self.cursor = self.db.cursor()
                 self.cursor.execute(sql)
                 self.db.commit()
-                self.db.close()
                 self.root.lower()
                 showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
                 self.root.destroy()
             except Exception as E:
                 showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', detail=f'{E}')
+            finally:
+                self.db.close()
 
     def sql_edit(self, tabela: str, **kwargs) -> str:
         db_id = self.id_entry.get()
@@ -2666,12 +2641,13 @@ class EditPojazd:
                 self.cursor = self.db.cursor()
             self.cursor.execute(sql)
             self.db.commit()
-            self.db.close()
             self.root.lower()
             showinfo('Zapisano', 'Wprowadzone zmiany zostały zapisane.')
             self.root.destroy()
         except Exception as E:
-            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', details=f'{E}')
+            showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', detail=f'{E}')
+        finally:
+            self.db.close()
 
     def delete(self):
         potwierdzenie = askyesno('Ostrzeżenie!', 'Usuwasz wpis z bazy danych, ta czynność jest NIEODWRACALNA!\n',
@@ -2683,12 +2659,13 @@ class EditPojazd:
                     self.cursor = self.db.cursor()
                 self.cursor.execute(sql)
                 self.db.commit()
-                self.db.close()
                 self.root.lower()
                 showinfo('Usunięto', 'Zaznaczony wpis został usunięty z bazy danych.')
                 self.root.destroy()
             except Exception as E:
                 showerror('Błąd', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.', detail=f'{E}')
+            finally:
+                self.db.close()
 
     def sql_edit(self, tabela: str, **kwargs) -> str:
         db_id = self.id_entry.get()
@@ -2703,7 +2680,8 @@ class EditPojazd:
         db_id = self.id_entry.get()
         sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
         return sql
-
+        
+print(sqlite3.SQLITE_BUSY_TIMEOUT)
 
 # Create a copy of DB in light version location for read-only users.
 try:
