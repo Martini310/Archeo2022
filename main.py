@@ -8,7 +8,11 @@ import sqlite3
 import json
 import shutil
 import os
+import pyperclip
+
+
 sqlite3.SQLITE_BUSY_TIMEOUT = 10000
+
 
 class App:
     def __init__(self):
@@ -910,6 +914,17 @@ class App:
         self.szukaj_pojazd_db_view.configure(xscrollcommand=self.szukaj_pojazd_db_scrollbar_x.set)
         # self.szukaj_pojazd_db_scrollbar_x.grid(column=0, row=5, sticky='WE')
 
+        # Copy treeview rows to clipboard
+        self.pojazd_treeview_popup = tk.Menu(self.szukaj_pojazd_db_view, tearoff=0)
+        self.pojazd_treeview_popup.add_command(
+            command=lambda: self.treeview_copy(self.szukaj_pojazd_db_view),
+            label="Kopiuj")
+
+        self.szukaj_pojazd_db_view.bind('<Button-3>',
+                                          lambda event: self.popup_menu(event, self.szukaj_pojazd_db_view,
+                                                                        self.pojazd_treeview_popup))
+        self.szukaj_pojazd_db_view.bind('<Control-c>', lambda event: self.treeview_copy(self.szukaj_pojazd_db_view))
+
         self.wyniki_label = tk.Label(self.wyszukiwanie, text="  Wyniki wyszukiwania")
         self.wyniki_label.grid(column=0, row=3, sticky='W')
 
@@ -968,10 +983,37 @@ class App:
         self.zamknij_button3 = ttk.Button(self.wyszukiwanie, text="Zamknij", command=lambda: self.root.quit())
         self.zamknij_button3.grid(column=0, row=6, padx=10, pady=10)
 
+        # Copy selected treeview rows to clipboard
+        self.kierowca_treeview_popup = tk.Menu(self.szukaj_kierowca_db_view, tearoff=0)
+        self.kierowca_treeview_popup.add_command(
+            command=lambda: self.treeview_copy(self.szukaj_kierowca_db_view),
+            label="Kopiuj")
+
+        self.szukaj_kierowca_db_view.bind('<Button-3>', lambda event: self.popup_menu(event, self.szukaj_kierowca_db_view, self.kierowca_treeview_popup))
+        self.szukaj_kierowca_db_view.bind('<Control-c>', lambda event: self.treeview_copy(self.szukaj_kierowca_db_view))
+
         self.root.mainloop()
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    def treeview_copy(self, treeview):
+        # Copy selected rows to clipboard
+        copied_data = []
+        headers = treeview['columns']
+        copied_data.append("\t".join(headers))
+
+        for item in treeview.selection():
+            values = treeview.item(item, 'values')
+            copied_data.append("\t".join(values))  # Create a tab-separated string
+
+        # Join the copied data with newlines and copy to clipboard
+        copied_text = "\n".join(copied_data)
+        pyperclip.copy(copied_text)
+
+    def popup_menu(self, event, treeview, popup):
+        # Popup menu after right-click in treeview
+        treeview.identify_row(event.y)
+        popup.post(event.x_root, event.y_root)
 
     def zwrot_podglad(self, event):
         """Show name preview after entry pesel or nr KK"""
@@ -2275,10 +2317,10 @@ class App:
         info_label5.grid(column=0, row=2, pady=5, sticky='E')
         info_label7.grid(column=0, row=3, pady=5, sticky='E')
 
-        info_label2 = tk.Label(window, text='1.5')
+        info_label2 = tk.Label(window, text='1.6')
         info_label4 = tk.Label(window, text='Martin Brzeziński')
         info_label6 = tk.Label(window, text='1 października 2022')
-        info_label8 = tk.Label(window, text='14 czerwca 2023')
+        info_label8 = tk.Label(window, text='18 października 2023')
         info_label2.grid(column=1, row=0, pady=5, sticky='W')
         info_label4.grid(column=1, row=1, sticky='W')
         info_label6.grid(column=1, row=2, pady=5, sticky='W')
@@ -2680,7 +2722,8 @@ class EditPojazd:
         db_id = self.id_entry.get()
         sql = f"DELETE FROM {tabela} WHERE id = '{db_id}';"
         return sql
-        
+
+
 print(sqlite3.SQLITE_BUSY_TIMEOUT)
 
 # Create a copy of DB in light version location for read-only users.
