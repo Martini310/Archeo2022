@@ -248,6 +248,8 @@ If you have any questions or ideas for development feel free to contact me via e
 ```maritn.brzezinski@wp.eu```
 
 ### Changelog
+#### Version 1.6 - 2023-10-18
+* Add 'copy to clipboard' after ctrl+c or right click on table view.
 #### Version 1.5 - 2023-06-14
 * Refactor code and add 'try-finally' statements where db connection is executed.
 * Set sqlite timeout to 10000ms. 
